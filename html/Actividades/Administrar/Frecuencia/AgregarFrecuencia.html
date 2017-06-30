@@ -1,0 +1,118 @@
+<div ng-controller="FrecuenciaController as frecuencia">
+   
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="modalFrecuencia" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+
+            <form name="frecuenciaForma">
+               
+                <br>
+                
+                <div class="row">
+                    <div class="col-xs-8 col-sm-10">
+                        <!-- <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarTema()"><span aria-hidden="true">&times;</span></button>-->
+                        <span ng-if="operacion == 'Agregar' || operacion == 'AgregarExterior'" class="tituloModal">Agregar Frecuencia</span>
+                        <span ng-if="operacion == 'Editar'" class="tituloModal">Editar Frecuencia</span>
+                    </div>
+                    
+                    <div class="col-xs-4 col-sm-2">
+                        <div class="btn-group-vertical pull-right" role="group" >
+                            <a class="btn botonFinModal"  ng-click="CerrarFrecuencia()"><span class="fa fa-times"></span></a>
+                            <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarFrecuencia(frecuenciaForma.frecuencia.$invalid)"><span class="fa fa-check"></span></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <br>
+                
+                <div class="row">
+                    <div class="col-sm-12">
+                        
+                        <div class="input-group">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="frecuencia" ng-model="nuevaFrecuencia.Nombre" ng-maxlength="250"/>
+                                <label>Frecuencia</label>
+                            </div>
+                            <span class="input-group-btn">
+                                <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(2)" type="button"><span class="fa fa-times-circle"></span></a>
+                            </span>
+                        </div>
+        
+                   </div>             
+                </div>
+                <br><br>
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block" ng-click="CerrarFrecuencia()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarFrecuencia(frecuenciaForma.frecuencia.$invalid)">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarFrecuenciaModal">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarFrecuencia()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeFrecuencia">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+</div>
+
+    

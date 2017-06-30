@@ -1,0 +1,164 @@
+<div ng-controller="EtiquetaController as etiqueta"> 
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="modalEtiqueta" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitosoEtiqueta">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <form name="etiquetaForma">
+               
+               <div class="row">
+                   
+                   <div class="col-xs-8 col-sm-10">
+                        <!--<button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarEtiquetaModal()"><span aria-hidden="true">&times;</span></button>-->
+                       <br><br>
+                        <span ng-if="operacion == 'Agregar' || operacion == 'AgregarExterior'" class="tituloModal">Agregar Etiqueta</span>
+                        <span ng-if="operacion == 'Editar'" class="tituloModal">Etiqueta</span>
+                    </div>
+                    <div class="col-xs-4 col-sm-2">
+                        <div class="btn-group-vertical pull-right" role="group" >
+                            <a class="btn botonFinModal"  ng-click="CerrarEtiquetaModal()"><span class="fa fa-times"></span></a>
+                            <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarEtiqueta(etiquetaForma.etiqueta.$invalid)"><span class="fa fa-check"></span></a>
+                        </div>
+                    </div>
+                </div>
+                <br><br>
+                
+                <div class="row">
+                    <div class="col-sm-12">
+                       <div class="input-group">
+                            <div class="entrada2">
+                                <input type="text" ng-pattern="erEtiqueta" required class="{{claseEtiqueta.nombre}} form-control" name="etiqueta" ng-model="nuevaEtiqueta.Nombre" ng-maxlength="120"/>
+                                <label>Etiqueta</label>
+                            </div>
+                            <span class="input-group-btn">
+                                <a class="btn close cerrarModal"  ng-click="LimpiarEtiqueta()" type="button"><span aria-hidden="true">&times;</span></a>
+                            </span>
+                        </div>
+                   </div>        
+                </div>
+                <br>
+                
+                <div class="row" ng-show="operacion=='Editar'">
+                     <!-- Activo -->
+                    <div class="col-sm-6">
+                         <label class="btn checkBoxActivo" >Etiqueta Activa <input type="checkbox" class="badgebox" ng-model="nuevaEtiqueta.Activo"><span class="badge">&check;</span></label>
+                     </div>
+                </div>
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block"  ng-click="CerrarEtiquetaModal()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarEtiqueta(etiquetaForma.etiqueta.$invalid)">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+    
+    <!-- Activar - Desactivar -->
+    <div class="modal fade" id="modalActivarDesactivarEtiqueta">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeAdvertencia}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="CancelarCambiarActivoEtiqueta()">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarActualizarEtiqueta()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarEtiquetaModal">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarEtiquetaModal()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeEtiqueta">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+        
+    <!-- Alertas -->
+    <div class="alertaMensaje" id="alertaEditarExitosoEtiqueta">
+        <div class="alert alertaExtito">
+            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+            <strong style="display: inline-block;">{{mensaje}}</strong>
+        </div>
+    </div>
+    
+</div>
+
+    

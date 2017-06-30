@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html ng-app="MQR">
+    <head>
+        <title>Life a Bit</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- angular-->
+        <script type="text/javascript" src="libs/angular/angular.js"></script>
+        <script type="text/javascript" src="libs/angular/angular-route.min.js"></script>
+        <script type="text/javascript" src="libs/angular/angular-md5.js"></script>
+        <script type="text/javascript" src="libs/angular-loading-bar/loading-bar.js"></script>
+        
+        <script type="text/javascript" src="libs/alaSQL/alasql.js"></script>
+
+
+        <!-- jQuery-->
+        <script src="libs/jQuery.js"></script>
+        <script src="libs/jquery-base64.min.js"></script>
+
+        <!-- Bootstrap-->
+        <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.css">
+        <script src="libs/bootstrap/js/bootstrap.min.js"></script>
+        
+        <link rel="stylesheet" href="libs/angular-loading-bar/loading-bar.css">
+        
+        <!-- Date picker -->
+        <link rel="stylesheet" href="libs/bootstrap/datepicker/bootstrap-material-datetimepicker.css">
+        
+        <script type="text/javascript" src="libs/bootstrap/datepicker/moment-with-locales.min.js"></script>
+        <script type="text/javascript" src="libs/bootstrap/datepicker/bootstrap-material-datetimepicker.js"></script>
+        
+        <!--js-->
+        <script src="js/app.js"></script>
+        <script src="js/Controlador/LoginController.js"></script>
+        <script src="js/Controlador/EncabezadoController.js"></script>
+        <script src="js/Controlador/RecuperarPasswordControlador.js"></script>
+        <script src="js/Controlador/AplicacionController.js"></script>
+        
+        
+        <!-- Sabiduría -->
+            <!-- Administrar -->
+            <script src="js/Controlador/Sabiduria/Administrar/AdministrarEtiquetaController.js"></script>
+            <script src="js/Controlador/Sabiduria/Administrar/UsuarioController.js"></script>
+            
+            <script src="js/Controlador/Sabiduria/Administrar/Etiqueta/EtiquetaController.js"></script>
+        
+            
+        <!-- Actividades -->
+         <script src="js/Controlador/Actividades/ActividadesController.js"></script>
+               <!-- Administrar -->
+               <script src="js/Controlador/Actividades/Administrar/AdministrarFrecuenciaController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/AdministrarTemaActividadController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/AdministrarPersonaActividadController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/AdministrarLugarController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/AdministrarUnidadController.js"></script>
+                
+               <script src="js/Controlador/Actividades/Administrar/Frecuencia/FrecuenciaController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/TemaActividad/TemaActividadController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/Persona/PersonaActividadController.js"></script>
+               
+               <script src="js/Controlador/Actividades/Administrar/Lugar/LugarController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/Ciudad/CiudadController.js"></script>
+               
+               <script src="js/Controlador/Actividades/Administrar/Unidad/DivisaController.js"></script>
+               <script src="js/Controlador/Actividades/Administrar/Unidad/UnidadController.js"></script>
+               
+        <!-- Diario -->
+        <script src="js/Controlador/Diario/DiarioActividadesController.js"></script>
+        
+        <!-- Notas -->
+        <script src="js/Controlador/Notas/NotasController.js"></script>
+        
+        <!-- Conocimiento -->
+        <script src="js/Controlador/Conocimiento/ConocimientoController.js"></script>
+        
+         <!-- Buscador -->
+        <script src="js/Controlador/Buscador/BuscadorController.js"></script>
+        
+        <!-- Datos -->
+        <script src="js/Datos/General/Usuario.js"></script>
+        
+        <!-- Sabiduria -->
+        <script src="js/Datos/Sabiduria/Etiqueta.js"></script>
+
+        <script src="js/Datos/Sabiduria/Usuario.js"></script>
+        
+        
+        <!-- Actividades -->
+        <script src="js/Datos/Actividades/Frecuencia.js"></script>
+        <script src="js/Datos/Actividades/TemaActividad.js"></script>
+        <script src="js/Datos/Actividades/Actividad.js"></script>
+        <script src="js/Datos/Actividades/PersonaActividad.js"></script>
+        <script src="js/Datos/Actividades/Lugar.js"></script>
+        <script src="js/Datos/Actividades/Ciudad.js"></script>
+        <script src="js/Datos/Actividades/Unidades.js"></script>
+        <script src="js/Datos/Actividades/Divisas.js"></script>
+        <script src="js/Datos/Actividades/EventoActividad.js"></script>
+        
+        
+        <!-- Diario -->
+        <script src="js/Datos/Diario/Diario.js"></script>
+        
+        <!-- Notas -->
+        <script src="js/Datos/Notas/Notas.js"></script>
+        
+        <!-- Conocimiento -->
+        <script src="js/Datos/Conocimiento/Conocimiento.js"></script>
+        
+        <!-- Buscador -->
+        <script src="js/Datos/Buscador/Buscador.js"></script>
+        
+        <!--css-->
+        <link rel="stylesheet" href="css/HeaderStyles.css">
+        <link rel="stylesheet" href="css/LoginStyles.css">
+        <link rel="stylesheet" href="css/AppStyles.css">
+        <link rel="stylesheet" href="css/tabs.css">
+        <link rel="stylesheet" href="css/botones.css">
+        <link rel="stylesheet" href="css/tabla.css">
+        <link rel="stylesheet" href="css/textoStyles.css">
+        <link rel="stylesheet" href="css/InformacionStyles.css">
+        <link rel="stylesheet" href="css/Cancionero.css">
+        <link rel="stylesheet" href="css/ActividadStyles.css">
+        <link rel="stylesheet" href="css/Evento.css">
+        <link rel="stylesheet" href="css/Diario.css">
+        <link rel="stylesheet" href="css/Notas.css">
+        <link rel="stylesheet" href="css/Conocimiento.css">
+        <link rel="stylesheet" href="css/Buscador.css">
+        
+        <!--awesome font-->
+        <link rel="stylesheet" href="css/font-awesome.min.css">
+        <!--<link type="image/x-icon" href="img/index/favicon/icon.ico" rel="icon" />-->
+        
+
+    </head>
+    <body class="fondoPagina">
+        <div>
+           <div id="header">
+               <header ng-include=" 'html/Header.html' "></header>
+           </div>
+
+            <div id="content">
+                <div ng-view autoscroll="true" class="content"></div>
+            </div>
+
+            <!--<div id="footer">
+                <footer ng-include=" 'html/Footer.html' "></footer>
+            </div>-->
+        </div>
+    </body>
+</html>

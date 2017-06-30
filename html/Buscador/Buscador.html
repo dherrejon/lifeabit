@@ -1,0 +1,560 @@
+<div ng-controller="BucadorController as buscador" >
+   
+   
+        
+    <div class="container-fluid" ng-show="detalle.length == 0">
+       
+       <div class="row">
+            <div class="col-xs-12">
+                <div style="margin-top:57px"> </div>
+            </div>
+        </div>
+        
+        <!-- Barra de Busqueda -->
+        <div class="barraBuscarInformacion">
+           
+            <div class="row ">
+               <div class="col-xs-12">
+                  
+                   <div class="input-group input-group-lg">
+                     
+                         <!-- tipo de busqueda -->
+                          <span class="input-group-btn">
+                               <button type="button" class="btn botonBuscarFiltro dropdown-toggle" style="width: 133px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="fa fa-search"></span> {{campoBuscar}}
+                               </button>
+                                <ul class="dropdown-menu dropdown-menu-left" style=" border-radius:0px">
+
+                                 <li><a href="" ng-click="CambiarCampoBuscar('Conceptos')" class="dropdownOpcion2">
+                                      Conceptos
+                                  </a></li>
+
+                                  <li><a href="" ng-click="CambiarCampoBuscar('Fecha')" class="dropdownOpcion2"> 
+                                      Fecha
+                                  </a></li>
+                                </ul>
+                          </span>
+
+                          <!-- entradas -->
+                          <input type="text" id="fechaFiltro" class="form-control entrada"  style="display: block; position: fixed; width:1%; border-color: transparent; z-index: -9999999" onchange="angular.element(this).scope().CambiarFechaFiltro(this)"/> 
+
+                          <input ng-show="campoBuscar=='Conceptos'" type="text"  placeholder="Consultar" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConcepto" id="buscarConcepto" autocomplete="off">
+                        
+                          <button ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscar text-left" ng-click="AbrirCalendario()">{{filtro.fechaFormato}}</button>
+                        
+                          <div ng-show="buscarConcepto.length > 0" class="dropdown-menu modalAgregarDropdown" style="margin-left:130px; padding: 5px">
+
+                             <li><a href="" ng-click="SetFiltroEtiqueta(etiqueta)" class="dropdownOpcion2 text-left" ng-repeat="etiqueta in etiqueta | filter:BuscarEtiquetaFiltro | orderBy:'Nombre'" ng-show="etiqueta.mostrar">
+                                  {{etiqueta.Nombre}}
+                              </a></li>
+
+                              <li><a href="" ng-click="SetFiltroTema(tema)" class="dropdownOpcion2" ng-repeat="tema in tema | filter:BuscarTemaFiltro | orderBy:'Nombre'"  ng-show="tema.mostrar"> 
+                                  {{tema.Tema}}
+                              </a></li>
+
+                          </div>
+
+                          <!-- origen de informacion -->
+                          <span class="input-group-btn">
+
+                             <button class="btn botonBuscarFiltro hidden-xs" ng-click="LimpiarBuscar()" style="border-width: 0px; border-right: 3px solid #1859b2; border-radius: 0px !important">
+                                   <span class="fa fa-times-circle" ></span>
+                                </button>
+
+                               <!--<button class="btn botonBuscarFiltro hidden-xs" ng-class="{noActivo: !filtro.origen.texto}" ng-click="CambiarFiltroOrigen(1, filtro.origen.texto)">
+                                   <span class="fa fa-commenting-o"></span>
+                                </button>
+
+                               <button class="btn botonBuscarFiltro  hidden-xs" ng-class="{noActivo: !filtro.origen.imagen}" ng-click="CambiarFiltroOrigen(2, filtro.origen.imagen)">
+                                   <span class="fa fa-file-image-o"></span>
+                               </button>
+                               <button class="btn botonBuscarFiltro  hidden-xs" ng-class="{noActivo: !filtro.origen.archivo}" ng-click="CambiarFiltroOrigen(3, filtro.origen.archivo)">
+                                   <span class="fa fa-file-text-o"></span>
+                               </button>
+
+
+                               <button type="button" class="btn botonBuscarFiltro dropdown-toggle hidden-sm hidden-md hidden-lg" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="fa fa-caret-down"></span>
+                               </button>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                  <li><a href="" ng-click="CambiarFiltroOrigen(1, filtro.origen.texto)" class="botonBuscarFiltro" ng-class="{noActivo: !filtro.origen.texto}">
+                                      <span class="fa fa-commenting-o"></span> Textos
+                                  </a></li>
+                                  <li><a href="" ng-click="CambiarFiltroOrigen(2, filtro.origen.imagen)" class="botonBuscarFiltro" ng-class="{noActivo: !filtro.origen.imagen}">
+                                       <span class="fa fa-file-image-o"></span> Imagen
+                                  </a></li>
+                                  <li><a href="" ng-click="CambiarFiltroOrigen(3, filtro.origen.archivo)" class="botonBuscarFiltro" ng-class="{noActivo: !filtro.origen.archivo}"> 
+                                      <span class="fa fa-file-text-o"></span> Archivos
+                                  </a></li>
+                                </ul>-->
+
+                          </span>
+                    </div>
+                    
+               </div>
+            </div>
+            
+        </div>
+        
+        <!-- Opcion de busqueda por aplicacion -->
+        <div class="row">
+            <div class="col-xs-12" style="width: 100%">
+             
+              <!-- Separador -->
+                <div class="row" style="height:74px">
+                   <div class="col-xs-12  text-center" >
+                   </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="row" ng-show="(filtro.tema.length + filtro.etiqueta.length + filtro.fecha.length) > 0">
+            <div class="col-xs-12 barraApp" style="width: 100%">
+             
+               <div class="btn-group">
+                    <a href="" ng-repeat="app in appBuscar" class="btn botonBarraApp" ng-class="{Activo: app == appFiltro}" ng-click="CambiarAppFiltro(app)">
+                        {{app}} 
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+         <!-- Fitros -->
+        <div class="row" ng-show="(filtro.tema.length + filtro.etiqueta.length) > 0">
+           <div class="col-xs-12" style="width: 100%">
+                
+                
+                <div class="row verFitros" >
+
+                    <div class="col-xs-12">
+                        
+                        <!-- Botones -->
+                       <div class="pull-right btn-group">
+                          
+                            <!-- Limpiar filtro -->
+                            <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="LimpiarFiltro()" >
+                               <span class="fa fa-ban" style="font-size:14pt"></span>
+                           </button>
+
+                           <!-- Ver Detalles -->
+                           <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()">
+                               <b class="fa fa-angle-double-right" ng-if="!verFiltro" style="font-size:18pt"></b>
+                               <b class="fa fa-angle-double-up" ng-if="verFiltro" style="font-size:18pt"></b>
+                           </button>
+
+                        </div>
+                        
+                    </div>
+            
+                    
+                    <!-- Etiquetas -->
+                    <div class="col-xs-12" ng-show="filtro.etiqueta.length && verFiltro">
+                        <b> Etiquetas: </b><br>
+                        <span ng-repeat="etiqueta in filtro.etiqueta | orderBy:'Nombre'">
+                            <div class="btn-group" role="group" style="margin-bottom:8px">
+                                <a class="btn campoAgregado" ng-click="QuitaretiquetaFiltro(etiqueta)" style="font-size:10pt">{{etiqueta.Nombre}}</a>
+                                <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitaretiquetaFiltro(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                            </div>
+                        </span>
+                    </div>
+                    
+                    <!-- Temas -->
+                    <div class="col-xs-12" ng-show="filtro.tema.length > 0 && verFiltro">
+                        <b> Tema: </b><br>                        
+                        <span ng-repeat="tema in filtro.tema | orderBy:'Tema'" >
+                            <div class="btn-group" role="group" style="margin-bottom:8px">
+                                <a class="btn campoAgregado" ng-click="QuitarTemaFiltro(tema)" style="font-size:10pt">{{tema.Tema}}</a>
+                                <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitarTemaFiltro(tema)"><span class="fa fa-times-circle"></span></a>
+                            </div>
+                        </span>
+                    </div>
+                    
+                </div>
+            
+            </div>
+        </div>
+        
+        
+        <!------------------------------ Información filtrada --------------------------->
+        <div class="row" >
+            <div class="col-xs-12" ><!-- ng-show="anchoPantalla > 767 || detalle.length == 0" -->
+               
+                <!-- Actividades -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.actividad = !verApp.actividad">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Actividades ({{actividad.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.actividad "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.actividad "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.actividad && appFiltro == 'Todo') || appFiltro == 'Actividades'"> <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="actividad in actividad | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(diario.FechaFormato)}}" ng-click="GetActividadPorId(actividad.ActividadId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                            {{actividad.Nombre}}
+                        </span>
+                    </a>
+                </div>
+                
+                <!-- Diario -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.diario = !verApp.diario">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Diario ({{diario.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.diario "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.diario "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.diario && appFiltro == 'Todo') || appFiltro == 'Diario'"> <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="diario in diario | orderBy:'-Fecha' "  class="btn appElemento {{GetClaseDiario(diario.FechaFormato)}}" ng-click="GetDiarioPorId(diario.DiarioId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <b class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;" ng-if="campoBuscar == 'Conceptos'">
+                            {{diario.FechaFormato}}
+                        </b>
+                        
+                        <div class="col-xs-12" ><!-- ng-if="campoBuscar == 'Fecha'" -->
+                            <p class="textoDetalleBarra" data-ng-bind-html="diario.NotasHTML" ></p>
+                        </div>
+                        
+                    </a>
+                </div>
+                
+                <!-- Notas -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.nota = !verApp.nota">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Notas ({{nota.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.nota "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.nota "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.nota && appFiltro == 'Todo') || appFiltro == 'Notas'" > <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="nota in nota | orderBy:'Titulo' "  class="btn appElemento {{GetClaseDiario(nota.Titulo)}}" ng-click="GetNotasPorId(nota.NotaId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                            {{nota.Titulo}}
+                        </span>
+                    </a>
+                </div>
+                
+                
+            </div>
+        </div>
+        
+        
+    </div>
+    
+     <div class="container-fluid" ng-show="detalle.length > 0">
+        
+        <div class="row">
+            <div class="col-xs-12">
+                <div style="margin-top:57px"> </div>
+            </div>
+        </div>
+        
+         <div class="row">
+            <div class="col-xs-12" style="background: #E6E6E6;">
+
+                <button class="btn botonTextoAzul" ng-click="LimpiarDetalle()">
+                    <span class="fa fa-chevron-left"></span> <span>Atras</span>
+                </button>
+
+            </div>
+        </div>
+        <br>
+        
+        <div ng-repeat="detalle in detalle">
+            <div class="row">
+                <div class="col-xs-12">
+                    <div >
+                        
+                        <span class="tituloDetalle" ng-if="tipoDetalle=='Actividad'">{{detalle.Nombre}}</span>
+                        
+                        <span class="tituloDetalle" ng-if="tipoDetalle=='Nota'">{{detalle.Titulo}}</span>
+                        
+                        <span class="tituloDetalle" ng-if="tipoDetalle=='Diario'">{{detalle.FechaFormato}}</span>
+
+                        <button class="btn  botonDetallesActividad pull-right" ng-click="verDetalle = !verDetalle">
+                           <b class="fa fa-angle-double-right" ng-if="!verDetalle"></b>
+                           <b class="fa fa-angle-double-up" ng-if="verDetalle"></b>
+                       </button>
+
+                    </div>
+
+                </div>
+            </div>
+        
+            <div class="row">
+                <div class="col-xs-12">
+
+                    <div ng-if="verDetalle">
+
+                        <!-- Etiquetas -->
+                        <div class="row" ng-if="detalle.Etiqueta.length > 0">
+                           <div class="col-sm-12"> 
+                               <b> Etiquetas:  </b>
+                               <span ng-repeat="etiqueta in detalle.Etiqueta | orderBy:'Nombre'">
+                                   <span class="textoDetalle" ng-if="!$last">{{etiqueta.Nombre}},</span>
+                                   <span class="textoDetalle" ng-if="$last">{{etiqueta.Nombre}}.</span>
+                               </span>             
+                           </div>
+                        </div>
+
+                        <!-- Temas -->
+                        <div class="row" ng-if=" detalle.Tema.length > 0">
+                           <div class="col-sm-12"> 
+                               <b> Temas:  </b>
+                               <span ng-repeat="tema in detalle.Tema | orderBy:'Tema'">
+                                   <span class="textoDetalle" ng-if="!$last">{{tema.Tema}},</span>
+                                   <span class="textoDetalle" ng-if="$last">{{tema.Tema}}.</span>
+                               </span>             
+                           </div>
+                        </div>
+                        
+                        <!-- Fecha nota -->
+                        <div class="row" ng-if="tipoDetalle == 'Nota'">
+                           <div class="col-sm-12"> 
+                               <b> Fecha:  </b>
+                               <span class="textoDetalle">{{detalle.FechaFormato}}</span>             
+                           </div>
+                        </div>
+
+                        <div ng-if="tipoDetalle == 'Actividad'">
+                        <!-- Frecuencia y Fecha de creación -->
+                            <div class="row">
+                               <div class="col-sm-6" ng-if="detalle.Frecuencia.Nombre.length > 0"> 
+                                   <b> Frecuencia:  </b>
+                                   <span class="textoDetalle"> {{detalle.Frecuencia.Nombre}} </span>             
+                               </div>
+
+                               <div class="col-sm-6" ng-if="detalle.Lugar.Nombre.length > 0"> 
+                                   <b>   Lugar por defecto:  </b>
+                                   <span class="textoDetalle"> {{detalle.Lugar.Nombre}} </span>             
+                               </div>
+                            </div>
+
+                            <!-- Frecuencia y Fecha de creación -->
+                            <div class="row">
+                               <div class="col-sm-12"> 
+                                   <b> Fecha de alta:  </b>
+                                   <span class="textoDetalle"> {{detalle.FechaCreacionFormato}} </span>             
+                               </div>
+                            </div>
+
+
+                            <!--Notas -->
+                            <br ng-if="detalle.Notas.length > 0">
+                            <div class="row" ng-if="detalle.Notas.length > 0">
+                               <div class="col-sm-12"> 
+                                  <b> Notas:  </b><br>
+                                   <p ng-bind-html="detalle.NotasHTML"></p>                
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+             
+             <!-- Divisor -->
+            <div class="row">
+               <div class="col-sm-12"> 
+                   <div class="divisorAzul"></div>                      
+               </div>
+            </div>
+            <br>
+             
+             <div class="row">
+               <div class="col-sm-12"> 
+                  
+                   <p style="font-size:12pt" ng-bind-html="detalle.NotasHTML" ng-if="tipoDetalle == 'Nota' || tipoDetalle == 'Diario'"></p> 
+                                        
+               </div>
+            </div>
+            
+            <!-- Eventos Actividades -->
+            <div class="row" ng-if="tipoDetalle == 'Actividad'">
+               <div class="col-xs-12">
+                  <div ng-repeat="evento in detalle.Evento | orderBy:'-Fecha' | filter: {Fecha:filtro.fecha}" >
+
+                     <div class="eventoVista {{GetClaseEvento(evento)}}">
+
+                         <!-- Fecha y Ciudad -->
+                         <div class="row">
+                            <!-- Cantidad -->
+                             <div class="col-xs-12 ">
+
+
+                               <!-- Fecha -->
+                               <span ng-if="(hoy == evento.Fecha)" >
+                                   <span class="fechaIndicador">
+                                       <span  style="margin-left: 5px;"> Hoy </span>
+                                   </span>
+
+                                    <span style="margin-left: 5px;"></span>
+                                </span>
+
+                                 <b style="color: black"> {{evento.FechaFormato}}</b>
+
+                                <!--<span class="" ng-if="evento.Ciudad.CiudadId.length > 0">
+                                     <b class=" datoEvento fa fa-map-marker"> </b>
+                                     <span class="datoEvento"> {{evento.Ciudad.Ciudad}}, {{evento.Ciudad.Estado}}. {{evento.Ciudad.Pais}}.</span><br>
+                                 </span>-->
+
+
+                                 <div class="pull-right btn-group">
+
+                                    <!-- Detalles -->
+                                     <a class=" operacionEvento" ng-click="VerDetallesEvento(evento)">
+                                         <span class="fa fa-eye"></span>
+                                     </a>
+
+                                 </div>
+
+                             </div>
+                         </div>
+
+                         <!-- Divisor -->
+                         <div class="divisorGris1" ng-if="(evento.Cantidad.length + evento.Costo.length + evento.Lugar.LugarId.length) >0">
+                         </div>
+
+                         <!-- Cantidad, costo y lugar -->
+                         <div class="row hidden-xs">
+                            <!-- Cantidad -->
+                             <div class="col-sm-4  text-center">
+                                <span ng-if="evento.Cantidad.length > 0">
+                                     <b class="">Cantidad</b><br>
+                                     <span class="">{{evento.Cantidad}} {{evento.Unidad.Unidad}}</span><br>
+                                 </span>
+                             </div>
+
+                             <!-- Costo -->
+                             <div class="col-sm-4 text-center">
+                                <span ng-if="evento.Costo.length > 0">
+                                     <b class="">Costo</b><br>
+                                     <span class="">{{evento.Costo}} {{evento.Divisa.Divisa}}</span><br>
+                                 </span>
+                             </div>
+
+                             <!-- Lugar -->
+                             <div class="col-sm-4 text-center">
+                                <span ng-if="evento.Lugar.LugarId.length > 0">
+                                     <b class="">Lugar</b><br>
+                                     <span class="">{{evento.Lugar.Nombre}}</span><br>
+                                 </span>
+                             </div>
+                         </div>
+
+
+                         <!-- Cantidad, costo y lugar -->
+                         <div class="row hidden-sm hidden-md hidden-lg">
+                            <!-- Cantidad -->
+                             <div class="col-xs-12 ">
+                                <span ng-if="evento.Cantidad.length > 0">
+                                     <b class="">Cantidad: </b>
+                                     <span class="">{{evento.Cantidad}} {{evento.Unidad.Unidad}}</span>
+                                 </span>
+                             </div>
+
+                             <!-- Costo -->
+                             <div class="col-xs-12">
+                                <span ng-if="evento.Costo.length > 0">
+                                     <b class="">Costo: </b>
+                                     <span class="">{{evento.Costo}} {{evento.Divisa.Divisa}}</span>
+                                 </span>
+                             </div>
+
+                             <!-- Lugar -->
+                             <div class="col-xs-12">
+                                <span ng-if="evento.Lugar.LugarId.length > 0">
+                                     <b class="">Lugar: </b>
+                                    <span class="">{{evento.Lugar.Nombre}}</span>
+                                 </span>
+                             </div>
+                         </div>
+
+                     </div>
+                      <br>
+
+
+                  </div>
+               </div>
+            </div>
+             
+         </div>
+        
+     </div>
+    
+    <!-- -------------------------------- Modales ----------------------------------------------------------------------- -->
+    <!---------- Detalles Evento Actividad---------------->
+    <div class="modal fade" id="DetalleEvento">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-lg modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">&times;</span></button>
+                    
+                    <!-- Fecha -->
+                    <span class="tituloModal">{{detalleEvento.FechaFormato}}</span><br><br>
+                    <span></span>
+                    
+                    <!-- Separador -->
+                    <div class="row">
+                        <div class="col-xs-12"> <div class="divisorAzul1"></div> </div>
+                    </div>
+                    
+                    <!-- Actividad -->
+                    <span >
+                        <b>Actividad: </b> <span>{{detalleEvento.Actividad}}</span><br>
+                    </span>
+                    
+                    <!-- Ciudad -->
+                    <span ng-if="detalleEvento.Ciudad.CiudadId.length > 0">
+                        <span class="fa fa-map-marker"></span> <span>{{detalleEvento.Ciudad.Ciudad}}, {{detalleEvento.Ciudad.Estado}}. {{detalleEvento.Ciudad.Pais}}.</span><br>
+                    </span>
+                    
+                    <!-- Lugar -->
+                    <span ng-if="detalleEvento.Lugar.LugarId.length > 0">
+                        <b>Lugar: </b> <span>{{detalleEvento.Lugar.Nombre}}.</span><br>
+                    </span>
+                    
+                    <!-- Cantidad -->
+                    <span ng-if="detalleEvento.Cantidad.length > 0">
+                        <b>Cantidad: </b> <span>{{detalleEvento.Cantidad}} {{detalleEvento.Unidad.Unidad}}</span><br>
+                    </span>
+                    
+                    <!-- Costo -->
+                    <span ng-if="detalleEvento.Costo.length > 0">
+                        <b>Costo: </b> <span>{{detalleEvento.Costo}} {{detalleEvento.Divisa.Divisa}}</span><br>
+                    </span>
+                    
+                    <!-- Persona -->
+                    <span ng-if="detalleEvento.Persona.length > 0">
+                        <b>Personas: </b> 
+                        <span ng-repeat="persona in detalleEvento.Persona | orderBy:'Nombre'">
+                            <span ng-if="!$last">{{persona.Nombre}}, </span>
+                            <span ng-if="$last">{{persona.Nombre}}.</span>
+                        </span>
+                    </span>
+                    
+
+                </div>
+            </div>
+            <!-- Separador -->
+            <div class="row" ng-if="detalleEvento.Notas.length > 0">
+                <div class="col-xs-12"> <div class="divisorAzul1"></div> </div>
+            </div>
+            
+            <br>
+            <!-- Contenido -->
+            <div class="row">
+                <div class="col-xs-12 detalleInformacion" >
+                    <p ng-bind-html="detalleEvento.NotasHTML"></p>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+</div>

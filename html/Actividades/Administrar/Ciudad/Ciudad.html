@@ -1,0 +1,301 @@
+<div ng-controller="CiudadController as ciudad">
+   <!-- buscar -->
+   <div class="col-xs-6">
+        <div class="input-group" style="z-index:1">
+            <div class="entrada2">
+                <input type="text" required class="entrada form-control" name="buscar" ng-model="buscarCiudad"/>
+                <label>Buscar</label>
+            </div>
+
+            <span class="input-group-btn">
+                <button class="btn close cerrarModal"  ng-click="LimpiarBuscar(1)"><span aria-hidden="true">&times;</span></button>
+            </span>
+        </div>
+   </div>
+   
+   <!-- agregar -->
+   <div class="col-xs-6">
+       <button class="btn  botonAgregar pull-right" ng-click="AbrirCiudad('Agregar', null)"><span class="fa fa-plus"></span> Agregar</button>
+   </div>
+   
+   <br><br><br>
+    <div class="table-responsive tablaInformacion">
+        <table class="table table-hover table-condensed">
+            <thead class="TituloTabla">
+              <tr>
+                <th><button class="btn btn-block botonTablaOrdenar" ng-click="CambiarOrdenarCiudad('Pais')"><b>País </b><b ng-if="ordenarCiudad === 'Pais'" class="fa fa-arrow-up"></b>  <b ng-if="ordenarLugar === '-Pais'" class="fa fa-arrow-down"></b></button></th>
+                <th><button class="btn btn-block botonTablaOrdenar" ng-click="CambiarOrdenarCiudad('Estado')"><b>Estado </b><b ng-if="ordenarCiudad === 'Estado'" class="fa fa-arrow-up"></b>  <b ng-if="ordenarLugar === '-Estado'" class="fa fa-arrow-down"></b></button></th>
+                <th><button class="btn btn-block botonTablaOrdenar" ng-click="CambiarOrdenarCiudad('Ciudad')"><b>Ciudad </b><b ng-if="ordenarCiudad === 'Ciudad'" class="fa fa-arrow-up"></b>  <b ng-if="ordenarLugar === '-Ciudad'" class="fa fa-arrow-down"></b></button></th>
+                <th><button class="btn botonTablaNormal "><b class="pull-right">Operaciones</b></button></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr  ng-repeat="ciudad in ciudad | orderBy:[ordenarCiudad, 'Pais', 'Estado', 'Ciudad'] | filter:FiltrarBuscarCiudad">
+                  <td style="font-size:12pt">
+                     {{ciudad.Pais}} 
+                  </td>
+                  
+                  <td style="font-size:12pt">
+                     {{ciudad.Estado}} 
+                  </td>
+                  
+                  <td style="font-size:12pt">
+                     {{ciudad.Ciudad}} 
+                  </td>
+
+                <td class="text-right">
+                    <a  class="botonEditar" href="" data-toggle="modal" data-target="#" ng-click="AbrirCiudad('Editar', ciudad)">
+                        <span class="fa fa-pencil fa-2x" ></span>
+                    </a>
+                    
+                    <a  class="botonBorrar" style="margin-left:30px" href="" data-toggle="modal" data-target="#" ng-click="BorrarCiudad(ciudad)">
+                        <span class="fa fa-trash fa-2x" ></span>
+                    </a>
+                </td>
+
+              </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="modalCiudad" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+           
+           <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitosoCiudad">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            
+            <form name="ciudadForma">
+               
+                <br>
+                
+                <div class="row">
+                    <div class="col-xs-8 col-sm-10">
+                        <!-- <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarTema()"><span aria-hidden="true">&times;</span></button>-->
+                        <span ng-if="operacion == 'Agregar' || operacion == 'AgregarExterior'" class="tituloModal">Agregar Ciudad</span>
+                        <span ng-if="operacion == 'Editar'" class="tituloModal">Editar Ciudad</span>
+                    </div>
+                    
+                    <div class="col-xs-4 col-sm-2">
+                        <div class="btn-group-vertical pull-right" role="group" >
+                            <a class="btn botonFinModal"  ng-click="CerrarCiudad()"><span class="fa fa-times"></span></a>
+                            <a focus class="btn botonFinModal" id="terminarCiudad" ng-click="TerminarCiudad(ciudadForma.pais.$invalid, ciudadForma.estado.$invalid, ciudadForma.ciudad.$invalid)"><span class="fa fa-check"></span></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <br>
+                
+                <!-- Pais -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        
+                        <div class="input-group">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="pais" ng-model="nuevaCiudad.Pais" ng-maxlength="255" ng-disabled="!paisNuevo" id="paisNuevo"/>
+                                <label style="z-index:10">Pais</label>
+                            </div>
+                            <span class="input-group-btn">
+                                <div class="dropdown">
+                                   <a type="button" class="btn botonInputDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="fa fa-chevron-down"></span>
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-right elemetosDropdownListModal">
+
+                                       <li> 
+                                           <a href="" class="dropdownOpcionModal text-center" ng-click="CambiarPais('AgregarPais')"> 
+                                            <span>Agregar</span>
+                                            </a>
+                                        </li>
+                                        
+                                        <div role="separator" class="dropdown-divider"></div>
+
+                                        <li ng-repeat="pais in pais  | orderBy:'Pais'">
+                                            <a  href="" class="dropdownOpcionModal"  ng-click="CambiarPais(pais.Pais)">
+                                                <span>{{pais.Pais}}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </div>
+        
+                   </div>             
+                </div>
+                <br><br>
+                
+                <!-- Estado -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        
+                        <div class="input-group">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="estado" ng-model="nuevaCiudad.Estado" ng-maxlength="255" ng-disabled="!estadoNuevo" id="estadoNuevo"/>
+                                <label style="z-index:10">Estado</label>
+                            </div>
+                            <span class="input-group-btn">
+                                <div class="dropdown">
+                                   <a type="button" class="btn botonInputDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="nuevaCiudad.Pais.length == 0">
+                                        <span class="fa fa-chevron-down"></span>
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-right elemetosDropdownListModal">
+
+                                       <li> 
+                                           <a href="" class="dropdownOpcionModal text-center" ng-click="CambiarEstado('AgregarEstado')"> 
+                                            <span>Agregar</span>
+                                            </a>
+                                        </li>
+                                        
+                                        <div role="separator" class="dropdown-divider"></div>
+
+                                        <li ng-repeat="estado in estado  | orderBy:'Estado' | filter:{Pais:nuevaCiudad.Pais}:true">
+                                            <a  href="" class="dropdownOpcionModal"  ng-click="CambiarEstado(estado.Estado)">
+                                                <span>{{estado.Estado}}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </div>
+        
+                   </div>             
+                </div>
+                <br><br>
+                
+                <!-- Ciudad -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        
+                        <div class="input-group">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="ciudad" ng-model="nuevaCiudad.Ciudad" ng-maxlength="255" id="ciudadNuevo"/>
+                                <label>Ciudad</label>
+                            </div>
+                            <span class="input-group-btn">
+                                <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(2)" type="button"><span class="fa fa-times-circle"></span></a>
+                            </span>
+                        </div>
+        
+                   </div>             
+                </div>
+                <br>
+                
+                <br><br>
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block" ng-click="CerrarCiudad()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarCiudad(ciudadForma.pais.$invalid, ciudadForma.estado.$invalid, ciudadForma.ciudad.$invalid)">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarCiudadModal">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarCiudad()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+     <!-- Borrar -->
+    <div class="modal fade sombraDivModal" id="borrarCiudad">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeBorrar}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarBorrarCiudad()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeCiudad">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Alertas -->
+    <div class="alertaMensaje" id="alertaEditarExitosoCiudad">
+        <div class="alert alertaExtito">
+            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+            <strong style="display: inline-block;">{{mensaje}}</strong>
+        </div>
+    </div>
+    
+</div>
+
+    

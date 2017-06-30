@@ -1,0 +1,210 @@
+<div ng-controller="FrecuenciaController as frecuencia">
+   <!-- buscar -->
+   <div class="col-xs-6">
+        <div class="input-group" style="z-index:1">
+            <div class="entrada2">
+                <input type="text" required class="entrada form-control" name="buscar" ng-model="buscarFrecuencia"/>
+                <label>Buscar</label>
+            </div>
+
+            <span class="input-group-btn">
+                <button class="btn close cerrarModal"  ng-click="LimpiarBuscar(1)"><span aria-hidden="true">&times;</span></button>
+            </span>
+        </div>
+   </div>
+   
+   <!-- agregar -->
+   <div class="col-xs-6">
+       <button class="btn  botonAgregar pull-right" ng-click="AbrirFrecuencia('Agregar', null)"><span class="fa fa-plus"></span> Agregar</button>
+   </div>
+   
+   <br><br><br>
+    <div class="table-responsive tablaInformacion">
+        <table class="table table-hover table-condensed">
+            <thead class="TituloTabla">
+              <tr>
+                <th><button class="btn btn-block botonTablaOrdenar" ng-click="CambiarOrdenarFrecuencia('Nombre')"><b>Nombre </b><b ng-if="ordenarFrecuencia === 'Nombre'" class="fa fa-arrow-up"></b>  <b ng-if="ordenarFrecuencia === '-Nombre'" class="fa fa-arrow-down"></b></button></th>
+                <th><button class="btn botonTablaNormal "><b class="pull-right">Operaciones</b></button></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr  ng-repeat="frecuencia in frecuencia | orderBy:ordenarFrecuencia | filter:buscarFrecuencia">
+                  <td style="font-size:12pt">
+                     {{frecuencia.Nombre}} 
+                  </td>
+
+                <td class="text-right">
+                    <a  class="botonEditar" href="" data-toggle="modal" data-target="#" ng-click="AbrirFrecuencia('Editar', frecuencia)">
+                        <span class="fa fa-pencil fa-2x" ></span>
+                    </a>
+                    
+                    <a  class="botonBorrar" style="margin-left:30px" href="" data-toggle="modal" data-target="#" ng-click="BorrarFrecuencia(frecuencia)">
+                        <span class="fa fa-trash fa-2x" ></span>
+                    </a>
+                </td>
+
+              </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="modalFrecuencia" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+           
+           <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitosoFrecuencia">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            
+            <form name="frecuenciaForma">
+               
+                <br>
+                
+                <div class="row">
+                    <div class="col-xs-8 col-sm-10">
+                        <!-- <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarTema()"><span aria-hidden="true">&times;</span></button>-->
+                        <span ng-if="operacion == 'Agregar' || operacion == 'AgregarExterior'" class="tituloModal">Agregar Frecuencia</span>
+                        <span ng-if="operacion == 'Editar'" class="tituloModal">Editar Frecuencia</span>
+                    </div>
+                    
+                    <div class="col-xs-4 col-sm-2">
+                        <div class="btn-group-vertical pull-right" role="group" >
+                            <a class="btn botonFinModal"  ng-click="CerrarFrecuencia()"><span class="fa fa-times"></span></a>
+                            <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarFrecuencia(frecuenciaForma.frecuencia.$invalid)"><span class="fa fa-check"></span></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <br>
+                
+                <div class="row">
+                    <div class="col-sm-12">
+                        
+                        <div class="input-group">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="frecuencia" ng-model="nuevaFrecuencia.Nombre" ng-maxlength="250"/>
+                                <label>Frecuencia</label>
+                            </div>
+                            <span class="input-group-btn">
+                                <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(2)" type="button"><span class="fa fa-times-circle"></span></a>
+                            </span>
+                        </div>
+        
+                   </div>             
+                </div>
+                <br><br>
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block" ng-click="CerrarFrecuencia()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarFrecuencia(frecuenciaForma.frecuencia.$invalid)">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarFrecuenciaModal">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarFrecuencia()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+     <!-- Borrar -->
+    <div class="modal fade sombraDivModal" id="borrarFrecuencia">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeBorrar}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarBorrarFrecuencia()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeFrecuencia">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Alertas -->
+    <div class="alertaMensaje" id="alertaEditarExitosoFrecuencia">
+        <div class="alert alertaExtito">
+            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+            <strong style="display: inline-block;">{{mensaje}}</strong>
+        </div>
+    </div>
+    
+</div>
+
+    

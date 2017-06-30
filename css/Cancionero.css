@@ -1,0 +1,233 @@
+.botonEditar, .botonBorrar, .botonEditar:focus, .botonEditar:active, .botonBorrar:focus, .botonBorrar:active
+{
+    color: #262626;
+}
+
+.botonEditar:hover
+{
+    color: forestgreen;
+}
+
+.botonBorrar:hover
+{
+    color: firebrick;
+}
+
+/*------------Lista -------------*/
+.margenLista
+{
+    border: 2px solid #262626;
+    min-height: 60%;
+    overflow: scroll;
+    background: rgb(234, 234, 234);
+}
+
+
+/*------------------- Cancionero -------------------------------------------*/
+.operacionApp
+{
+    background: #013ADF;
+    border-radius: 0px;
+    border-bottom: 2px solid #0B0B61;
+}
+
+.textoApp, .textoApp:focus, .textoApp:hover, .textoApp:active
+{
+    color: white;
+    background: transparent;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.buscarTexto.contornoAzul, .buscarTexto.contornoAzul:hover, .buscarTexto.contornoAzul:active, .buscarTexto.contornoAzul:focus
+{
+    border-color: #1859b2;
+}
+
+.limpiarTextoBotonAgregado.contornoAzul, .limpiarTextoBotonAgregado.contornoAzul:hover, .limpiarTextoBotonAgregado.contornoAzul:active, .limpiarTextoBotonAgregado.contornoAzul:focus
+{
+    border-color: #1859b2;
+}
+
+.buscarTexto, .buscarTexto:hover, .buscarTexto:active, .buscarTexto:focus
+{
+    color: #262626;
+    border-radius: 0px;
+    border-width: 1px 0px 1px 1px;
+    border-style:  solid;
+    border-color: #424242;
+    background: white;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.limpiarTextoBoton, .limpiarTextoBoton:hover, .limpiarTextoBoton:active, .limpiarTextoBoton:focus
+{
+    color: #262626;
+    border-radius: 0px;
+    border-width: 1px 1px 1px 0px;
+    border-style:  solid;
+    border-color: #424242;
+    background: white;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+
+.panelOpciones
+{
+    background: #E6E6E6;
+    overflow-y: scroll;
+    height: 65vh !important;
+}
+
+.panelOpcionesCancionero
+{
+    background: #E6E6E6;
+    overflow-y: scroll;
+    height: 70vh !important;
+}
+
+
+.panelDetalleCancion
+{
+    overflow-y: scroll;
+    height: 65vh !important;
+}
+
+.panelDetalleCancion::-webkit-scrollbar, .panelOpciones::-webkit-scrollbar 
+{
+    display: none;
+}
+
+.visualizarImagenCompleta
+{
+    max-height: 90vh;
+}
+
+.cancionA, .cancionA:focus, .cancionA:active, .cancionA:hover
+{
+    background: white;
+    color:  #262626;
+    
+    border-width: 0px 1px 1px 0px;
+    border-color:  #848484;
+    border-style: solid;
+    border-radius: 0px;
+    
+    text-align: left;
+    width: 100%;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.cancionA.active
+{
+    background: #E0F2F7;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.textoArtista
+{
+    color:#BDBDBD;
+    font-size: 10pt;
+    
+    max-width: 100%;
+}
+
+.botonVacio, .botonVacio:hover, .botonVacio:focus, .botonVacio:active
+{
+    color: #262626;
+    background: transparent;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonCM, .botonCM:active, .botonCM:focus
+{
+    color: #262626;
+    background: white;
+    border-radius: 0px;
+    font-size: 13pt;
+    border-bottom: 1px solid #848484;
+    border-top: 1px solid #848484;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonCM:hover
+{
+    color: #262626;
+    background: #E0F2F7;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.contextMenu
+{
+    border-radius: 0px;
+    border: solid 2px #262626;
+    background: #E6E6E6;
+}
+
+.sepadorDetalles
+{
+    height: 3px;
+    background: #848484;
+}
+
+.tituloCancion
+{
+    color: #262626;
+    font-size: 16pt;
+    text-align: center;
+}
+
+.modalCancionero
+{
+    background: white;
+    left: 0%;
+    top: 0%;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+}
+
+.modalImagenCancionero
+{
+    padding: 20px;
+    color: black;
+}
+
+.expandirImagen, .expandirImagen:focus, .expandirImagen:active, .expandirImagen:hover
+{
+    color: #013ADF;
+    border-radius: 0px;
+    background: white;
+    font-size: 14pt;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+@media (max-width: 767px) 
+{
+    
+    .panelOpciones, .panelOpcionesCancionero
+    {
+        background: #E6E6E6;
+        overflow-y: scroll;
+        max-height: 150px !important;
+        height: auto !important;
+    }
+}

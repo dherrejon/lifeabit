@@ -1,0 +1,179 @@
+.eventoVista
+{
+    width: 100%;
+    border-radius: 0px;
+    border-width:  1px 1px 1px 5px;
+    border-style: solid;
+    border-color: #1859b2;
+    padding: 10px;
+    
+    font-size: 14px;
+    color:  #848484;
+}
+
+.eventoVista.Pasada
+{
+    background: #e6e6e6;
+    color: black;
+}
+
+.divisorGris1
+{
+    height: 1px;
+    background:#7F7F7F;
+    margin-bottom: 5px;
+}
+
+.divisorGris2
+{
+    height: 2px;
+    background:#7F7F7F;
+    margin-bottom: 5px;
+}
+
+.divisorAzul1
+{
+    height: 1px;
+    background:#1859b2;
+    margin-bottom: 5px;
+}
+
+.datoEvento
+{
+    font-size: 14px;
+    color:  #848484;
+    text-align: center;
+}
+
+/*.operacionEvento, .operacionEvento:focus, .operacionEvento:active
+{
+    border: 1px solid #081e3b;
+    background: white;
+    color: #081e3b;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.operacionEvento:hover
+{
+    border: 1px solid #1859b2;
+    background: #1859b2;
+    color: white;
+    
+    outline: none !important;
+    box-shadow: none;
+}*/
+
+.botonDatePicker, .botonDatePicker:focus, .botonDatePicker:active
+{
+    color: #1859b2;
+    background: white;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+/*fecha*/
+.botonDatePicker:hover
+{
+    background: #1859b2;
+    color: white;
+}
+
+.botonFecha
+{
+    font-size:16px;
+    text-align: left;
+    color:  #262626;
+    margin-left:11px;
+    z-index: 4;
+}
+
+/*Animacion de aparecer*/
+.animated 
+{
+    -webkit-animation-duration: 0.6s;
+    animation-duration: 0.6s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+.animated.infinite 
+{
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+}
+
+.animated.hinge 
+{
+    -webkit-animation-duration: 1.2s;
+    animation-duration: 1.2s;
+}
+
+@-webkit-keyframes rotateInDownLeft {
+  from {
+    -webkit-transform-origin: left bottom;
+    transform-origin: left bottom;
+    -webkit-transform: rotate3d(0, 0, 1, -45deg);
+    transform: rotate3d(0, 0, 1, -45deg);
+    opacity: 0;
+  }
+
+  to {
+    -webkit-transform-origin: left bottom;
+    transform-origin: left bottom;
+    -webkit-transform: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes rotateInDownLeft {
+  from {
+    -webkit-transform-origin: left bottom;
+    transform-origin: left bottom;
+    -webkit-transform: rotate3d(0, 0, 1, -45deg);
+    transform: rotate3d(0, 0, 1, -45deg);
+    opacity: 0;
+  }
+
+  to {
+    -webkit-transform-origin: left bottom;
+    transform-origin: left bottom;
+    -webkit-transform: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.rotateInDownLeft {
+  -webkit-animation-name: rotateInDownLeft;
+  animation-name: rotateInDownLeft;
+}
+
+
+
+.operacionEvento, .operacionEvento:focus, .operacionEvento:active
+{
+    background: transparent;
+    color: #081e3b;
+    border-radius: 0px;
+    font-size: 14pt;
+    padding-left: 7px;
+    padding-right: 7px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.operacionEvento:hover
+{
+    color: #1859b2;
+    cursor: pointer;
+    
+    outline: none !important;
+    box-shadow: none;
+}

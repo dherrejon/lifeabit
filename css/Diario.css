@@ -1,0 +1,153 @@
+.fechaNotas
+{
+    display: inline-block; 
+    display: -webkit-box;  
+    -webkit-line-clamp: 3;  
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.fechaIndicador, .fechaIndicador:hover, .fechaIndicador:focus, .fechaIndicador:active
+{
+    border-radius: 8px;
+    border-width: 0px;
+    cursor: default;
+    background: #2076ed;
+    color: white;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.dropdownOpcion2 /*Opciones de los dropdown list*/
+{
+    color: #081e3b !important;
+    border-bottom: solid 1px #2076ED;;
+    margin-left: 3px;
+    margin-right: 3px;
+    font-size: 12pt;
+    cursor: pointer;
+}
+
+.dropdownOpcion2:hover, .dropdownOpcion2:focus, .dropdownOpcion2:active  /*Hover en las opciones de las dropdown list*/
+{
+    background-color: #2076ED !important;
+    color: white !important;
+    cursor: hand !important;
+}
+
+/*---------- boton filtro ----------------*/
+.botonAgrupador, .botonAgrupador:hover, .botonAgrupador:focus, .botonAgrupador:active
+{
+    border-width: 0px;
+    border-radius: 0px;
+    background: transparent;
+    color: #C2D3E8;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonAgrupador.Activo
+{
+    color: white;
+}
+
+
+/*opearciones de diario detalles*/
+.btnOptDiarioDetalles, .btnOptDiarioDetalles:active, .btnOptDiarioDetalles:hover, .btnOptDiarioDetalles:focus
+{
+    border-width: 0px;
+    border-radius: 0px;
+    background: transparent;
+    color: #262626;
+
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnOptDiarioDetalles.boton
+{
+    color: #1859b2;
+    font-size: 14pt;
+    cursor: pointer;
+}
+
+
+/*--- drop down */
+.dropdownOpt
+{
+    border-radius: 0px;
+    border: solid 2px #1859b2;
+    margin-top: 0px;
+}
+
+.dropdownOpt:before
+{
+    content: "";
+    position: absolute;
+    top: -24px;
+    left: 10px;
+    
+    border: 12px solid transparent;
+    border-bottom-color: #1859b2;
+}
+
+.dropdownOpt:after
+{
+    content: "";
+    position: absolute;
+    top: -18px;
+    left: 13px;
+    
+    border: 9px solid transparent;
+    border-bottom-color: white;
+}
+
+/*--- drop down */
+.dropdownRight
+{
+    border-radius: 0px;
+    border: solid 2px #1859b2;
+    margin-top: 0px;
+}
+
+.dropdownRight:before
+{
+    content: "";
+    position: absolute;
+    top: -24px;
+    right: 2px;
+    
+    border: 12px solid transparent;
+    border-bottom-color: #1859b2;
+}
+
+.dropdownRight:after
+{
+    content: "";
+    position: absolute;
+    top: -18px;
+    right: 5px;
+    
+    border: 9px solid transparent;
+    border-bottom-color: white;
+}
+
+/*---- Etiqueta concepto --------------*/
+.labelConcepto, .labelConcepto:hover, .labelConcepto:active, .labelConcepto:focus
+{
+    background: #2076ed;
+    color: white;
+    width: 100%;
+    border-radius: 0px;
+    border-bottom: 2px solid #79adf4;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.labelConcepto:hover
+{
+    opacity: 0.9;
+}

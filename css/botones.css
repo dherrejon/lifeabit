@@ -1,0 +1,429 @@
+.botonAgregar
+{
+    border: none;
+    background: none;
+    color: #262626;
+    font-size: 16pt;
+}
+
+.botonAgregar:hover, .botonAgregar:active, .botonAgregar:focus
+{
+    color: rgba(78,122,137,1); 
+    outline: none !important;
+    box-shadow: none;
+}
+
+/*-----------Modales-------------------*/
+.botonFinModal, .botonFinModal:focus, .botonFinModal:active
+{
+    border: 2px solid #1859b2;
+    border-radius: 0px;
+    color:  #1859b2; 
+    background: #F1F1F1;
+    font-size: 18px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonFinModal:hover
+{
+    border: 2px solid #1859b2;
+    color: #F1F1F1;
+    background: #1859b2;
+}
+
+.botonFinModal:disabled
+{
+    background: rgb(234, 234, 234);
+}
+
+.cerrarModal, .cerrarModal:focus, .cerrarModal:active
+{
+    color: #79adf4; 
+    opacity: 1.0;
+    font-size: 24px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.cerrarModal:hover
+{
+    color: #1859b2;
+    opacity: 1.0;
+}
+
+/*----------------- Tabla -------------------------------*/
+.botonTablaOrdenar
+{
+    background: none;
+    text-align: left;
+    width: 100%;
+}
+
+.botonTablaNormal
+{
+    background: none;
+    text-align: center;
+    width: 100%;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonTablaOrdenar:hover, .botonTablaOrdenar:active, .botonTablaOrdenar:focus
+{
+    color:  #D9D9D9 !important;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonTablaNormal:hover, .botonTablaNormal:active, .botonTablaNormal:focus
+{
+    cursor: default;
+    color:  #D9D9D9 !important;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonTablaOperacion, .botonTablaOperacion:focus
+{
+    color: #262626;
+}
+
+.botonTablaOperacion:hover
+{
+    color: rgba(78,122,137,1);
+}
+
+/*-------------------Acordio vertical---------------*/
+.opcionAcordion, .opcionAcordion:active, .opcionAcordion:focus
+{
+    background: #D9D9D9;
+    border-radius: 0px;
+    border-color: #262626;
+    border-style: solid;
+    border-width: 0px 0px 0px 5px;
+    text-align: left;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.opcionAcordionSeleccionado, .opcionAcordionSeleccionado:active, .opcionAcordionSeleccionado:focus
+{
+    background: #D9D9D9;
+    border-radius: 0px;
+    border-color: rgba(78,122,137,1);
+    border-style: solid;
+    border-width: 0px 0px 0px 5px;
+    color: rgb(41,69,77); 
+    text-align: left;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.opcionAcordion:hover, .opcionAcordionSeleccionado:hover
+{
+    background: rgba(38,38, 38, 0.2);
+}
+
+/*-------------  botones filtrar ----------------*/
+.botonMostrarFiltro, .botonMostrarFiltro:active, .botonMostrarFiltro:focus
+{
+    border-radius: 0px;
+    background: rgb(41,69,77); 
+    color: white;
+    outline: none;
+    box-shadow: none;
+    
+    border-width: 0px 0px 2px 0px;
+    border-style: solid;  
+    border-color:  rgba(78,122,137,1);
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonMostrarFiltro:hover
+{
+    background: rgba(41,69,77, 0.9); 
+    color: white;
+}
+
+.botonLimpiarFiltro, .botonLimpiarFiltro:active, .botonLimpiarFiltro:focus
+{
+    border: none;
+    border-radius: 0px;
+    color: black;
+    background: transparent;
+    font-size: 16pt !important;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonLimpiarFiltro:hover
+{
+    color: gray;
+    opacity: 0.9;
+}
+
+.tituloFitro
+{
+    color: #262626;
+    font-size: 12pt !important;
+}
+
+.panelFiltro
+{
+    max-height: 150px;
+    overflow-y: scroll;   
+    overflow-x: hidden;
+    position: static;
+}
+
+.panelFiltro::-webkit-scrollbar 
+{
+    display: none;
+}
+
+.filtroPanelPrincipal
+{
+    border-radius: 0px;
+    border: solid 2px #262626;
+}
+
+/*-------- check box Activo---------*/
+
+.checkBoxActivo
+{
+    color: #262626;
+    border: 2px solid #262626;
+    width: 100%;
+    display: block;
+    background: #F1F1F1;
+}
+
+.checkBoxActivo:disabled
+{
+    opacity: 1.0;
+    background: #F1F1F1;
+}
+
+.badgebox
+{
+    opacity: 0;
+}
+
+.badgebox + .badge
+{
+    text-indent: -999999px;
+	width: 27px;
+    background: #262626;
+    color: #F1F1F1;
+}
+
+.badgebox:focus + .badge
+{
+    box-shadow: inset 0px 0px 5px;
+}
+
+.badgebox:checked + .badge
+{
+	text-indent: 0;
+}
+
+
+/*--------clase para CheckBox----------*/
+
+.radio,
+.checkbox 
+{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: -8px;  
+}
+
+.checkbox label.anchoTotal
+{
+    width: 100%;
+}
+
+.checkbox label.anchoTotal:after
+{
+    content: '';
+}
+
+.checkbox .cr
+{
+    position: relative;
+
+    border: 2px solid #262626;
+    border-radius: 0px;
+    width: 25px;
+    height: 25px;
+    float: left;
+    margin-right: .5em;
+}
+
+.radio .cr 
+{
+    border-radius: 50%;
+}
+
+.checkbox .cr .cr-icon
+{
+    position: absolute;
+    font-size: 10pt;
+    line-height: 0;
+    top: 50%;
+    left: 20%;
+}
+
+.checkbox label input[type="checkbox"]
+{
+    display: none;
+}
+
+.checkbox label input[type="checkbox"] + .cr > .cr-icon
+{
+    transform: scale(3) rotateZ(-20deg);
+    opacity: 0;
+    transition: all .3s ease-in;
+}
+
+.checkbox label input[type="checkbox"]:checked + .cr > .cr-icon
+{
+    transform: scale(1) rotateZ(0deg);
+    opacity: 1;
+}
+
+.checkbox label input[type="checkbox"]:disabled + .cr
+{
+    opacity: .5;
+}
+
+/*---------------------------------- Ordenar --------------------------*/
+.botonOrdenar, .botonOrdenar:active, .botonOrdenar:focus
+{
+    background: white;
+    color: #262626;
+    text-align: left;
+    border-bottom: 2px solid rgba(78,122,137,1);
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonOrdenar.active
+{
+    background: rgba(41,69,77, 0.9); 
+    color: white;
+}
+
+/*------------------------------------  alerta bootstarp -------*/
+.alertaMensaje 
+{       	    
+    z-index: 9999999999;
+    display: none;   
+    left: 0;
+    top: 0;
+    position: fixed;
+    width: 100%;
+
+    animation: fadein 2s;
+    -moz-animation: fadein 1.8s; /* Firefox */
+    -webkit-animation: fadein 1.8s; /* Safari and Chrome */
+    -o-animation: fadein 1.8s; /* Opera */
+}
+
+.alertaExtito
+{
+    background: white;
+    border-top: 3px solid #04B404;
+    border-bottom: 3px solid #04B404;
+    border-radius: 0px;
+    color:  #262626;
+}
+
+.textIconoExito
+{
+    color:  #04B404;
+}
+
+.botonModalError, .botonModalError:active, .botonModalError:focus, .botonModalError:hover
+{
+    color: white;
+    background:  #970000 !important;
+    border-radius: 0px;
+    width: 100%;
+    bottom: 0 !important;
+    left: 0 !important;
+    position: fixed;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+
+/*------------- drop down---------------------*/
+.modalAgregarDropdown
+{
+    background: white; 
+    display: block; 
+    position: absolute; 
+    border-radius:0px;
+}
+
+
+/*Seleccion de opcion dropdown list*/
+.botonSeleccionar:hover
+{
+    background:  rgb(234, 234, 234);
+}
+
+.botonSeleccionar 
+{
+    position: relative;
+    background: white;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.botonSeleccionar:after 
+{
+    content: "";
+    background: #262626;
+    display: block;
+    position: absolute;
+    padding-top: 300%;
+    padding-left: 350%;
+    margin-left: -20px!important;
+    margin-top: -120%;
+    opacity: 0;
+    transition: all 0.8s
+}
+
+.botonSeleccionar:active:after 
+{
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    transition: 0s
+}
+
+.inicioBienvenida, .inicioBienvenida:focus, .inicioBienvenida:active, .inicioBienvenida:hover
+{
+    color: #1859b2;
+    background: white;
+    font-size: 12pt;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+
+

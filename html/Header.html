@@ -1,0 +1,392 @@
+<div ng-controller="EncabezadoControlador as encabezado" ng-show="usuario.SesionIniciada">
+   
+    <div class="container-fluid">
+        
+        <div class="row">
+            <div class="col-xs-12">
+                <!-- Alertas -->
+                <div class="alertaMensaje" id="alertaExitoso">
+                    <div class="alert alertaExtito">
+                        <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                        <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                        <strong style="display: inline-block;">{{mensaje}}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-xs-12" style="z-index:9">
+
+                <nav class="encabezadoUsuario navbar  navbar-fixed-top">
+                    <div style="padding-left:15px; padding-right:20px">
+                        
+                        
+                        <div class="dropdown margenApp"  ng-mouseenter="MouseEnterarElementoPredeterminado('app');" ng-mouseleave="MouseSalirElementoPredeterminado('app');" id="app">
+                          
+                           <button  class="btn botonOperacionBarraLateral" data-toggle="dropdown">
+                              <span class="fa fa-th-large" style="font-size:16pt"></span>
+                            </button>
+                            
+                            <ul class="dropdown-menu menuApp barraNavegacionDropdown">
+                                
+                                <li>
+                                  <a  href="#Aplicacion" class="dropdownOpcion2" ng-click="IniciarApp('Home')">
+                                    <span class="fa fa-home"></span>
+                                    <span>Life@Bit</span>
+                                  </a>
+                                </li>
+
+                                <li ng-repeat="app in apps |orderBy:['grupo']"  ng-class="{dropdownsubmenu: app.isGrupo}">
+                                    <!-- Inicio -->
+                                    <a  href="" class="dropdownOpcion2" ng-click="IniciarApp(app)">
+                                        <span ng-class="app.icono"></span>
+                                        <span>{{app.texto}}</span>
+                                    </a>
+
+                                </li>
+                                
+                            </ul>
+                            
+                        </div>
+                        
+                        <div class="navbar-header">
+
+                            <button id="buttonCollapse" type="button" class="barraNavegacionBoton navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                              <span class="barraNavegacionHamburguesa icon-bar"></span>
+                              <span class="barraNavegacionHamburguesa icon-bar"></span>
+                              <span class="barraNavegacionHamburguesa icon-bar"></span>
+                            </button>
+                            
+                            <span class="encabezadoTitulo pull-left">
+                                <span>{{barraNavegacion.titulo}}</span>
+                            </span>
+
+                        </div>
+                
+                         <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div  class="collapse navbar-collapse" id="navbarCollapse">
+                                
+                            <ul class="nav navbar-nav navbar-right hidden-xs">
+                                   
+                               <li ng-if="opcion.show && opcion.tipo=='link' && opcion.show" ng-repeat="opcion in barraNavegacion.opcion">
+                                    <!-- menú principal -->
+                                    <a href="{{opcion.referencia}}">
+                                        <span>{{opcion.texto}}</span>
+
+                                    </a>
+                                </li>
+
+                                <li ng-if="opcion.show && opcion.tipo=='dropdown' && opcion.show" ng-repeat="opcion in barraNavegacion.opcion"  class="dropdown " ng-mouseenter="MouseEnterarElemento($index);" ng-mouseleave="MouseSalirElemento($index);" id="{{opcion.texto}}">
+                                    <!-- menú principal -->
+                                    <a class="claseSeccion" ng-click="MouseClickOpcion(opcion, 'opc')">
+                                        <span>{{opcion.texto}}</span>
+
+                                    </a>
+
+                                    <!-- módulos desplegados en dropdown list -->
+                                    <ul class="dropdown-menu barraNavegacionDropdown">
+
+                                        <li ng-repeat="elemento in opcion.elemento | orderBy:'texto'" ng-if="elemento.funcion.length == 0 && elemento.show">
+                                            <a  href="{{elemento.referencia}}" class="dropdownOpcion" ng-click="MouseClickElemento(opcion.texto, null);">
+                                                <span>{{elemento.texto}}</span>
+                                            </a>
+                                        </li>
+
+                                        <!--<li ng-repeat="elemento in opcion.elemento | orderBy:'texto'" ng-if="elemento.funcion.length > 0">
+                                            <a  href="" class="dropdownOpcion" ng-click="MouseClickElemento(opcion, elemento.funcion);">
+                                                <span>{{elemento.texto}}</span>
+                                            </a>
+                                        </li>-->
+
+                                    </ul>
+
+                                </li>
+                        
+                               
+                               <!-- app -->
+                                <!--<li class="dropdown " ng-mouseenter="MouseEnterarElementoPredeterminado('app');" ng-mouseleave="MouseSalirElementoPredeterminado('app');" id="app" ng-show="usuario.Aplicacion != 'Aplicaciones'">
+                                    <a class="claseSeccion" ng-click="MouseClickOpcion('app', 'pre')">
+                                        <span>App</span>
+                                        <span class="fa fa-caret-down"></span>
+                                    </a>
+
+
+                                    <ul class="dropdown-menu barraNavegacionDropdown">
+                                        
+                                        <li>
+                                          <a  href="#Aplicacion" class="dropdownOpcion" ng-click="IniciarApp('Aplicaciones')">
+                                            <span class="fa fa-home"></span>
+                                            <span>Life@Bit</span>
+                                          </a>
+                                        </li>
+
+                                        <li ng-repeat="app in apps |orderBy:['grupo']" ng-show="app.habilitada" ng-class="{dropdownsubmenu: app.isGrupo}">
+                                            <!-- Inicio
+                                            <a  href="" class="dropdownOpcion" ng-click="IniciarApp(app)">
+                                                <span ng-class="app.icono"></span>
+                                                <span>{{app.texto}}</span>
+                                            </a>
+                                        
+                                        </li>
+
+                                    </ul>
+
+                                </li>-->
+                                
+                                <!-- usuario -->
+                                <li   class="dropdown " ng-mouseenter="MouseEnterarElementoPredeterminado('usuario');" ng-mouseleave="MouseSalirElementoPredeterminado('usuario');" id="usuario">
+                                    <a class="claseSeccion" ng-click="MouseClickOpcion('usuario', 'pre')">
+                                        <span class="fa fa-user"></span>
+                                        <span> {{usuario.NombreUsuario}}</span>
+                                    </a>
+
+
+                                    <ul class="dropdown-menu barraNavegacionDropdown">
+                                        
+                                        <li  ng-if="permisoUsuario">
+                                            <a  href="#Usuario" class="dropdownOpcion" ng-click="MouseClickElemento('usuario', null);">
+                                                <span>Administrar Usuarios</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a  href="" class="dropdownOpcion" ng-click="MouseClickElemento('usuario', 'CambiarPassword');">
+                                                <span>Cambiar Contraseña</span>
+                                            </a>
+                                        </li>
+                                        
+                                        <li>
+                                            <a  href="" class="dropdownOpcion" ng-click="MouseClickElemento('usuario', 'CerrarSesion');">
+                                                <span>Cerrar Sesión</span>
+                                            </a>
+                                        </li>
+                                    
+                                    </ul>
+
+                                </li>
+                            </ul>
+                            
+                            <!-- barra de navegación en móviles (xs)-->
+                            <ul class="nav navbar-nav hidden-sm hidden-lg hidden-md">
+
+                               <li ng-repeat="opcion in barraNavegacion.opcion"  ng-if="opcion.show && opcion.tipo=='link'">
+                                    <a  class="text-center" href="{{opcion.referencia}}" ng-click="CerrarBarraNavegacion()">
+                                        <span>{{opcion.texto}}</span>
+                                   </a>
+                                </li>
+
+                                <li ng-repeat="opcion in barraNavegacion.opcion" class="dropdown" ng-if="opcion.show && opcion.tipo=='dropdown'">
+
+                                    <a class="dropdown-toggle  text-center" data-toggle="dropdown">
+                                        <span>{{opcion.texto}}</span>
+                                        <span class="caret"></span>
+                                    </a>
+
+                                    <ul class="dropdown-menu barraNavegacionDropdown">
+                                        <li ng-repeat="elemento in opcion.elemento | orderBy:'texto'" ng-if="elemento.funcion.length == 0 && elemento.show">
+                                            <a href="{{elemento.referencia}}" class="dropdownOpcion text-center" ng-click="CerrarBarraNavegacion()">
+                                                <span>{{elemento.texto}}</span>
+                                            </a>
+                                        </li>
+
+                                        <li ng-repeat="elemento in opcion.elemento | orderBy:'texto'" ng-if="elemento.funcion.length > 0 && elemento.show">
+                                            <a  href="" class="dropdownOpcion text-center" ng-click="MouseClickElemento(opcion, elemento.funcion);">
+                                                <span>{{elemento.texto}}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                
+                                <!-- app -->
+                                <!--<li ng-show="usuario.Aplicacion != 'Aplicaciones'">
+
+                                    <a class="dropdown-toggle  text-center" data-toggle="dropdown">
+                                        <span>App</span>
+                                        <span class="caret"></span>
+                                    </a>
+
+                                    <ul class="dropdown-menu barraNavegacionDropdown">
+                                      
+                                      <li>
+                                          <a  href="#Aplicacion" class="dropdownOpcion" ng-click="IniciarApp('Aplicaciones')">
+                                            <span class="fa fa-home"></span>
+                                            <span>Life@Bit</span>
+                                          </a>
+                                      </li>
+                                       
+                                       <li ng-repeat="app in apps |orderBy:['grupo']" ng-show="app.habilitada" ng-class="{dropdownsubmenu: app.isGrupo}">
+                                            <!-- Inicio 
+                                            <a  href="" class="dropdownOpcion" ng-click="IniciarApp(app)">
+                                                <span ng-class="app.icono"></span>
+                                                <span>{{app.texto}}</span>
+                                            </a>
+
+                                        </li>                                        
+                                    </ul>
+                                </li>-->        
+                                
+                                <!-- Usuario -->
+                                <li>
+
+                                    <a class="dropdown-toggle  text-center" data-toggle="dropdown">
+                                        <span class="fa fa-user"></span>
+                                        <span> {{usuario.NombreUsuario}}</span>
+                                    </a>
+
+                                    <ul class="dropdown-menu barraNavegacionDropdown">
+                                        
+                                        <li  ng-if="permisoUsuario">
+                                            <a  href="#Usuario" class="dropdownOpcion" ng-click="MouseClickElemento('usuario', null);">
+                                                <span>Administrar Usuarios</span>
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a  href="" class="dropdownOpcion" ng-click="MouseClickElemento('usuario', 'CambiarPassword');">
+                                                <span>Cambiar Contraseña</span>
+                                            </a>
+                                        </li>
+                                        
+                                        <li>
+                                            <a  href="" class="dropdownOpcion" ng-click="MouseClickElemento('usuario', 'CerrarSesion');">
+                                                <span>Cerrar Sesión</span>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                                
+                            </ul>
+                            
+                        </div>
+
+                    </div>
+                </nav>
+                 
+            </div>
+        </div>
+    </div>
+    
+    <!----------------------- Modales ----------------------------------->
+    <div class="modal fade" id="CambiarPasswordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <a class="btn close cerrarModal" ng-click="CerrarCambiarPasswordForma()"><span aria-hidden="true">&times;</span></a>
+                    <span class="tituloModal">Cambiar Contraseña</span>
+                </div>
+            </div>
+            <br><br><br>
+            
+            <form name="passwordForma">
+                <div class="row">
+                    <div class="col-sm-6">
+                       <div class="entrada2">
+                            <input type="password" required ng-pattern="erPassword" class="{{clasePassword.nuevo}} form-control" name="nuevo" ng-model="nuevoPassword.nuevo" ng-maxlength="150"/>
+                            <label>Nueva Contraseña</label>
+                        </div>
+                     </div>
+                     
+                     <br class="hidden-sm hidden-md hidden-lg"><br class="hidden-sm hidden-md hidden-lg">
+                     <div class="col-sm-6">
+                       <div class="entrada2">
+                            <input type="password" required class="{{clasePassword.repetir}} form-control" name="repetir" ng-model="nuevoPassword.repetir" ng-maxlength="150"/>
+                            <label>Repetir Contraseña</label>
+                        </div>
+                   </div>          
+                </div>
+                <br><br>
+                <div class="row">
+                    <div class="col-sm-6">
+                       <div class="entrada2">
+                            <input type="password" required class="{{clasePassword.actual}} form-control" name="actual" ng-model="nuevoPassword.actual" ng-maxlength="150"/>
+                            <label>Contraseña Actual</label>
+                        </div>
+                     </div>          
+                </div>
+                <br>
+                <!-------- mensaje de error ---->
+                <!--<div class="row">
+                    <div class="col-xs-12">
+                        <div ng-repeat="error in mensajeError">
+                            <span class="textoError">{{error}}</span>
+                        </div>
+                    </div>
+                </div>-->
+                <br>
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block" ng-click="CerrarCambiarPasswordForma()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="GuardarPassword(passwordForma.nuevo.$invalid)">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+    
+    <!-- cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarCambiarPassword">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarCambiarPasswordForma()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeEncabezado">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+</div>
+
+    

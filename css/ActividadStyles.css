@@ -1,0 +1,247 @@
+.barraLateralActividad
+{
+    position: fixed;
+    width: 25%;
+    height: 100%;
+    display: block;
+    background: #E6E6E6;
+    overflow: scroll;
+}
+
+.panelOperacionBotonLateral, .panelOperacionBotonLateral:focus, .panelOperacionBotonLateral:active, .panelOperacionBotonLateral:hover
+{
+    color: white;
+    background: #1859b2;
+    border-bottom: 2px  solid #79adf4;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonOperacionBarraLateral, .botonOperacionBarraLateral:hover, .botonOperacionBarraLateral:active, .botonOperacionBarraLateral:focus
+{
+    color: white !important;
+    border-radius: 0px;
+    background: transparent;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.itemBarraLateral, .itemBarraLateral:focus, .itemBarraLateral:active, .itemBarraLateral:hover
+{
+    background: white;
+    color:  #262626;
+    
+    border-width: 0px 1px 1px 0px;
+    border-color:  #848484;
+    border-style: solid;
+    border-radius: 0px;
+    
+    text-align: left;
+    width: 100%;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.itemBarraLateral.active
+{
+    background: #E0F2F7;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.divisorAzul
+{
+    margin-top: 3px;
+    margin-bottom: 3px;
+    height: 3px;
+    background: #1859b2;
+}
+
+.tituloActividad
+{
+    color:  #262626;
+    font-size: 16pt;
+    font-style: bold;
+}
+
+.botonDetallesActividad, .botonDetallesActividad:active, .botonDetallesActividad:focus, .botonDetallesActividad:hover
+{
+    background: transparent;
+    color:  #262626;
+    border-radius: 0px;
+    font-size: 16pt;
+    margin-top: -5px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonDetallesActividad:hover
+{
+    background: transparent;
+    color:  #1859b2;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.textoDetalle
+{
+    color:#7F7F7F;
+}
+
+.detallesActividadPanel
+{
+    margin-top: 56px;
+}
+
+@media (max-width: 767px) 
+{
+    
+    .barraLateralActividad
+    {
+        width: 100%;
+        z-index: 5;
+    }
+    
+    .itemBarraLateral
+    {
+         min-height: 45px;
+         font-size: 14pt;
+    }
+}
+
+.campoAgregado.contornoAzul, .campoAgregado.contornoAzul:hover, .campoAgregado.contornoAzul:active, .campoAgregado.contornoAzul:focus,
+.campoAgregadoQuitar.contornoAzul, .campoAgregadoQuitar.contornoAzul:hover, .campoAgregadoQuitar.contornoAzul:active, .limpiarTextoBotonAgregado.contornoAzul:focus
+{
+    border-color: #1859b2;
+    background: #e6e6e6;
+}
+
+.campoAgregado, .campoAgregado:hover, .campoAgregado:active, .campoAgregado:focus
+{
+    color: #262626;
+    border-radius: 0px;
+    border-width: 2px 0px 2px 2px;
+    border-style:  solid;
+    border-color: #424242;
+    background: white;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.campoAgregadoQuitar, .campoAgregadoQuitar:hover, .campoAgregadoQuitar:active, .campoAgregadoQuitar:focus
+{
+    color: #262626;
+    border-radius: 0px;
+    border-width: 2px 2px 2px 0px;
+    border-style:  solid;
+    border-color: #424242;
+    background: white;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonFiltrarBarraLateral, .botonFiltrarBarraLateral:hover, .botonFiltrarBarraLateral:active, .botonFiltrarBarraLateral:focus
+{
+    color: white;
+    background: transparent;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+
+.botonFiltroBarraLateral, .botonFiltroBarraLateral:hover, .botonFiltroBarraLateral:active, .botonFiltroBarraLateral:focus
+{
+    color: #1859b2;
+    background: transparent;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonTextoAzul, .botonTextoAzul:active
+{
+    color: #1859b2;
+    background: transparent;
+    font-size: 12pt;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonTextoAzul:hover, .botonTextoAzul:focus
+{
+    opacity: 0.8;
+    color: #1859b2;
+}
+
+/*------- Botones de ciudades -----------*/
+.botonInputDropDown, .botonInputDropDown:focus, .botonInputDropDown:active, .botonInputDropDown:hover
+{
+    color: white;
+    background: #1859b2;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonInputDropDown:disabled
+{
+    color: white;
+    background: #1859b2;
+    opacity: 0.8;
+}
+
+.filtroModal
+{ 
+    overflow-x: hidden;
+    position: static;
+}
+
+.verFitros
+{
+    background: #d2e4fb;
+    color:  #262626;
+    border-bottom: 2px  solid #79adf4;
+}
+
+.botonFalsoTitulo, .botonFalsoTitulo:active, .botonFalsoTitulo:focus, .botonFalsoTitulo:hover
+{
+    color:  #262626;
+    background: transparent;
+    cursor: default;
+    font-size: 12pt;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonOperacionInformacion, .botonOperacionInformacion:active, .botonOperacionInformacion:focus
+{
+    background: red;
+    color: #081e3b;
+    border-radius: 0px;
+    font-size: 10pt;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.botonOperacionInformacion:hover
+{
+    background: white;
+    color: #1859b2;
+    
+    outline: none !important;
+    box-shadow: none;
+}

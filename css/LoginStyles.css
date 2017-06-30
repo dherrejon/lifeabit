@@ -1,0 +1,233 @@
+.loginPanel
+{
+    background: white;
+    min-height: 100vh;
+}
+
+.tituloLogin
+{
+    font-size: 24pt;
+    color: #1859b2;
+    border-color: #1859b2;
+    border-width: 0px 0px 0px 5px;
+    border-style: solid;
+}
+
+.botonLogin
+{
+    border: 3px solid #1859b2;
+    background: white;
+    color: #1859b2;
+    border-radius: 0px;
+}
+
+.botonLogin:hover, .botonLogin:focus
+{
+    background: #1859b2;
+    color: white;
+}
+
+/* Clase para las entradas de texto en el login */
+.entrada
+{
+    background-color: transparent;
+    color: #262626;
+    border-width: 0px 0px 3px 0px; 
+    border-style: solid;
+    border-color: #262626;
+    border-radius: 0px;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.entrada:disabled
+{
+    background: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed !important;
+}
+
+.entradaLogin, .entradaLogin:focus
+{
+    background-color: transparent;
+    color: #1859b2;
+    border-width: 0px 0px 3px 0px; 
+    border-style: solid;
+    border-color: #1859b2;
+    border-radius: 0px;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.entrada:focus, .entradaError:focus
+{
+    color: #262626;
+    border-style: solid;
+    border-color: #262626; 
+    outline: none !important;
+    box-shadow: none;
+}
+
+.entradaError
+{
+    background-color: transparent;
+    color: #262626;
+    border-width: 0px 0px 3px 0px; 
+    border-style: solid;
+    border-color: #970000;
+    border-radius: 0px;
+    outline: none !important;
+    box-shadow: none;
+
+}
+
+.entrada2
+{
+    position:relative;
+}
+
+.entrada2 label
+{
+    color: #262626;
+    font-size:16px;
+    font-weight:400;
+    letter-spacing:.5px;
+    position:absolute;
+    pointer-events:none;
+    left:0;top:2px;
+    -webkit-transition:.2s ease all;
+    transition:.2s ease all;
+}
+
+.entrada2 input[type=text],.entrada2 input[type=password],.entrada2 input[type=email]
+{
+    font-weight:400;
+    font-size:18px;
+    color: #262626;
+    width:100%;
+    box-shadow:none;
+    -webkit-transition:none;
+    transition:none;
+    
+}
+
+.entrada2 input[type=text]:disabled~label, .entrada2 input[type=text]:focus~label,.entrada2 input[type=text]:valid~label,.entrada2 input[type=password]:focus~label,.entrada2 input[type=password]:valid~label, .entrada2 input[type=email]:focus~label,.entrada2 input[type=email]:valid~label,
+.entrada2 input[type=text]:focus~label,.entrada2 input[type=text]:valid~label,.entrada2 input[type=password]:focus~label,.entrada2 input[type=password]:valid~label, .entrada2 input[type=email]:focus~label,.entrada2 input[type=email]:valid~label
+{
+    top:-20px;
+    color: #1859b2;
+    opacity:1;
+    font-weight:400;
+    font-size:14px;
+    font-weight: bold;
+}
+
+.entrada2 input[type=text]:focus:not([readonly])~label,.entrada2 input[type=password]:focus:not([readonly])~label,.entrada2 input[type=email]:focus:not([readonly])~label
+{
+    color: #262626 !important;
+    font-weight:400;
+    font-weight: bold;
+}
+
+/*---------- Texto Detalles ------------*/
+.subrayado
+{
+    border-width: 0px 0px 2px 0px;
+    border-style:  solid;
+    border-color: #262626;
+}
+
+.textoModal
+{
+    font-size: 14pt;
+    color:#262626;
+}
+
+/*-----------Error-----------------*/
+.textoError
+{
+    color: #970000 !important;
+}
+
+/*------------icono--------------*/
+
+.btn-circle 
+{
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 15px;
+    cursor: default;
+}
+
+.btn-circle.btn-lg 
+{
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+}
+
+.btn-circle.btn-xl 
+{
+    width: 100px;
+    height: 100px;
+    padding: 10px 16px;
+    font-size: 30px;
+    line-height: 1.33;
+    border-radius: 50px;
+    border: 3px solid #1859b2;
+    background: #1859b2;
+    color: white;
+}
+
+.btn-circle.btn-xl:focus, .btn-circle.btn-xl:hover
+{
+    width: 100px;
+    height: 100px;
+    padding: 10px 16px;
+    font-size: 30px;
+    line-height: 1.33;
+    border-radius: 50px;
+    border: 3px solid #1859b2;
+    background: #1859b2;
+    color: white;
+    
+    outline:0px;
+}
+
+.textoError
+{
+    color: #1859b2;
+}
+
+/*-------Recuperar password*/
+.recuperarPassword
+{
+    color: #848484 !important;
+    text-align: center;
+}
+
+.recuperarPassword:hover
+{
+    text-decoration: underline;
+}
+
+.margenNegro
+{
+    border: solid 3px #1859b2;
+    border-radius: 3px;
+    padding: 20px;
+}
+
+.usuarioTimes
+{
+    border-width: 0px;
+    border-bottom: solid 3px #1859b2;
+    border-radius: 0px;
+    margin-top: -5px;
+}
