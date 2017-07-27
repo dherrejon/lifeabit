@@ -72,7 +72,7 @@
 .botonDetallesActividad, .botonDetallesActividad:active, .botonDetallesActividad:focus, .botonDetallesActividad:hover
 {
     background: transparent;
-    color:  #262626;
+    color: #262626;
     border-radius: 0px;
     font-size: 16pt;
     margin-top: -5px;

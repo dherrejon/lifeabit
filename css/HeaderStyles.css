@@ -199,30 +199,14 @@ a:link
     margin-right: 40px;
 }
 
-
 .margenApp
 {
-    margin-left: 10px;
-    float: right;
+    margin-left: -15px;
+    float: left;
 }
 
 .menuApp
 {
-    right: 0;
-    left: auto;
-}
-
-@media (max-width: 767px)
-{
-    .margenApp
-    {
-        margin-left: -15px;
-        float: left;
-    }
-    
-    .menuApp
-    {
-      right: auto;
-      left: 0;
-    }
+    right: auto;
+    left: 0;
 }

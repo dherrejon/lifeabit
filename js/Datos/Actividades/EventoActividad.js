@@ -5,6 +5,7 @@ class EventoActividad
         this.EventoActividadId = "";
         this.Notas = "";
         this.Fecha = "";
+        this.Hora = "";
         this.Cantidad = "";
         this.Costo = "";
         this.Actividad = "";
@@ -54,6 +55,7 @@ function SetEventoActividad(data)
     
     evento.EventoActividadId = data.EventoActividadId;
     evento.Fecha = data.Fecha;
+    evento.Hora = data.Hora;
     evento.ActividadId = data.ActividadId;
     evento.Actividad = data.Actividad;
     evento.Costo = data.Costo;

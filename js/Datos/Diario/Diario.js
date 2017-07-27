@@ -4,6 +4,7 @@ class Diario
     {
         this.DiarioId = "";
         this.Fecha = "";
+        this.Hora = "";
         this.Notas = "";
         
         this.Etiqueta = [];
@@ -42,6 +43,7 @@ function SetDiario(data)
     
     diario.DiarioId = data.DiarioId;
     diario.Fecha = data.Fecha;
+    diario.Hora = data.Hora;
     diario.Notas = data.Notas;
     
     diario.FechaFormato = TransformarFecha(data.Fecha);

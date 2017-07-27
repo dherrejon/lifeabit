@@ -523,6 +523,11 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         $scope.verFiltro = !$scope.verFiltro;
     };
     
+    $scope.AgregarDiarioEtiquetas = function(diario)
+    {
+        $scope.AbrirDiario("ClonarEtiquetas", diario, null);
+    };  
+    
     //------------ Abrir - Editar -----------------
     $scope.AbrirDiario = function(operacion, objeto, fecha)
     {
@@ -550,6 +555,20 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             $scope.inicioDiario = jQuery.extend({}, $scope.nuevoDiario);
             
             document.getElementById("fechaDiario").value = $scope.nuevoDiario.Fecha;
+            document.getElementById("horaDiario").value = $scope.nuevoDiario.Hora;
+        }
+        else if(operacion == "ClonarEtiquetas")
+        {
+            $scope.FechaDefinida = false;
+            $scope.nuevoDiario = $scope.SetDiarioEtiqueta(objeto);
+            $scope.ActivarDesactivarTema(objeto.Tema);
+            $scope.ActivarDesactivarEtiqueta(objeto.Etiqueta);
+
+            $scope.inicioDiario = jQuery.extend({}, $scope.nuevoDiario);
+            
+            document.getElementById("fechaDiario").value = $scope.nuevoDiario.Fecha;
+            
+            $scope.operacion = "Agregar";
         }
         
         $('#modalDiario').modal('toggle');
@@ -562,6 +581,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         diario.DiarioId = data.DiarioId;
         diario.Notas = data.Notas;
         diario.Fecha = data.Fecha;
+        diario.Hora = data.Hora;
         diario.FechaFormato = data.FechaFormato;
         
         if(diario.Notas !== null && diario !==undefined)
@@ -573,6 +593,30 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         {
             diario.NotasHTML = "";
         }
+        
+        for(var k=0; k<data.Etiqueta.length; k++)
+        {
+            diario.Etiqueta[k] = SetEtiqueta(data.Etiqueta[k]);
+        }
+        
+        for(var k=0; k<data.Tema.length; k++)
+        {
+            diario.Tema[k] = SetTemaActividad(data.Tema[k]);
+        }
+        
+        return diario;
+
+    };
+    
+    $scope.SetDiarioEtiqueta = function(data)
+    {
+        var diario = new Diario();
+        
+        diario.Fecha = data.Fecha;
+        diario.FechaFormato = data.FechaFormato;
+        
+        diario.NotasHTML = "";
+        
         
         for(var k=0; k<data.Etiqueta.length; k++)
         {
@@ -709,11 +753,18 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     };
     
     //--------- Fecha -------------------
-    $('#fechaDiario').bootstrapMaterialDatePicker(
+    /*$('#fechaDiario').bootstrapMaterialDatePicker(
     { 
         weekStart : 0, 
         time: false,
         format: "YYYY-MM-DD",
+        maxDate: new Date()
+    });*/
+    
+    $('#fechaDiario').datetimepicker(
+    {
+        locale: 'es',
+        format: 'YYYY-MM-DD',
         maxDate: new Date()
     });
     
@@ -723,6 +774,20 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         {
             $scope.nuevoDiario.Fecha = element.value;
             $scope.nuevoDiario.FechaFormato = TransformarFecha(element.value);
+        });
+    };
+    
+    //----------- Hora -------------
+    $('#horaDiario').datetimepicker(
+    {
+        format: 'LT'
+    });
+    
+    $scope.CambiarHoraDiario = function(element) 
+    {
+        $scope.$apply(function($scope) 
+        {
+            $scope.nuevoDiario.Hora = element.value;
         });
     };
     
@@ -1121,6 +1186,8 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     //------------ terminar ---------
     $scope.TerminarDiario = function()
     {
+        $scope.nuevoDiario.Hora = document.getElementById("horaDiario").value;
+        
         if(!$scope.ValidarDatos())
         {
             $('#mensajeDiario').modal('toggle');
@@ -1545,7 +1612,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         if(($scope.nuevoDiario.Etiqueta.length + $scope.nuevoDiario.Tema.length) === 0)
         {
             $scope.mensajeError[$scope.mensajeError.length] = "*Selecciona al menos una etiqueta o un tema.";
-        }
+        }        
         
         if($scope.mensajeError.length > 0)
         {

@@ -268,7 +268,7 @@
                 <!-- Notas de la Fecha -->
                 <div class="row">
                    <div class="col-xs-12">
-                      <div ng-repeat="diario in detalle | filter:FiltrarDiario | orderBy:'-Fecha'"> <!-- -->
+                      <div ng-repeat="diario in detalle | filter:FiltrarDiario | orderBy:['-Fecha', 'Hora']"> <!-- -->
                         
                          <div class="" style="color: black">
                             
@@ -283,8 +283,9 @@
                                        <!--<button class="btn btnOptDiarioDetalles pull-left" style="cursor: default">
                                             <spna class="fa fa-dot-circle-o fa fa-2x"> </spna>
                                         </button>-->
+                                        <span class="textoGris btn botonAparente" >{{diario.Hora}}</span>
                                        
-                                        <div class="btn-group pull-right" >
+                                        <span class="btn-group pull-right" >
 
 
                                             <!-- Bullet -->
@@ -292,8 +293,7 @@
                                                 <spna class="fa fa-dot-circle-o fa fa-2x"> </spna>
                                             </button>-->
 
-                                            
-
+                                        
                                             <!-- Conceptos -->
                                             <div class="btn-group">
                                                 <button class="btn btnOptDiarioDetalles boton" data-toggle="dropdown">
@@ -362,6 +362,10 @@
                                                 </button>
 
                                                 <ul class="dropdown-menu dropdown-menu-right dropdownRight">
+                                                   <li><a class=" dropdownOpcion2" ng-click="AgregarDiarioEtiquetas(diario)">
+                                                         <span class="fa fa-plus"> Agregar</span>
+                                                    </a></li>
+                                                    
                                                     <li><a class=" dropdownOpcion2" ng-click="VerDetallesDiario(diario)">
                                                          <span class="fa fa-eye"> Detalles</span>
                                                     </a></li>
@@ -377,7 +381,7 @@
 
                                                 </ul>
                                             </div>
-                                        </div>
+                                        </span>
                                          <b style="font-size:12pt" ng-show="detalleAgrupado != 'Fecha'">{{diario.FechaFormato}}</b>
                                      </div>
                                     
@@ -459,7 +463,28 @@
                         
                         <div class="row" >
                             <div class="col-xs-12" >
-                                <input ng-disabled="FechaDefinida" type="text"  id="fechaDiario" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onchange="angular.element(this).scope().CambiarFechaDiario(this)"/>
+                                <input ng-disabled="FechaDefinida" type="text"  id="fechaDiario" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top: -25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaDiario(this)"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <br>
+                <!-- Hora -->
+                <div class="row">
+                      
+                    <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                        <label class="">Hora</label><br>
+                        <!--<div class="row" >
+                           <div class="col-xs-12" >
+                            <span class="botonFecha">{{nuevoDiario.Hora}}</span>
+                            </div>
+                        </div>-->
+                        
+                        <div class="row" >
+                            <div class="col-xs-12" >
+                                <input type="text"  id="horaDiario" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraDiario(this)"/>
                             </div>
                         </div>
                     </div>
@@ -822,14 +847,22 @@
                     <!-- Fecha -->
                     <span class="tituloModal" style="font-size:14pt">{{detalleDiario.FechaFormato}}</span><br>
                     
+                    <!-- Hora -->
+                    <span ng-if="detalleDiario.Hora.length > 0">
+                        <b>Hora: </b> 
+                        <span>
+                            {{detalleDiario.Hora}}
+                        </span><br>
+                    </span>
+                    
                     <!-- Etiqueta -->
                     <span ng-if="detalleDiario.Etiqueta.length > 0">
                         <b>Etiquetas: </b> 
                         <span ng-repeat="etiqueta in detalleDiario.Etiqueta | orderBy:'Nombre'">
                             <span ng-if="!$last">{{etiqueta.Nombre}}, </span>
                             <span ng-if="$last">{{etiqueta.Nombre}}.</span>
-                        </span>
-                    </span><br>
+                        </span><br>
+                    </span>
                     
                     <!-- Temas -->
                     <span ng-if="detalleDiario.Tema.length > 0">
@@ -837,8 +870,8 @@
                         <span ng-repeat="tema in detalleDiario.Tema | orderBy:'Tema'">
                             <span ng-if="!$last">{{tema.Tema}}, </span>
                             <span ng-if="$last">{{tema.Tema}}.</span>
-                        </span>
-                    </span><br>
+                        </span><br>
+                    </span>
                 </div>
             </div>
 

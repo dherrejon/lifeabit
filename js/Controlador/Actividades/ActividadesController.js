@@ -2522,6 +2522,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
         evento.EventoActividadId = data.EventoActividadId;
         evento.Fecha = data.Fecha;
+        evento.Hora = data.Hora;
         evento.FechaFormato = data.FechaFormato;
         evento.ActividadId = data.ActividadId;
         evento.Actividad = data.Actividad;

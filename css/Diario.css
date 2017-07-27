@@ -151,3 +151,18 @@
 {
     opacity: 0.9;
 }
+
+.textoGris
+{
+    color: #4d4d4d;
+}
+
+.botonAparente, .botonAparente:hover, .botonAparente:focus, .botonAparente:active
+{
+    cursor: text;
+    padding-left: 0px;
+    text-align: default;
+    
+    outline: none !important;
+    box-shadow: none;
+}

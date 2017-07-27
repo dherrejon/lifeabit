@@ -188,7 +188,7 @@
                   
                    <div class="col-sm-12">
                       <!-- Nombre -->            
-                       <b class="tituloActividad"> {{detalle.Nombre}} </b>
+                       <span class="tituloActividad"> {{detalle.Nombre}} </span>
                        
                        <!-- Botones -->
                        <div class="pull-right btn-group">
@@ -198,9 +198,9 @@
                            </button>
                           
                             <!-- "context menu" -->
-                            <button class="fa fa-ellipsis-v btn botonVacio" data-toggle="dropdown" style="font-size: 16pt"></button>
+                            <button class="fa fa-ellipsis-v btn botonVacio" data-toggle="dropdown" style="font-size: 16pt;" data-target="operaciones"></button>
 
-                            <ul class="dropdown-menu  contextMenu">
+                            <ul class="dropdown-menu  contextMenu" id="operaciones">
                                 <!--<button class="col-xs-12 btn botonCM" ng-click="RegistrarEvento('Agregar', detalle, null)"> <span class="fa fa-calendar-check-o "></span> Registrar</button>-->
                                 <button class="col-xs-12 btn botonCM" ng-click="AbrirActividad('Copiar', detalle)"> <span class="fa fa-files-o "></span> Copiar</button>
                                 <button class="col-xs-12 btn botonCM" ng-click="AbrirActividad('Editar', detalle)"> <span class="fa fa-pencil"></span> Editar</button><br>

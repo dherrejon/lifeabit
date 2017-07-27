@@ -7,7 +7,7 @@ function GetDiario($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT DiarioId, Notas, Fecha FROM Diario WHERE UsuarioId = ".$id;
+    $sql = "SELECT DiarioId, Notas, Fecha, DATE_FORMAT(Hora,  '%h:%i %p' ) as Hora FROM Diario WHERE UsuarioId = ".$id;
 
     try 
     {
@@ -50,7 +50,7 @@ function AgregarDiario()
         $app->stop();
     }*/
 
-    $sql = "INSERT INTO Diario (UsuarioId, Notas, Fecha) VALUES(:UsuarioId, :Notas, :Fecha)";
+    $sql = "INSERT INTO Diario (UsuarioId, Notas, Fecha, Hora) VALUES(:UsuarioId, :Notas, :Fecha, STR_TO_DATE( :Hora, '%h:%i %p' ))";
     
     try 
     {
@@ -61,6 +61,7 @@ function AgregarDiario()
         $stmt->bindParam("UsuarioId", $diario->UsuarioId);
         $stmt->bindParam("Fecha", $diario->Fecha);
         $stmt->bindParam("Notas", $diario->Notas);
+        $stmt->bindParam("Hora", $diario->Hora);
 
         $stmt->execute();
         
@@ -237,7 +238,7 @@ function EditarDiario()
          $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
     }*/
 
-    $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas WHERE DiarioId = ".$diario->DiarioId;
+    $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ) WHERE DiarioId = ".$diario->DiarioId;
     
     try 
     {
@@ -247,6 +248,7 @@ function EditarDiario()
         
         $stmt->bindParam("Notas", $diario->Notas);
         $stmt->bindParam("Fecha", $diario->Fecha);
+        $stmt->bindParam("Hora", $diario->Hora);
 
         $stmt->execute();
 
