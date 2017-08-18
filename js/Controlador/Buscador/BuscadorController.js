@@ -108,6 +108,7 @@ app.controller("BucadorController", function($scope, $window, $http, $rootScope,
             }
             else
             {
+                alert(data[0].Estatus);
                 $scope.LimpiarBusqueda();
             }
         

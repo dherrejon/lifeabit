@@ -1,4 +1,4 @@
-var app = angular.module('MQR',['ngRoute','angular-md5', 'angular-loading-bar']);
+var app = angular.module('MQR',['ngRoute','angular-md5', 'angular-loading-bar', 'ui.bootstrap']);
 
 app.constant('CONFIG',{
         APIURL: "php/API/index.php",

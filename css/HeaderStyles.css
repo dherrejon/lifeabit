@@ -199,6 +199,7 @@ a:link
     margin-right: 40px;
 }
 
+
 .margenApp
 {
     margin-left: -15px;
@@ -210,3 +211,18 @@ a:link
     right: auto;
     left: 0;
 }
+
+/*@media (max-width: 767px)
+{
+    .margenApp
+    {
+        margin-left: -15px;
+        float: left;
+    }
+    
+    .menuApp
+    {
+      right: auto;
+      left: 0;
+    }
+}*/

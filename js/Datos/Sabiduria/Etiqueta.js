@@ -128,5 +128,84 @@ function BorrarEtiqueta($http, CONFIG, $q, id)
     return q.promise;
 }
 
+//----------------- Etiquetas equivalentes ------------------------
+function GetEtiquetaEquivalente($http, $q, CONFIG, id)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetEtiquetaEquivalente/' + id,
+
+      }).success(function(data)
+        {
+            var etiqueta = []; 
+            for(var k=0; k<data.length; k++)
+            {
+                etiqueta[k] = new Etiqueta();
+                etiqueta[k] = SetEtiqueta(data[k]);
+            }
+    
+            q.resolve(etiqueta);  
+        }).error(function(data, status){
+            q.resolve([]);
+     }); 
+    return q.promise;
+}
+
+
+//--------- Filtrar------------------
+
+function FiltrarBuscarEtiqueta(etiqueta, buscar)
+{
+    if(buscar !== undefined)
+    {
+        if(buscar.length > 0)
+        {
+            var index = etiqueta.Nombre.toLowerCase().indexOf(buscar.toLowerCase());
+
+
+            if(index < 0)
+            {
+                return false;
+            }
+            else
+            {
+                if(index === 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+}
+
+function SetEtiquetaEquivalente($http, CONFIG, $q, equivalente)
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'PUT',
+          url: CONFIG.APIURL + '/SetEtiquetaEquivalente',
+          data: equivalente
+
+      }).success(function(data)
+        {
+            q.resolve(data);    
+        }).error(function(data, status){
+            q.resolve([{Estatus:status}]);
+
+     }); 
+    return q.promise;
+}
+
 
   

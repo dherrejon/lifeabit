@@ -13,7 +13,7 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
     
     $scope.GetEtiqueta = function()              
     {
-        GetEtiqueta($http, $q, CONFIG, $rootScope.UsuarioId).then(function(data)
+        GetEtiqueta($http, $q, CONFIG, $scope.usuarioLogeado.UsuarioId).then(function(data)
         {
             $scope.etiqueta = data;
         
@@ -87,13 +87,21 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         {
             $scope.nuevaEtiqueta = SetEtiqueta(etiqueta);
         }
-    
+        
+        $scope.etiquetaInicial =  jQuery.extend({}, $scope.nuevaEtiqueta);
         $('#modalEtiqueta').modal('toggle');
     };
     
     $scope.CerrarEtiquetaModal = function()
     {
-        $('#cerrarEtiquetaModal').modal('toggle');
+        if(JSON.stringify($scope.etiquetaInicial) === JSON.stringify($scope.nuevaEtiqueta))
+        {
+            $('#modalEtiqueta').modal('toggle');
+        }
+        else
+        {
+            $('#cerrarEtiquetaModal').modal('toggle');
+        }
     };
     
     $scope.ConfirmarCerrarEtiquetaModal = function()
@@ -131,12 +139,13 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         }
         else
         {
-            if($scope.operacion == "Agregar" || $scope.operacion=="AgregarExterior")
+            $scope.nuevaEtiqueta.Nombre = $scope.nuevaEtiqueta.Nombre.charAt(0).toUpperCase() + $scope.nuevaEtiqueta.Nombre.substr(1).toLowerCase();
+            if($scope.operacion == "Agregar" || $scope.operacion == "AgregarExterior")
             {
                 $scope.nuevaEtiqueta.UsuarioId = $rootScope.UsuarioId;
                 $scope.AgregarEtiqueta();
             }
-            else if($scope.operacion == "Editar")
+            else if($scope.operacion == "Editar" || $scope.operacion == "EditarExterior")
             {
                 $scope.EditarEtiqueta();
             }
@@ -187,10 +196,20 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         {
             if(data[0].Estatus == "Exitoso")
             {
+                if($scope.operacion == "Editar")
+                {
+                    //$scope.GetEtiqueta();
+                    $scope.mensaje = "Etiqueta editada";
+                    $scope.EnviarAlerta('ExitosoEditar');
+                }
+                else if($scope.operacion == "EditarExterior")
+                {
+                    ETIQUETA.TerminarEditarEtiqueta($scope.nuevaEtiqueta);
+                }
+                
+                $scope.SetNuevaEtiqueta($scope.nuevaEtiqueta);
                 $('#modalEtiqueta').modal('toggle');
-                $scope.GetEtiqueta();
-                $scope.mensaje = "Etiqueta editada";
-                $scope.EnviarAlerta('ExitosoEditar');
+                
             }
             else
             {
@@ -203,6 +222,21 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
              $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeEtiqueta').modal('toggle');
         });
+    };
+    
+    $scope.SetNuevaEtiqueta = function(etiqueta)
+    {
+        if($scope.operacion == "Editar" || $scope.operacion == "EditarExterior")
+        {
+            for(var k=0; k<$scope.etiqueta.length; k++)
+            {
+                if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.etiqueta[k] = jQuery.extend({}, etiqueta);
+                    break;
+                }
+            }
+        }
     };
     
     $scope.ValidarDatos = function()
@@ -370,8 +404,46 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         }
     };
     
+    
+    
+    
+    /*----------------------- Usuario logeado --------------------------*/
     //----------------------Inicializar---------------------------------
-    $scope.GetEtiqueta();
+    $scope.InicializarControlador = function()
+    {
+        $scope.GetEtiqueta();
+    };
+    
+    $scope.usuarioLogeado =  datosUsuario.getUsuario(); 
+    
+    //verifica que haya un usuario logeado
+    if($scope.usuarioLogeado !== null)
+    {
+        if(!$scope.usuarioLogeado.SesionIniciada)
+        {
+             $location.path('/Login');
+        }
+        else
+        {
+            $scope.InicializarControlador();
+        }
+    }
+    
+    //destecta cuando los datos del usuario cambian
+    $scope.$on('cambioUsuario',function()
+    {
+        $scope.usuarioLogeado =  datosUsuario.getUsuario();
+    
+        if(!$scope.usuarioLogeado.SesionIniciada)
+        {
+            $location.path('/Login');
+            return;
+        }
+        else
+        {
+            $scope.InicializarControlador();
+        }
+    });
     
     /*---------------- EXTERIOR -------------------------*/
     $scope.$on('AgregarEtiqueta',function()
@@ -381,6 +453,19 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         $scope.nuevaEtiqueta = new Etiqueta();
     
         $('#modalEtiqueta').modal('toggle');
+        
+        $scope.etiquetaInicial = new Etiqueta();
+    });
+    
+    $scope.$on('EditarEtiqueta',function()
+    {
+        $scope.operacion = "EditarExterior";
+
+        $scope.nuevaEtiqueta = SetEtiqueta(ETIQUETA.GetEtiqueta());
+    
+        $('#modalEtiqueta').modal('toggle');
+        
+        $scope.etiquetaInicial =  jQuery.extend({}, $scope.nuevaEtiqueta);
     });
     
 });
@@ -397,6 +482,12 @@ app.factory('ETIQUETA',function($rootScope)
       $rootScope.$broadcast('AgregarEtiqueta'); 
   };
     
+  service.EditarEtiqueta = function(etiqueta)
+  {
+      this.etiqueta = etiqueta;
+      $rootScope.$broadcast('EditarEtiqueta'); 
+  };
+    
   service.TerminarEtiqueta = function(etiqueta)
   {
       this.etiqueta = etiqueta;
@@ -410,6 +501,12 @@ app.factory('ETIQUETA',function($rootScope)
           $rootScope.$broadcast('TerminarEtiqueta');
       }
       
+  };
+    
+  service.TerminarEditarEtiqueta = function(etiqueta)
+  {
+      this.etiqueta = etiqueta;
+      $rootScope.$broadcast('TerminarEditarEtiqueta'); 
   };
     
   service.GetEtiqueta = function()

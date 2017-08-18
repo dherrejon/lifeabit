@@ -202,14 +202,14 @@
 
 .checkImage, .checkImage:focus, .checkImage:active, .checkImage:hover
 {
-    background: rgba(0,0,0,0.15);
+    background: rgba(24,89,178, 0.4);
     color: #04B404;
     font-size: 16pt;
     border-radius: 0px;
     
     position:absolute;
     top:0px;
-    left:0px;
+    left: 0px;
     
     outline: none !important;
     box-shadow: none;
@@ -230,4 +230,63 @@
     left: 0 !important;
     position: fixed;
     text-align: center;
+}
+
+.imgContainer
+{
+    height: 150px; 
+    background:  #d2e4fb; 
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.crop
+{
+    overflow: hidden !important;
+    max-height: 150px !important;
+}
+
+
+
+@media (max-width: 480px)
+{
+    .imgContainer
+    {
+        height: 75px; 
+    }
+    
+    .crop 
+    {
+        max-height: 75px !important;
+        overflow: hidden !important;
+    }
+}
+
+@media (min-width: 481px)
+{
+    .imgContainer
+    {
+        height: 115px; 
+    }
+    
+    .crop 
+    {
+        max-height: 115px !important;
+        overflow: hidden !important;
+    }
+}
+
+@media (min-width: 768px)
+{
+    .imgContainer
+    {
+        height: 115px; 
+    }
+    
+    .crop 
+    {
+        max-height: 115px !important;
+        overflow: hidden !important;
+    }
 }

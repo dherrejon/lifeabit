@@ -313,11 +313,18 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                
                if(index == -1)
                 {
-                    $scope.AgregarEtiquetaFiltro();
+                    $scope.AgregarEtiquetaFiltro($scope.buscarConcepto);
                 }
                 else
                 {
-                    $scope.AgregarTemaFiltro();
+                    var etiquetas = $scope.buscarConcepto.split(" ");
+                    for(var k=0; k<etiquetas.length; k++)
+                    {
+                        if(etiquetas[k] != "")
+                        {
+                            $scope.AgregarEtiquetaFiltro(etiquetas[k]);
+                        }
+                    }
                 }
                
               break;
@@ -370,11 +377,11 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         }
     };
     
-    $scope.AgregarEtiquetaFiltro = function()
+    $scope.AgregarEtiquetaFiltro = function(etiqueta)
     {
         for(var k=0; k<$scope.etiqueta.length; k++)
         {
-            if($scope.etiqueta[k].Nombre.toLowerCase() == $scope.buscarConcepto.toLowerCase())
+            if($scope.etiqueta[k].Nombre.toLowerCase() == etiqueta.toLowerCase())
             {
                 if($scope.etiqueta[k].mostrar)
                 {
@@ -383,7 +390,6 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 else
                 {
                     $scope.buscarConcepto = "";
-                    
                 }
                 $scope.$apply();
             }

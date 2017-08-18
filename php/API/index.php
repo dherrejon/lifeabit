@@ -213,6 +213,9 @@
     $app->post('/ActivarDesactivarEtiqueta', $seguridad, $ChecarSesion, 'ActivarDesactivarEtiqueta');
     $app->delete('/BorrarEtiqueta', $seguridad, $ChecarSesion, 'BorrarEtiqueta');
 
+    $app->get('/GetEtiquetaEquivalente/:id', $seguridad, $ChecarSesion, 'GetEtiquetaEquivalente');
+    $app->put('/SetEtiquetaEquivalente', $seguridad, $ChecarSesion, 'SetEtiquetaEquivalente');
+
     //---------------------------------------------------------------------------------------------------------------Actividades
     
     /*-----------------------  Frecuencia ------------------------------------------*/
@@ -313,6 +316,7 @@
     //---------------------------------------------------------------------------------------------------------------Imagenes  
     /*-----------------------  Imagenes ------------------------------------------*/
     $app->post('/GetGaleriaFotos', $seguridad, $ChecarSesion, 'GetGaleriaFotos');
+    $app->post('/GetFototeca', $seguridad, $ChecarSesion, 'GetFototeca');
 
 
     $app->run(); 

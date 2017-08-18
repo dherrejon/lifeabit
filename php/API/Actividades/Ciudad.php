@@ -7,7 +7,7 @@ function GetCiudad($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT CiudadId, Pais, Estado, Ciudad FROM Ciudad WHERE UsuarioId = ".$id;
+    $sql = "SELECT CiudadId, Pais, Estado, Ciudad, AbreviacionPais, AbreviacionEstado, DiarioDefecto FROM Ciudad WHERE UsuarioId = ".$id;
 
     try 
     {
@@ -33,7 +33,7 @@ function AgregarCiudad()
     $request = \Slim\Slim::getInstance()->request();
     $ciudad = json_decode($request->getBody());
     global $app;
-    $sql = "INSERT INTO Ciudad(UsuarioId, Pais, Estado, Ciudad) VALUES(:UsuarioId, :Pais, :Estado, :Ciudad)";
+    $sql = "INSERT INTO Ciudad(UsuarioId, Pais, Estado, Ciudad, AbreviacionEstado, AbreviacionPais) VALUES(:UsuarioId, :Pais, :Estado, :Ciudad, :AbreviacionEstado, :AbreviacionPais)";
 
     try 
     {
@@ -44,6 +44,8 @@ function AgregarCiudad()
         $stmt->bindParam("Pais", $ciudad->Pais);
         $stmt->bindParam("Estado", $ciudad->Estado);
         $stmt->bindParam("Ciudad", $ciudad->Ciudad);
+        $stmt->bindParam("AbreviacionEstado", $ciudad->AbreviacionEstado);
+        $stmt->bindParam("AbreviacionPais", $ciudad->AbreviacionPais);
 
         $stmt->execute();
         
@@ -63,7 +65,7 @@ function EditarCiudad()
     $request = \Slim\Slim::getInstance()->request();
     $ciudad = json_decode($request->getBody());
    
-    $sql = "UPDATE Ciudad SET Pais = :Pais, Estado = :Estado, Ciudad = :Ciudad  WHERE CiudadId =".$ciudad->CiudadId."";
+    $sql = "UPDATE Ciudad SET Pais = :Pais, Estado = :Estado, Ciudad = :Ciudad, AbreviacionPais = :AbreviacionPais, AbreviacionEstado = :AbreviacionEstado  WHERE CiudadId =".$ciudad->CiudadId."";
     
     try 
     {
@@ -73,6 +75,8 @@ function EditarCiudad()
         $stmt->bindParam("Pais", $ciudad->Pais);
         $stmt->bindParam("Estado", $ciudad->Estado);
         $stmt->bindParam("Ciudad", $ciudad->Ciudad);
+        $stmt->bindParam("AbreviacionPais", $ciudad->AbreviacionPais);
+        $stmt->bindParam("AbreviacionEstado", $ciudad->AbreviacionEstado);
         
         $stmt->execute();
         $db = null;

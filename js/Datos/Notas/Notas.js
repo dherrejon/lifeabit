@@ -113,6 +113,15 @@ function SetNota(data)
         for(var k=0; k<data.Etiqueta.length; k++)
         {
             nota.Etiqueta[k] = data.Etiqueta[k];
+            
+            if(data.Etiqueta[k].Visible == "1")
+            {
+                data.Etiqueta[k].Visible = true;
+            }
+            else if(data.Etiqueta[k].Visible == "0")
+            {
+                data.Etiqueta[k].Visible = false;
+            }
         }
     }
     
@@ -157,7 +166,7 @@ function AgregarNota($http, CONFIG, $q, nota)
             }
         }
     }
-    
+
     var Nota = SetNota(nota);
     Nota.UsuarioId = nota.UsuarioId;
     Nota.AgregarImagen = nota.ImagenSrc.length;
@@ -195,7 +204,6 @@ function AgregarNota($http, CONFIG, $q, nota)
 function EditarNota($http, CONFIG, $q, nota)
 {
     var q = $q.defer();
-    
     
     var fd = new FormData();
     
@@ -238,10 +246,10 @@ function EditarNota($http, CONFIG, $q, nota)
             }
             else
             {
-                q.resolve(data);
+                q.resolve([{Estatus: "Error"}]);
             }  
         }).error(function(data, status){
-            q.resolve(status);
+            q.resolve([{Estatus: status}]);
 
      }); 
     return q.promise;
@@ -330,6 +338,30 @@ function GetGaleriaFotos($http, $q, CONFIG, datos)
     $http({      
           method: 'POST',
           url: CONFIG.APIURL + '/GetGaleriaFotos',
+          data: datos
+
+      }).success(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                q.resolve(data[1].Fotos);
+            }
+
+            q.resolve([]);
+             
+        }).error(function(data, status){
+            q.resolve([]);
+     }); 
+    return q.promise;
+}
+
+function GetFototeca($http, $q, CONFIG, datos)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'POST',
+          url: CONFIG.APIURL + '/GetFototeca',
           data: datos
 
       }).success(function(data)

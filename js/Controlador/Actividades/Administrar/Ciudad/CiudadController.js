@@ -32,10 +32,10 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
     
     $scope.SetPaisEstado = function(ciudad)
     {
-        var sql = "SELECT DISTINCT Pais FROM ?";
+        var sql = "SELECT DISTINCT Pais, AbreviacionPais FROM ?";
         $scope.pais = alasql(sql, [ciudad]);
 
-        sql = "SELECT DISTINCT Pais, Estado FROM ?";
+        sql = "SELECT DISTINCT Pais, Estado, AbreviacionEstado FROM ?";
         $scope.estado = alasql(sql, [ciudad]);
     };
     
@@ -162,7 +162,7 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
     };
     
     /*-------------- Operaciones de agergar Editar ---------------------*/
-    $scope.CambiarPais = function(pais)
+    $scope.CambiarPais = function(pais, abreviacion)
     {
         if(pais == 'AgregarPais')
         {
@@ -171,6 +171,8 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
             
             $scope.nuevaCiudad.Pais = "";
             $scope.nuevaCiudad.Estado = "";
+            $scope.nuevaCiudad.AbreviacionPais = "";
+            $scope.nuevaCiudad.AbreviacionEstado = "";
             
             $("#paisNuevo").focus();
         }
@@ -179,22 +181,25 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
             if(pais != $scope.nuevaCiudad.Pais)
             {
                 $scope.nuevaCiudad.Pais = pais;
+                $scope.nuevaCiudad.AbreviacionPais = abreviacion;
                 
                 $scope.paisNuevo = false;
                 $scope.estadoNuevo = false;
                 
                 $scope.nuevaCiudad.Estado = "";
+                $scope.nuevaCiudad.AbreviacionEstado = "";
             }
         }
     };
     
-    $scope.CambiarEstado = function(estado)
+    $scope.CambiarEstado = function(estado, abreviacion)
     {
         if(estado == 'AgregarEstado')
         {
             $scope.estadoNuevo = true;
             
             $scope.nuevaCiudad.Estado = "";
+            $scope.nuevaCiudad.AbreviacionEstado = "";
             
             $("#estadoNuevo").focus();
         }
@@ -203,6 +208,7 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
             if(estado != $scope.nuevaCiudad.Estado)
             {
                 $scope.nuevaCiudad.Estado = estado;
+                $scope.nuevaCiudad.AbreviacionEstado = abreviacion;
                 
                 $scope.estadoNuevo = false;
                 
@@ -212,9 +218,9 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
     
     
     /*----------------- Terminar agregar-editar tema --------------------*/
-    $scope.TerminarCiudad = function(paisInvalido, estadoInvalido, ciudadInvalido)
+    $scope.TerminarCiudad = function(paisInvalido, estadoInvalido, ciudadInvalido, pAbreInvalido, eAbreInvalido)
     {
-        if(!$scope.ValidarDatos(paisInvalido, estadoInvalido, ciudadInvalido))
+        if(!$scope.ValidarDatos(paisInvalido, estadoInvalido, ciudadInvalido, pAbreInvalido, eAbreInvalido))
         {
             $('#mensajeCiudad').modal('toggle');
             return;
@@ -233,7 +239,7 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
         }
     };
     
-    $scope.ValidarDatos = function(paisInvalido, estadoInvalido, ciudadInvalido)
+    $scope.ValidarDatos = function(paisInvalido, estadoInvalido, ciudadInvalido, pAbreInvalido, eAbreInvalido)
     {
         $scope.mensajeError = [];
         
@@ -242,9 +248,19 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
             $scope.mensajeError[$scope.mensajeError.length] = "*Escribe un país.";
         }
         
+        if(pAbreInvalido)
+        {
+            $scope.mensajeError[$scope.mensajeError.length] = "*Escribe la abreviación del país. Máximo 10 letras.";
+        }
+        
         if(estadoInvalido)
         {
             $scope.mensajeError[$scope.mensajeError.length] = "*Escribe un estado.";
+        }
+        
+        if(eAbreInvalido)
+        {
+            $scope.mensajeError[$scope.mensajeError.length] = "*Escribe la abreviación del estado. Máximo 10 letras.";
         }
         
         
@@ -408,7 +424,7 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
     $scope.GetCiudad();
     
     //------------------------ Exterior ---------------------------
-    $rootScope.$on('AgregarCiudadNuevo',function()
+    $scope.$on('AgregarCiudadNuevo',function()
     {
         var campo = CIUDAD.GetCampo();
         
@@ -432,7 +448,7 @@ app.controller("CiudadController", function($scope, $window, $http, $rootScope, 
 
         $scope.nuevaCiudad = new Ciudad();
         $scope.nuevaCiudad = SetCiudad(CIUDAD.GetCiudad());
-         $scope.nuevaCiudad.CiudadId = "";
+        $scope.nuevaCiudad.CiudadId = "";
     
         $('#modalCiudad').modal('toggle');
     });

@@ -6,6 +6,9 @@ class Ciudad
         this.Pais = "";
         this.Estado = "";
         this.Ciudad = "";
+        this.AbreviacionPais = "";
+        this.AbreviacionEstado = "";
+        this.DiarioDefecto = "";
     }
 }
 
@@ -47,6 +50,9 @@ function SetCiudad(data)
     ciudad.Pais = data.Pais;
     ciudad.Estado = data.Estado;
     ciudad.Ciudad = data.Ciudad;
+    ciudad.AbreviacionPais = data.AbreviacionPais;
+    ciudad.AbreviacionEstado = data.AbreviacionEstado;
+    ciudad.DiarioDefecto = data.DiarioDefecto;
     
     return ciudad;
 }

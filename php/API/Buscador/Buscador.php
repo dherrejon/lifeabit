@@ -8,7 +8,7 @@ function GetBuscador()
     
     $numTema = count($filtro->tema);
     $numEtiqueta = count($filtro->etiqueta);
-    
+
     if($numTema > 0)
     {
         $whereTema = "(";
@@ -21,69 +21,126 @@ function GetBuscador()
         $whereTema .= ")";
     }
     
+    $sqlEtiquetaNota = "";
+    $sqlEtiquetaBaseNota1 = " SELECT e.NotaId FROM EtiquetaNotaVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseNota2 = " GROUP BY e.NotaId";
+    
+    $sqlEtiquetaDiario = "";
+    $sqlEtiquetaBaseDiario1 = " SELECT e.DiarioId FROM EtiquetaDiarioVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseDiario2 = " GROUP BY e.DiarioId";
+    
+    $sqlEtiquetaActividad = "";
+    $sqlEtiquetaBaseActividad1 = " SELECT e.ActividadId FROM EtiquetaActividadVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseActividad2 = " GROUP BY e.ActividadId";
+    
     if($numEtiqueta > 0)
     {
-        $whereEtiqueta = "(";
+        //Equivalencias
+         for($k=0; $k<$numEtiqueta; $k++)
+         {
+            $sql = "SELECT IF(EtiquetaId1=".$filtro->etiqueta[$k]->EtiquetaId.", EtiquetaId2, EtiquetaId1) as EtiquetaId
+                    FROM EtiquetaEquivalenteVista
+                    WHERE EtiquetaId1 = ".$filtro->etiqueta[$k]->EtiquetaId." OR EtiquetaId2 =".$filtro->etiqueta[$k]->EtiquetaId;
+             
+            try 
+            {
+                $db = getConnection();
+                $stmt = $db->query($sql);
+                $filtro->etiqueta[$k]->Equivalente = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+             
+            catch(PDOException $e) 
+            {
+                echo($e);
+                echo '[ { "Estatus": '.$e.' } ]';
+                $app->status(409);
+                $app->stop();
+            }
+         }
         
+        
+        
+        //Crear IN en el where de etiquetas        
         for($k=0; $k<$numEtiqueta; $k++)
         {
+            $whereEtiqueta = "(";
             $whereEtiqueta .= $filtro->etiqueta[$k]->EtiquetaId. ",";
+            
+            
+            $numEquivalente = count($filtro->etiqueta[$k]->Equivalente);
+            for($i=0; $i<$numEquivalente; $i++)
+            {
+                $whereEtiqueta .= $filtro->etiqueta[$k]->Equivalente[$i]->EtiquetaId. ",";
+            }
+            
+            $whereEtiqueta = rtrim($whereEtiqueta,",");
+            $whereEtiqueta .= ")";
+            
+            //$filtro->etiqueta[$k]->Where = $whereEtiqueta;
+            
+            if($k==0)
+            {
+                $sqlEtiquetaNota .= $sqlEtiquetaBaseNota1.$whereEtiqueta.$sqlEtiquetaBaseNota2;
+                $sqlEtiquetaDiario .= $sqlEtiquetaBaseDiario1.$whereEtiqueta.$sqlEtiquetaBaseDiario2;
+                $sqlEtiquetaActividad .= $sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
+            }
+            else
+            {
+                $sqlEtiquetaNota .= " UNION ALL ".$sqlEtiquetaBaseNota1.$whereEtiqueta.$sqlEtiquetaBaseNota2;
+                $sqlEtiquetaDiario .= " UNION ALL ".$sqlEtiquetaBaseDiario1.$whereEtiqueta.$sqlEtiquetaBaseDiario2;
+                $sqlEtiquetaActividad .= " UNION ALL ".$sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
+            }
         }
-        $whereEtiqueta = rtrim($whereEtiqueta,",");
-        $whereEtiqueta .= ")";
     }
     
     
     if($numEtiqueta > 0 && $numTema > 0)
     {
-         $sql = "SELECT n.NotaId, n.Titulo FROM Nota n
-                    INNER JOIN (
+         $sql = "SELECT n.NotaId, n.Titulo FROM Nota n 
+                    INNER JOIN ("
+                        .$sqlEtiquetaNota.
+             
+                    " UNION ALL SELECT t.NotaId FROM TemaNotaVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.NotaId HAVING count(*) = ".$numTema.
+             
+                    ") x ON x.NotaId = n.NotaId GROUP BY n.NotaId  HAVING count(*) = ".($numEtiqueta+1);
+            
+            $sqlDiario = "SELECT d.DiarioId, d.Notas, d.Fecha  FROM Diario d 
+                    INNER JOIN ("
+                         .$sqlEtiquetaDiario.
+                
+                    " UNION ALL SELECT t.DiarioId FROM TemaDiarioVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.DiarioId HAVING count(*) = ".$numTema.
                     
-                    SELECT e.NotaId FROM EtiquetaNotaVista e   
-                    INNER JOIN (SELECT t.NotaId FROM TemaNotaVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.NotaId HAVING count(*) = ".$numTema.") y ON y.NotaId = e.NotaId
-                        
-                    WHERE e.EtiquetaId IN ".$whereEtiqueta." GROUP BY e.NotaId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.NotaId = n.NotaId";
-        
-        $sqlDiario = "SELECT  d.DiarioId, d.Notas, d.Fecha FROM Diario d
-                    INNER JOIN (
-                    
-                    SELECT e.DiarioId FROM EtiquetaDiarioVista e   
-                    INNER JOIN (SELECT t.DiarioId FROM TemaDiarioVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.DiarioId HAVING count(*) = ".$numTema.") y ON y.DiarioId = e.DiarioId
-                        
-                    WHERE e.EtiquetaId IN ".$whereEtiqueta." GROUP BY e.DiarioId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.DiarioId = d.DiarioId";
-        
-        $sqlActividad = "SELECT a.ActividadId, a.Nombre FROM Actividad a
-                    INNER JOIN (
-                    
-                    SELECT e.ActividadId FROM EtiquetaActividadVista e   
-                    INNER JOIN (SELECT t.ActividadId FROM TemaActividadVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema.") y ON y.ActividadId = e.ActividadId
-                        
-                    WHERE e.EtiquetaId IN ".$whereEtiqueta." GROUP BY e.ActividadId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.ActividadId = a.ActividadId";
+                    ") x ON x.DiarioId = d.DiarioId GROUP BY d.DiarioId  HAVING count(*) = ".($numEtiqueta+1);
+            
+            $sqlActividad = "SELECT a.ActividadId, a.Nombre FROM Actividad a 
+                    INNER JOIN ("
+                        .$sqlEtiquetaActividad.
+                
+                    " UNION ALL SELECT t.ActividadId FROM TemaActividadVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema.
+                
+                    ") x ON x.ActividadId = a.ActividadId GROUP BY a.ActividadId HAVING count(*) = ".($numEtiqueta+1);
     }
     else if($numEtiqueta > 0 || $numTema > 0)
     {
         if($numEtiqueta > 0)
         {
             $sql = "SELECT n.NotaId, n.Titulo FROM Nota n 
-                    INNER JOIN (
-                        SELECT e.NotaId FROM EtiquetaNotaVista e WHERE e.EtiquetaId in ".$whereEtiqueta." GROUP BY e.NotaId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.NotaId = n.NotaId";
+                    INNER JOIN ("
+                        .$sqlEtiquetaNota.
+                    ") x ON x.NotaId = n.NotaId GROUP BY n.NotaId  HAVING count(*) = ".$numEtiqueta;
             
             $sqlDiario = "SELECT d.DiarioId, d.Notas, d.Fecha  FROM Diario d 
-                    INNER JOIN (
-                        SELECT e.DiarioId FROM EtiquetaDiarioVista e WHERE e.EtiquetaId in ".$whereEtiqueta." GROUP BY e.DiarioId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.DiarioId = d.DiarioId";
+                    INNER JOIN ("
+                         .$sqlEtiquetaDiario.
+                    ") x ON x.DiarioId = d.DiarioId GROUP BY d.DiarioId  HAVING count(*) = ".$numEtiqueta;
             
             $sqlActividad = "SELECT a.ActividadId, a.Nombre FROM Actividad a 
-                    INNER JOIN (
-                        SELECT e.ActividadId FROM EtiquetaActividadVista e WHERE e.EtiquetaId in ".$whereEtiqueta." GROUP BY e.ActividadId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.ActividadId = a.ActividadId";
-            
-            
-            
+                    INNER JOIN ("
+                        .$sqlEtiquetaActividad.
+                    ") x ON x.ActividadId = a.ActividadId GROUP BY a.ActividadId HAVING count(*) = ".$numEtiqueta;
         }
         else if($numTema > 0)
         {
@@ -127,8 +184,7 @@ function GetBuscador()
     } 
     catch(PDOException $e) 
     {
-        echo($e);
-        echo '[ { "Estatus": "Fallo" } ]';
+        echo '[ { "Estatus": '.$e.' } ]';
         $app->status(409);
         $app->stop();
     }
@@ -145,7 +201,7 @@ function GetBuscador()
     catch(PDOException $e) 
     {
         echo($e);
-        echo '[ { "Estatus": "Fallo" } ]';
+        echo '[ { "Estatus": '.$e.' } ]';
         $app->status(409);
         $app->stop();
     }
@@ -164,7 +220,7 @@ function GetBuscador()
     catch(PDOException $e) 
     {
         echo($e);
-        echo '[ { "Estatus": "Fallo" } ]';
+        echo '[ { "Estatus": '.$e.' } ]';
         $app->status(409);
         $app->stop();
     }

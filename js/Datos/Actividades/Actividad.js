@@ -76,6 +76,15 @@ function SetActividad(data)
         for(var k=0; k<data.Etiqueta.length; k++)
         {
             actividad.Etiqueta[k] = data.Etiqueta[k];
+            
+            if(data.Etiqueta[k].Visible == "1")
+            {
+                actividad.Etiqueta[k].Visible = true;
+            }
+            else
+            {
+                actividad.Etiqueta[k].Visible = false;
+            }
         }
     }
     

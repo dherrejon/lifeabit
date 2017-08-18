@@ -31,5 +31,32 @@ function GetGaleriaFotos()
         $app->stop();
     }
 }
-    
+
+function GetFototeca()
+{
+    $request = \Slim\Slim::getInstance()->request();
+    $datos = json_decode($request->getBody());
+    global $app;
+
+    $sql = "SELECT ImagenId, Extension, Nombre, Size FROM Imagen WHERE UsuarioId = ".$datos[0];
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        echo '[ { "Estatus": "Exito"}, {"Fotos":'.json_encode($response).'} ]'; 
+        $db = null;
+ 
+    } 
+    catch(PDOException $e) 
+    {
+        echo($sql);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
 ?>

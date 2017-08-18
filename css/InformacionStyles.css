@@ -38,9 +38,12 @@
     border: solid 2px #262626;
     max-width: 100%;
     background: transparent;
-    min-height: 120px;
+    min-height: 100px;
+    height: auto;
     text-align: left;
     font-size: 14pt;
+    resize: none;
+    box-sizing: border-box;
     
     outline: none !important;
     box-shadow: none;

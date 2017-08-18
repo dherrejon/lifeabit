@@ -4,7 +4,7 @@
         <div class="row">
 
             <div class="col-sm-3 col-xs-12 barraLateralActividad" ng-show="anchoPantalla > 767 || detalle.DiarioId.length == 0">
-                
+               
                 
                 <!-- Separador -->
                 <div class="row" style="height:57px">
@@ -268,7 +268,7 @@
                 <!-- Notas de la Fecha -->
                 <div class="row">
                    <div class="col-xs-12">
-                      <div ng-repeat="diario in detalle | filter:FiltrarDiario | orderBy:['-Fecha', 'Hora']"> <!-- -->
+                      <div ng-repeat="diario in detalle | filter:FiltrarDiario | orderBy:['-Fecha', 'HoraFormato']"> <!-- -->
                         
                          <div class="" style="color: black">
                             
@@ -283,9 +283,8 @@
                                        <!--<button class="btn btnOptDiarioDetalles pull-left" style="cursor: default">
                                             <spna class="fa fa-dot-circle-o fa fa-2x"> </spna>
                                         </button>-->
-                                        <span class="textoGris btn botonAparente" >{{diario.Hora}}</span>
                                        
-                                        <span class="btn-group pull-right" >
+                                        <div class="btn-group pull-right" >
 
 
                                             <!-- Bullet -->
@@ -293,7 +292,8 @@
                                                 <spna class="fa fa-dot-circle-o fa fa-2x"> </spna>
                                             </button>-->
 
-                                        
+                                            
+
                                             <!-- Conceptos -->
                                             <div class="btn-group">
                                                 <button class="btn btnOptDiarioDetalles boton" data-toggle="dropdown">
@@ -316,7 +316,7 @@
                                                                 <div class="row">
                                                                     <div class="col-xs-12">
                                                                         <ul>
-                                                                            <li ng-repeat="etiqueta in diario.Etiqueta | orderBy:'Nombre'">
+                                                                            <li ng-repeat="etiqueta in diario.Etiqueta | orderBy:'Nombre'" ng-if="etiqueta.Visible">
                                                                                 <span>{{etiqueta.Nombre}}</span>
                                                                             </li>
                                                                         </ul>
@@ -381,8 +381,12 @@
 
                                                 </ul>
                                             </div>
-                                        </span>
-                                         <b style="font-size:12pt" ng-show="detalleAgrupado != 'Fecha'">{{diario.FechaFormato}}</b>
+                                        </div>
+                                        
+                                        <b style="font-size:12pt" ng-show="detalleAgrupado != 'Fecha'"> {{diario.FechaFormato}}<br></b>
+                                        <span class="textoGris btn botonAparente" ng-show="diario.Hora.length > 0"><span class="fa fa-clock-o"></span> {{diario.Hora}}</span>
+                                        <span class="textoGris btn botonAparente" ng-show="diario.Ciudad.CiudadId != null"><span class="fa fa-map-marker"></span> {{diario.Ciudad.Ciudad}} ({{diario.Ciudad.AbreviacionPais}})</span>
+                                         
                                      </div>
                                     
                                     <!-- Notas -->
@@ -440,153 +444,296 @@
                 <div class="col-xs-4 col-sm-2">
                     <div class="btn-group-vertical pull-right" role="group" >
                         <a class="btn botonFinModal"  ng-click="CerrarDiario()"><span class="fa fa-times"></span></a>
-                        <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarDiario()"><span class="fa fa-check"></span></a>
+                        <a focus class="btn botonFinModal" id="terminarDiario" ng-click="TerminarDiario()"><span class="fa fa-check"></span></a>
                     </div>
                 </div>
                 
                 
             </div>
-            <br>
             
             <form name="actividadForma">
-                
-                <!-- Fecha -->
-                <div class="row">
-                      
-                    <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                        <label class="">Fecha</label><br>
-                        <div class="row" >
-                           <div class="col-xs-12" >
-                            <span class="botonFecha">{{nuevoDiario.FechaFormato}}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="row" >
-                            <div class="col-xs-12" >
-                                <input ng-disabled="FechaDefinida" type="text"  id="fechaDiario" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top: -25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaDiario(this)"/>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                
-                <br>
-                <!-- Hora -->
-                <div class="row">
-                      
-                    <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                        <label class="">Hora</label><br>
-                        <!--<div class="row" >
-                           <div class="col-xs-12" >
-                            <span class="botonFecha">{{nuevoDiario.Hora}}</span>
-                            </div>
-                        </div>-->
-                        
-                        <div class="row" >
-                            <div class="col-xs-12" >
-                                <input type="text"  id="horaDiario" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraDiario(this)"/>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                
-                <!-- Notas -->
-                <div class="row">
-                    <div class="col-sm-12">
-                         <div class="">
-                            <label class="etiquetaNormal">Notas</label>
-                            <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="contenido" ng-model="nuevoDiario.Notas" maxlength="5000"></textarea>
-                        </div>
-                    </div>
-                </div>
+               
+               <div class="row">
+                     <div class="col-xs-12">
+                         
+                         <div class="text-center">
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Diario'" ng-class="{active: tabModal == 'Diario'}"><div class="fa fa-book tabModal"></div><br>Diario</a>
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Imagenes'" ng-class="{active: tabModal == 'Imagenes'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
+                         </div>
+                                          
+                     </div>
+                 </div>
                  <br>
-
-                <!-- Etiqueta -->
-                <div class="row">
-                     
-                     <div class="col-sm-12" id="etiquetaPanel">
-                        <label class="etiquetaNormal">Etiquetas</label><br>
-                         
-                         <!-- Buscar Etiqueta -->
-                         <div class="input-group">
-                            <input type="text" required class="entrada form-control" name="etiqueta" ng-model="buscarEtiqueta" placeholder="Etiqueta" ng-maxlength="120"  data-toggle="dropdown" id="nuevaEtiqueta" autocomplete="off"/>
-                            <span class="input-group-btn">
-                                <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(2)" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>
-                         
-                         <!-- lista de etiquetas -->
-                         <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarEtiqueta.length > 0">
-                            
-                            <table  class="table table-responsive">
-                                <tbody  style="cursor: pointer">
-                                    <tr   ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.show">
-                                      <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta)">{{etiqueta.Nombre}}</td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
-                      
-                    </div>
-                </div>
-                <br>
                 
-                <!-- Temas -->
-                <div class="row">
-                     
-                     <div class="col-sm-12" id="temaPanel">
-                       
-                       <!--lista de etiquetas Seleccionados -->
-                        <div ng-if="nuevoDiario.Etiqueta.length > 0">
-                             <b>Etiquetas</b><br>
-                             <span ng-repeat="etiqueta in nuevoDiario.Etiqueta | orderBy:'Nombre'">
-                                 <div class="btn-group" role="group" style="margin-bottom:8px">
-                                  <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="EditarEtiqueta(etiqueta)">{{etiqueta.Nombre}}</a>
-                                  <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                <div ng-show="tabModal == 'Diario'">
+                    <!-- Fecha -->
+                    <div class="row">
+
+                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                            <label class="">Fecha</label><br>
+                            <div class="row" >
+                               <div class="col-xs-12" >
+                                <span class="botonFecha">{{nuevoDiario.FechaFormato}}</span>
                                 </div>
-                             </span>
-                             <br>
-                         </div>
-                       
-                        <!-- <label class="etiquetaNormal">Temas</label><br>
+                            </div>
+
+                            <div class="row" >
+                                <div class="col-xs-12" >
+                                    <input ng-disabled="FechaDefinida" type="text"  id="fechaDiario" class="form-control diarioEntrada" style=" cursor:pointer; color:transparent; margin-top: -25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaDiario(this)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                
+                    <br>
+                                        
+                    <div class="row">
+                        <!-- Hora -->
+                        <div class="col-sm-6 etiquetaDropdownList" >
+                            <label class="">Hora</label><br>
+                            <!--<div class="row" >
+                               <div class="col-xs-12" >
+                                <span class="botonFecha">{{nuevoDiario.Hora}}</span>
+                                </div>
+                            </div>-->
+
+                            <div class="row" >
+                                <div class="col-xs-12" >
+                                    <input type="text"  id="horaDiario" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraDiario(this)"/>
+                                </div>
+                            </div>
+                        </div>
                         
-                         <!-- Buscar Tema --
-                         <div class="input-group">
-                            <input type="text" required class="entrada form-control" name="tema" ng-model="buscarTema" placeholder="Tema de la actividad" ng-maxlength="300"  data-toggle="dropdown" id="nuevoTema" autocomplete="off"/>
-                            <span class="input-group-btn">
-                                <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(3)" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>-->
-                         
-                         <div ng-if="nuevoDiario.Tema.length > 0">
-                              <b>Temas</b><br>
-                               <!--lista de temas Seleccionados -->
-                             <span ng-repeat="tema in nuevoDiario.Tema | orderBy:'Tema'">
-                                 <div class="btn-group" role="group" style="margin-bottom:8px">
-                                  <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
-                                  <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
-                                </div>
-                             </span>
-                         </div>
-                         
-                         <!-- lista de temas -->
-                         <!--<div class="dropdown-menu modalAgregarDropdown" ng-show="buscarTema.length > 0">
+                        <br class="hidden-md hidden-sm hidden-lg">
+                        <!-- Ciudad -->
+                        <div class="col-sm-6 etiquetaDropdownList">
+  
+                             <label>Ciudad</label>
+                            <div class="input-group">
+                                <input type="text"  class="form-control entrada" ng-model="buscarCiudad" uib-typeahead="c as (c.Ciudad + ' (' + c.AbreviacionPais + ')') for c in FiltrarBuscarCiudad($viewValue) | limitTo:5" typeahead-on-select="CambiarCiudad()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-no-results="noResultados"> 
+                                <span class="input-group-addon entrada" ng-click="buscarCiudad = ''" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="AbrirAgregarCiudad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                            </div>
                             
-                            <table  class="table table-responsive">
-                                <tbody  style="cursor: pointer">
-                                    <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
-                                      <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
-                                    </tr>
+                            <div ng-if="noResultados">
+                                Sin Resultado
+                            </div>
+                          
+                        </div>
+                    
+                    </div>
+                
+                    <!-- Notas -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                             <div class="">
+                                <label class="etiquetaNormal">Notas</label>
+                                <textarea required data-autoresize type="text"  class="form-control contenidoArea" style="font-size:12pt;" name="contenido" ng-model="nuevoDiario.Notas" maxlength="5000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <!-- Etiqueta -->
+                    <div class="row">
 
-                                </tbody>
-                            </table>
-                         </div>-->
-                      
+                         <div class="col-sm-12" id="etiquetaPanel">
+                            <label class="etiquetaNormal">Etiquetas</label><br>
+
+                             <!-- Buscar Etiqueta -->
+                             <div class="input-group">
+                                <input type="text" required class="entrada form-control" name="etiqueta" ng-model="buscarConcepto" placeholder="Etiqueta" ng-maxlength="120"  data-toggle="dropdown" id="nuevaEtiqueta" autocomplete="off"/>
+                                <span class="input-group-btn">
+                                    <a class="btn close cerrarModal"  ng-click="buscarConcepto = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
+                            </div>
+
+                             <!-- lista de etiquetas -->
+                             <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarConcepto.length > 0">
+
+                                <table  class="table table-responsive">
+                                    <tbody  style="cursor: pointer">
+
+                                       <!-- Etiquetas -->
+                                        <tr ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.show">
+                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta, true)">{{etiqueta.Nombre}}</td>
+                                        </tr>
+
+                                        <!-- Temas -->
+                                        <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
+                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                    <br>
+                
+                    <!-- Temas -->
+                    <div class="row">
+
+                         <div class="col-sm-12" id="temaPanel">
+
+                           <!--lista de etiquetas Seleccionados -->
+                           <div ng-if="nuevoDiario.Etiqueta.length > 0" >
+                                <b>Etiquetas</b><br>
+                                 <span ng-repeat="etiqueta in nuevoDiario.Etiqueta | orderBy:'Nombre'" >
+                                     <div class="btn-group" role="group" style="margin-bottom:8px">
+
+
+                                      <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
+
+                                      <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
+                                            <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
+                                                 <span class="fa fa-pencil"> </span> Editar
+                                            </a></li>
+
+                                             <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
+                                                 <span class="fa fa-clone"> </span> Equivalencias
+                                            </a></li>
+
+
+                                        </ul>
+
+                                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                                    </div>
+                                 </span>
+                                 <br><br>
+                             </div>
+
+
+                            <!-- <label class="etiquetaNormal">Temas</label><br>
+
+                             <!-- Buscar Tema --
+                             <div class="input-group">
+                                <input type="text" required class="entrada form-control" name="tema" ng-model="buscarTema" placeholder="Tema de la actividad" ng-maxlength="300"  data-toggle="dropdown" id="nuevoTema" autocomplete="off"/>
+                                <span class="input-group-btn">
+                                    <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(3)" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
+                            </div>-->
+
+                             <div ng-if="nuevoDiario.Tema.length > 0">
+                                  <b>Temas</b><br>
+                                   <!--lista de temas Seleccionados -->
+                                 <span ng-repeat="tema in nuevoDiario.Tema | orderBy:'Tema'">
+                                     <div class="btn-group" role="group" style="margin-bottom:8px">
+                                      <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
+                                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
+                                    </div>
+                                 </span>
+                             </div>
+
+                             <!-- lista de temas -->
+                             <!--<div class="dropdown-menu modalAgregarDropdown" ng-show="buscarTema.length > 0">
+
+                                <table  class="table table-responsive">
+                                    <tbody  style="cursor: pointer">
+                                        <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
+                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                             </div>-->
+
+                        </div>
                     </div>
                 </div>
                 
+                <div ng-show="tabModal == 'Imagenes'">
+                    <!-- Imagenes -->
+                    <div class="row" >
+
+                        <div class="col-xs-12">
+                            <a ng-click="AbrirFototeca()" class="pull-right btn operacionEvento"> 
+                                <span class="fa fa-picture-o"></span> Fototeca
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+
+                        <div class="col-sm-12">
+
+                           <div  method="post" enctype="multipart/form-data">
+
+                                <div class="form-group files">
+                                    <input id="cargarImagen" type="file" class="form-control" multiple accept="image/*" name="imagen" > <!-- onchange="angular.element(this).scope().CargarArchivo(this)" -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                
+                    <br>
+                
+
+                   <div class="row" >
+                       <div class="col-xs-12">
+                           <table  class="table table-responsive">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <tr   ng-repeat="img in nuevaNota.ImagenSrc" ng-if="nuevaNota.ImagenSrc.length > 0">
+                                      <td><img class="img-responsive imagenPrevisualizarModal center-block track by $index" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 0)"/></td>
+                                      <td class="hidden-xs">  {{img.name}} </td>
+                                      <td class="hidden-xs">  {{(img.size/1000000).toFixed(2)}} MB </td>
+                                      <td class="text-center">  
+                                          <a class="btn btnQuitarImg" ng-click="nuevaNota.ImagenSrc.splice($index,1)">
+                                             <span class="fa fa-times-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                    <tr ng-repeat="img in nuevaNota.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
+                                      <td ><img class="img-responsive imagenPrevisualizarModal center-block track by $index" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 1)"/></td>
+                                      <td class="hidden-xs">  {{img.Nombre}} </td>
+                                      <td class="hidden-xs">  {{(img.Size/1000000).toFixed(2)}} MB </td>
+                                      <td class="text-center">  
+                                          <a class="btn btnQuitarImg" ng-click="img.Eliminada = true">
+                                             <span class="fa fa-times-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                       </div>
+                    </div>
+                                             
+                     <div class="row"  ng-if="(fotoEliminada = (nuevaNota.Imagen | filter:{Eliminada:'true'}  ).length) > 0">
+                       <div class="col-xs-12">
+
+                           <a class="btn botonDetallesActividad" ng-click="showEliminada = !showEliminada">
+                               <span>Fotos Eliminadas ({{fotoEliminada}})</span>
+                               <span ng-show="showEliminada" class="fa fa-angle-double-up"></span>
+                               <span ng-show="!showEliminada" class="fa fa-angle-double-right"></span>
+                           </a>
+                           <table  class="table table-responsive" ng-show="showEliminada">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <tr ng-repeat="img in nuevaNota.Imagen"  ng-if="img.Eliminada == true">
+                                      <td ><img class="img-responsive imagenPrevisualizarModal center-block track by $index" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(false, false, true, nuevaNota.Imagen, null, $index)"/></td>
+                                      <td class="hidden-xs">  {{img.Nombre}} </td>
+                                      <td class="hidden-xs">  {{(img.Size/1000000).toFixed(2)}} MB </td>
+                                      <td class="text-center">  
+                                          <a class="btn btnAgregarImg" ng-click="img.Eliminada = false">
+                                             <span class="fa fa-check-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                       </div>
+                    </div>
+                </div>
                 
                 <br><br>
                 <!---- botones de operacion -->
@@ -815,6 +962,7 @@
         </div>
     </div>
     
+    <!-- detalle diario -->
     <div class="modal fade" id="detalleDiario">
         <br>    <br>   <br>
         <div class="modal-dialog modal-lg modalPrincipal">
@@ -855,10 +1003,18 @@
                         </span><br>
                     </span>
                     
+                    <!-- ciudad -->
+                    <span ng-if="detalleDiario.Ciudad.Ciudad != null">
+                        <b>Ciudad: </b> 
+                        <span>
+                            {{detalleDiario.Ciudad.Ciudad}} ({{detalleDiario.Ciudad.AbreviacionPais}})
+                        </span><br>
+                    </span>
+                    
                     <!-- Etiqueta -->
-                    <span ng-if="detalleDiario.Etiqueta.length > 0">
+                    <span ng-if="detalleDiario.EtiquetaVisible.length > 0">
                         <b>Etiquetas: </b> 
-                        <span ng-repeat="etiqueta in detalleDiario.Etiqueta | orderBy:'Nombre'">
+                        <span ng-repeat="etiqueta in detalleDiario.EtiquetaVisible | orderBy:'Nombre'">
                             <span ng-if="!$last">{{etiqueta.Nombre}}, </span>
                             <span ng-if="$last">{{etiqueta.Nombre}}.</span>
                         </span><br>
@@ -870,8 +1026,8 @@
                         <span ng-repeat="tema in detalleDiario.Tema | orderBy:'Tema'">
                             <span ng-if="!$last">{{tema.Tema}}, </span>
                             <span ng-if="$last">{{tema.Tema}}.</span>
-                        </span><br>
-                    </span>
+                        </span>
+                    </span><br>
                 </div>
             </div>
 
@@ -888,9 +1044,65 @@
         </div>
     </div>
     
-    
-    
+     <!---------- fototeca ---------------->
+    <div class="modal fade sombraDivModal" id="fototeca" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-lg modalPrincipal">
+         
+            <div class="row">
+                
+                <div class="col-xs-12">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" ng-click="AgregarImagenes()" ><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+            </div>
+            <br>
+          
+            <div class="row">
+                 <div ng-repeat="img in fototeca">
+                    <!-- Imagenes -->
+                    <div style="padding-left: 12px;  padding-right: 12px">
+                         <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px;  padding-right: 3px">
+                           <div class="imgContainer" >
+                                <div class="crop">
+
+                                    <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
+                                        <span class="fa fa-check-circle" ></span>
+                                    </a>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                 </div>
+                            </div>
+                            <div style="height: 15px"></div>
+                         </div>
+                     </div>
+                </div>     
+            </div>            
+            <br>
+            <!---- botones de operacion -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="AgregarImagenes()" >TERMINAR</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+     
 </div>
+ 
+ <!-- otros html -->
+<div ng-include=" 'html/Actividades/Administrar/Ciudad/AgregarCiudad.html' "> </div>
+
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
+  
+
 
    
     

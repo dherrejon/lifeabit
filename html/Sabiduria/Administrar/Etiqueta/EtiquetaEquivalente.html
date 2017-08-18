@@ -1,0 +1,191 @@
+<div ng-controller="EtiquetaEquivalenteController as etiquetaEquivalente"> 
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="modalEtiquetaEquivalente" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitosoEtiqueta">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <form name="etiquetaForma">
+               
+               <div class="row">
+                   
+                   <div class="col-xs-8 col-sm-10">
+                        <!--<button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarEtiquetaModal()"><span aria-hidden="true">&times;</span></button>-->
+                       <br><br>
+                        <span  class="tituloModal">Etiquetas Equivalentes</span>
+                    </div>
+                    <div class="col-xs-4 col-sm-2">
+                        <div class="btn-group-vertical pull-right" role="group" >
+                            <a class="btn botonFinModal"  ng-click="CerrarEtiquetaEquivalenteModal()"><span class="fa fa-times"></span></a>
+                            <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarEtiqueta(etiquetaForma.etiqueta.$invalid)"><span class="fa fa-check"></span></a>
+                        </div>
+                    </div>
+                </div>
+              
+                <div class="row">
+                   
+                   <div class="col-xs-12">
+                       <br><br>
+                        <span  style="font-size: 22px;"><b> {{equivalente.Nombre}}</b></span>
+                    </div>
+                </div>
+                
+                <br><br>
+                
+                <!-- Etiqueta -->
+                <div class="row" id="AgregarConcepto">
+
+                     <div class="col-sm-12">
+                        <label class="etiquetaNormal">Etiqueta</label><br>
+
+
+                         <!-- Buscar Etiqueta -->
+                         <div class="input-group">
+                            <input type="text" required class="entrada form-control" name="etiqueta" ng-model="buscarEtiqueta" placeholder="Etiqueta" ng-maxlength="255"  data-toggle="dropdown" id="nuevaEtiquetaEquivalente" autocomplete="off" /> <!-- onblur="angular.element(this).scope().AgregarEtiquetaBlur()" -->
+
+                            <span class="input-group-btn">
+                                <a class="btn close cerrarModal"  ng-click="buscarEtiqueta = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                            </span>
+
+
+                        </div>
+
+                         <!-- lista de etiquetas -->
+                         <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarEtiqueta.length > 0">
+
+                            <table  class="table table-responsive">
+                                <tbody  style="cursor: pointer">
+
+                                    <!-- etiquetas --> 
+                                    <tr  ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.mostrar">
+                                      <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta, true)">{{etiqueta.Nombre}}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <br>
+
+
+                    
+                <div class="row" >
+
+                     <div class="col-sm-12">
+
+                       <!--lista de etiquetas Equivalentes -->
+                        <div ng-show="equivalente.Etiqueta.length > 0" >
+                            <b>Etiquetas Equivalentes</b><br>
+                             <span ng-repeat="etiqueta in equivalente.Etiqueta | orderBy:'Nombre'">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+
+
+                                  <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="EditarEtiqueta(etiqueta)">{{etiqueta.Nombre}}</a>
+
+                                  <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiquetaEquivalente(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br><br>
+                         </div>
+                    </div>
+                </div>
+
+                
+
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block"  ng-click="CerrarEtiquetaEquivalenteModal()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarEtiquetaEquivalente()">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+    
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarEtiquetaEquivalenteModal">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarEtiquetaModal()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeEtiquetaEquivalente">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+        
+    <!-- Alertas -->
+    <div class="alertaMensaje" id="alertaEditarExitosoEtiqueta">
+        <div class="alert alertaExtito">
+            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+            <strong style="display: inline-block;">{{mensaje}}</strong>
+        </div>
+    </div>
+    
+</div>
+
+    

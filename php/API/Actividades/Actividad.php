@@ -171,13 +171,20 @@ function AgregarActividad()
             }
         }
         
-        $sql = "INSERT INTO EtiquetaPorActividad (ActividadId, EtiquetaId) VALUES";
+        $sql = "INSERT INTO EtiquetaPorActividad (ActividadId, EtiquetaId, Visible) VALUES";
         
         
         /*Etiqueta de la actividad*/
         for($k=0; $k<$countEtiqueta; $k++)
         {
-            $sql .= " (".$actividadId.", ".$actividad->Etiqueta[$k]->EtiquetaId."),";
+            if($actividad->Etiqueta[$k]->Visible)
+            {
+                $sql .= " (".$actividadId.", ".$actividad->Etiqueta[$k]->EtiquetaId.", true),";
+            }
+            else
+            {
+                $sql .= " (".$actividadId.", ".$actividad->Etiqueta[$k]->EtiquetaId.", false),";
+            }
         }
 
         $sql = rtrim($sql,",");
@@ -472,13 +479,21 @@ function EditarActividad()
             }
         }
         
-        $sql = "INSERT INTO EtiquetaPorActividad (ActividadId, EtiquetaId) VALUES";
+        $sql = "INSERT INTO EtiquetaPorActividad (ActividadId, EtiquetaId, Visible) VALUES";
         
         
         /*Etiqueta de la actividad*/
         for($k=0; $k<$countEtiqueta; $k++)
         {
-            $sql .= " (".$actividad->ActividadId.", ".$actividad->Etiqueta[$k]->EtiquetaId."),";
+            if($actividad->Etiqueta[$k]->Visible)
+            {
+                $sql .= " (".$actividad->ActividadId.", ".$actividad->Etiqueta[$k]->EtiquetaId.", true),";
+            }
+            else
+            {
+                $sql .= " (".$actividad->ActividadId.", ".$actividad->Etiqueta[$k]->EtiquetaId.", false),";
+            }
+            
         }
 
         $sql = rtrim($sql,",");

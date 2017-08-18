@@ -12,7 +12,7 @@ function GetBuscador($http, $q, CONFIG, filtro)
             q.resolve(data);
  
         }).error(function(data, status){
-            q.resolve([]);
+            q.resolve(data);
      }); 
     
     return q.promise;

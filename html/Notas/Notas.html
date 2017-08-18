@@ -268,7 +268,7 @@
                                                                 <div class="row">
                                                                     <div class="col-xs-12">
                                                                         <ul>
-                                                                            <li ng-repeat="etiqueta in nota.Etiqueta | orderBy:'Nombre'">
+                                                                            <li ng-repeat="etiqueta in nota.Etiqueta | orderBy:'Nombre'" ng-if="etiqueta.Visible">
                                                                                 <span>{{etiqueta.Nombre}}</span>
                                                                             </li>
                                                                         </ul>
@@ -344,9 +344,14 @@
                                      </div><br>
                                      
                                      <div ng-repeat="img in nota.Imagen">
-                                         <div class="col-xs-6 col-sm-4 col-lg-3 ">
-                                            <div class="crop">
-                                                 <img class="img-responsive center-block" style="margin-bottom:15px; max-width:100%; height:150px;" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
+                                        <div style="padding-left: 12px; padding-right: 12px">
+                                             <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
+                                               <div class="imgContainer" >
+                                                    <div class="crop">
+                                                         <img class="" style=" width:100%;" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
+                                                     </div>
+                                                </div>
+                                                <div style="height: 15px"></div>
                                              </div>
                                          </div>
                                     </div>
@@ -396,7 +401,7 @@
                 <div class="col-xs-4 col-sm-2">
                     <div class="btn-group-vertical pull-right" role="group" >
                         <a class="btn botonFinModal"  ng-click="CerrarNota()"><span class="fa fa-times"></span></a>
-                        <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarNota()" ng-class="{disabled: TerminarDeshabilitado()}"><span class="fa fa-check"></span></a>
+                        <a focus class="btn botonFinModal" id="terminarNota" ng-click="TerminarNota()" ng-class="{disabled: TerminarDeshabilitado()}"><span class="fa fa-check"></span></a>
                     </div>
                 </div>
                 
@@ -487,7 +492,7 @@
 
                     <!-- Etiqueta -->
                     <div class="row" id="AgregarConcepto">
-
+                         
                          <div class="col-sm-12">
                             <label class="etiquetaNormal">Etiquetas</label><br>
                             
@@ -511,13 +516,13 @@
                                         
                                         <!-- etiquetas --> 
                                         <tr   ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.show">
-                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta)">{{etiqueta.Nombre}}</td>
+                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta, true)">{{etiqueta.Nombre}}</td>
                                         </tr>
                                         
                                         <!-- temas -->
-                                        <!-- <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
+                                        <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
                                           <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
-                                        </tr> -->
+                                        </tr> 
 
                                     </tbody>
                                 </table>
@@ -531,13 +536,62 @@
                     <div class="row" >
                     
                          <div class="col-sm-12">
+                          
+                          <div ng-show="etiquetaSugerida.length > 0">
+                            <div>
+                               <b >Etiquetas Sugeridas</b>
+                                <span class="btn-group pull-right">
+                                     <a class="btn btnOptDiarioDetalles boton" ng-click="AgregarTodaEtiquetaSugerida()"> <span class="fa fa-check-circle-o"></span></a>
+                                     <a class="btn btnOptDiarioDetalles boton" ng-click="etiquetaSugerida = []"> <span class="fa fa-times-circle-o"></span></a>
+                                 </span>
+                            </div>
+                            <br>
+                             
+                             <span ng-repeat="etiqueta in etiquetaSugerida track by $index">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+                                  <a class="btn campoAgregado"  style="font-size:10pt" ng-click="AgregarEtiquetaSugerida(etiqueta, $index)">{{etiqueta}}</a>
+                                  <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="etiquetaSugerida.splice($index, 1)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br> 
+                         </div>
+                         
+                         <div ng-show="temaSugerido.length > 0">
+                             <div>                         
+                                 <b >Temas Sugeridos</b><br><br>   
+                             </div> 
+                             <span ng-repeat="tema in temaSugerido track by $index">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+                                  <a class="btn campoAgregado"  style="font-size:10pt" ng-click="AgregarTemaSugerido(tema, $index)">{{tema}}</a>
+                                  <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="temaSugerido.splice(index, 1)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br>
+                             
+                         </div>
+                         <br>
                            
                            <!--lista de etiquetas Seleccionados -->
                             <div ng-show="nuevaNota.Etiqueta.length > 0" >
                                 <b>Etiquetas</b><br>
-                                 <span ng-repeat="etiqueta in nuevaNota.Etiqueta | orderBy:'Nombre'">
+                                 <span ng-repeat="etiqueta in nuevaNota.Etiqueta | orderBy:'Nombre'" ng-if="etiqueta.Visible">
                                      <div class="btn-group" role="group" style="margin-bottom:8px">
-                                      <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="EditarEtiqueta(etiqueta)">{{etiqueta.Nombre}}</a>
+
+
+                                      <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
+
+                                      <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
+                                            <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
+                                                 <span class="fa fa-pencil"> </span> Editar
+                                            </a></li>
+
+                                             <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
+                                                 <span class="fa fa-clone"> </span> Equivalencias
+                                            </a></li>
+
+
+                                        </ul>
+
                                       <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
                                     </div>
                                  </span>
@@ -594,8 +648,8 @@
                              <div class="input-group">
                                
                                 <div class="entrada2">
-                                    <input type="text" required class="entrada form-control" name="titulo" ng-model="nuevaNota.Titulo"  ng-maxlength="300" autocomplete="off"/>
-                                     <label class="">Título</label><br>
+                                    <input type="text" required class="entrada form-control" name="titulo" ng-model="nuevaNota.Titulo"  ng-maxlength="300" autocomplete="off" ng-blur="CrearEtiquetaSugerida()"/>
+                                    <label class="">Título</label><br>
                                  </div>
                                 <span class="input-group-btn">
                                     <a class="btn close cerrarModal"  ng-click="nuevaNota.Titulo = ''" type="button"><span class="fa fa-times-circle"></span></a>
@@ -622,7 +676,7 @@
                         <div class="col-sm-12">
                              <div class="">
                                 <label class="etiquetaNormal">Observaciones</label>
-                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 300px !important" name="contenido" ng-model="nuevaNota.Observacion" maxlength="1500"></textarea>
+                                <textarea data-autoresize required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 300px !important" name="contenido" ng-model="nuevaNota.Observacion" maxlength="1500"></textarea>
                             </div>
                         </div>
                     </div>
@@ -965,13 +1019,14 @@
                     <span>{{detalleNota.FechaFormato}}</span><br>
                     
                     <!-- Etiqueta -->
-                    <span ng-if="detalleNota.Etiqueta.length > 0">
+                    <span ng-if="detalleNota.EtiquetaVisible.length > 0">
                         <b>Etiquetas: </b> 
-                        <span ng-repeat="etiqueta in detalleNota.Etiqueta | orderBy:'Nombre'">
+                        <span ng-repeat="etiqueta in detalleNota.EtiquetaVisible | orderBy:'Nombre'">
                             <span ng-if="!$last">{{etiqueta.Nombre}}, </span>
                             <span ng-if="$last">{{etiqueta.Nombre}}.</span>
                         </span>
-                    </span><br>
+                        <br>
+                    </span>
                     
                     <!-- Temas -->
                     <span ng-if="detalleNota.Tema.length > 0">
@@ -1177,9 +1232,10 @@
         </div>
     </div>
     
-    
-    
 </div>
+   
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
 
    
     

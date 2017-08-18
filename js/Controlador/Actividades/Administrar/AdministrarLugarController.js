@@ -1,7 +1,5 @@
 app.controller("AdministrarLugarController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location)
 {   
-    $scope.titulo = "Lugares";
-    
     $scope.tabs = tabLugar;
     
     //Cambia el contenido de la pestaña
@@ -27,13 +25,25 @@ app.controller("AdministrarLugarController", function($scope, $window, $http, $r
     /*----------------------- Usuario logeado --------------------------*/
     $scope.InicializarControlador = function()
     {
-        if($scope.usuarioLogeado.Aplicacion != "Mis Actividades")
+        if($scope.usuarioLogeado.Aplicacion != "Mis Actividades" && $scope.usuarioLogeado.Aplicacion != "Mi Diario")
         {
             $rootScope.IrPaginaPrincipal();
         }
         else
         {
             $rootScope.UsuarioId = $scope.usuarioLogeado.UsuarioId;
+            
+            if($scope.usuarioLogeado.Aplicacion == "Mi Diario")
+            {
+                $scope.tabs[0].show = false;
+                $scope.titulo = "Ciudades";
+            }
+            else
+            if($scope.usuarioLogeado.Aplicacion == "Mis Actividades")
+            {
+                $scope.tabs[0].show = true;
+                $scope.titulo = "Lugares";
+            }
         }
     };
     
@@ -73,6 +83,6 @@ app.controller("AdministrarLugarController", function($scope, $window, $http, $r
 
 
 var tabLugar = [
-                        {titulo:"Lugares", referencia: "#Lugar", clase:"active", area:"lugar"},
-                        {titulo:"Ciudades", referencia: "#Ciudad", clase:"", area:"ciudad"}
+                        {titulo:"Lugares", referencia: "#Lugar", clase:"active", area:"lugar", show: true},
+                        {titulo:"Ciudades", referencia: "#Ciudad", clase:"", area:"ciudad", show:true}
                     ];

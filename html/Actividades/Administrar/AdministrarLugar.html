@@ -7,7 +7,7 @@
                    
                     <!-- pestañas -->
                     <ul ng-if="anchoPantalla > 400" class="nav nav-tabs" role="tablist">
-                        <li   ng-repeat="tab in tabs" class="{{tab.clase}}"><a  href="" aria-controls="{{tab.area}}" role="tab" data-toggle="tab" ng-click="SeleccionarTab(tab, $index)">{{tab.titulo}}</a></li>
+                        <li   ng-repeat="tab in tabs" ng-class="{active : titulo==tab.titulo}"><a  href="" aria-controls="{{tab.area}}" role="tab" data-toggle="tab" ng-click="SeleccionarTab(tab, $index)" ng-if="tab.show">{{tab.titulo}}</a></li>
                     </ul>
 
 
@@ -20,7 +20,7 @@
                             </button>
 
                             <ul class="dropdown-menu elemetosDropdownListModal">
-                                <li ng-repeat="tab in tabs"  class="dropdownOpcionModal">
+                                <li ng-repeat="tab in tabs"  class="dropdownOpcionModal" ng-if="tab.show">
                                     <a  href="" class="dropdownOpcionModal" aria-controls="{{tab.area}}" ng-click="SeleccionarTab(tab, $index)">
                                         <span>{{tab.titulo}}</span>
                                     </a>

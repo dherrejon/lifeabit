@@ -50,7 +50,7 @@ function AgregarEventoActividad()
         $app->stop();
     }*/
 
-    $sql = "INSERT INTO EventoActividad (ActividadId, Fecha, Notas, Cantidad, Costo) VALUES(:ActividadId, :Fecha, :Notas, :Cantidad, :Costo)";
+    $sql = "INSERT INTO EventoActividad (ActividadId, Fecha, Notas, Cantidad, Costo, Hora) VALUES(:ActividadId, :Fecha, :Notas, :Cantidad, :Costo, STR_TO_DATE( :Hora, '%h:%i %p' ))";
     
     try 
     {
@@ -63,6 +63,7 @@ function AgregarEventoActividad()
         $stmt->bindParam("Notas", $evento->Notas);
         $stmt->bindParam("Cantidad", $evento->Cantidad);
         $stmt->bindParam("Costo", $evento->Costo);
+        $stmt->bindParam("Hora", $evento->Hora);
 
         $stmt->execute();
         
@@ -206,7 +207,7 @@ function EditarEventoActividad()
          $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
     }*/
 
-    $sql = "UPDATE EventoActividad SET Fecha = :Fecha, Notas = :Notas,  Costo = :Costo,  Cantidad = :Cantidad WHERE EventoActividadId = ".$evento->EventoActividadId;
+    $sql = "UPDATE EventoActividad SET Fecha = :Fecha, Notas = :Notas,  Costo = :Costo,  Cantidad = :Cantidad, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ) WHERE EventoActividadId = ".$evento->EventoActividadId;
     
     try 
     {
@@ -218,6 +219,7 @@ function EditarEventoActividad()
         $stmt->bindParam("Notas", $evento->Notas);
         $stmt->bindParam("Costo", $evento->Costo);
         $stmt->bindParam("Cantidad", $evento->Cantidad);
+        $stmt->bindParam("Hora", $evento->Hora);
 
         $stmt->execute();
 
@@ -389,11 +391,7 @@ function EditarEventoActividad()
     echo '[{"Estatus": "Exitoso"}]';
     $db->commit();
     $db = null;
-    
-  
-    
 }
-
 
 function BorrarEventoActividad()
 {

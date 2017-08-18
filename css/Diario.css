@@ -166,3 +166,69 @@
     outline: none !important;
     box-shadow: none;
 }
+
+/*----------- tab modal ------------------*/
+.tabModal
+{
+    color: #79adf4;
+    background: transparent;
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    font-size: 20px !important;
+    padding-top: 10px ;
+}
+
+.btnTabModal, .btnTabModal:focus
+{
+    color: #79adf4;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnTabModal:hover
+{
+    color: #79adf4;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnTabModal:hover > div.tabModal
+{
+    background: #79adf4;
+    color: white;
+}
+
+.btnTabModal.active 
+{
+    color: #1859b2;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnTabModal.active > div.tabModal
+{
+    background: #1859b2;
+    color: white;
+}
+
+.diarioEntrada, .diarioEntrada:focus
+{
+    background-color: transparent;
+    color: #262626;
+    border-width: 0px 0px 3px 0px; 
+    border-style: solid;
+    border-color: #262626;
+    border-radius: 0px;
+    outline: none !important;
+    box-shadow: none;
+}
+
+.diarioEntrada:disabled
+{
+    background: rgba(0, 0, 0, 0.15);
+    cursor: not-allowed !important;
+}

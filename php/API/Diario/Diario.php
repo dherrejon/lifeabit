@@ -7,7 +7,7 @@ function GetDiario($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT DiarioId, Notas, Fecha, DATE_FORMAT(Hora,  '%h:%i %p' ) as Hora FROM Diario WHERE UsuarioId = ".$id;
+    $sql = "SELECT * FROM DiarioVista WHERE UsuarioId = ".$id;
 
     try 
     {
@@ -68,6 +68,64 @@ function AgregarDiario()
         $diarioId = $db->lastInsertId();
         //echo '[{"Estatus": "Exitoso"}, {"Id": "'.$db->lastInsertId().'"}]';
         //$db = null;
+
+    } catch(PDOException $e) 
+    {
+        echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "INSERT INTO DiarioCiudad (DiarioId, CiudadId) VALUES(:DiarioId, :CiudadId)";
+    
+    try 
+    {
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam("DiarioId", $diarioId);
+        $stmt->bindParam("CiudadId", $diario->Ciudad->CiudadId);
+
+        $stmt->execute();
+
+    } catch(PDOException $e) 
+    {
+        echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "UPDATE Ciudad SET DiarioDefecto = 0 WHERE DiarioDefecto = 1 AND UsuarioId = :UsuarioId";
+    
+    try 
+    {
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam("UsuarioId", $diario->UsuarioId);
+
+        $stmt->execute();
+
+    } catch(PDOException $e) 
+    {
+        echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "UPDATE Ciudad SET DiarioDefecto = 1 WHERE CiudadId = :CiudadId";
+    
+    try 
+    {
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam("CiudadId", $diario->Ciudad->CiudadId);
+
+        $stmt->execute();
 
     } catch(PDOException $e) 
     {
@@ -238,7 +296,7 @@ function EditarDiario()
          $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
     }*/
 
-    $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ) WHERE DiarioId = ".$diario->DiarioId;
+    $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' )  WHERE DiarioId = ".$diario->DiarioId;
     
     try 
     {
@@ -255,6 +313,80 @@ function EditarDiario()
     } catch(PDOException $e) 
     {
         //echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "DELETE FROM DiarioCiudad WHERE DiarioId=".$diario->DiarioId;
+    try 
+    {
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+        
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        //echo $e;
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "INSERT INTO DiarioCiudad (DiarioId, CiudadId) VALUES (:DiarioId, :CiudadId)";
+    
+    try 
+    {
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam("DiarioId", $diario->DiarioId);
+        $stmt->bindParam("CiudadId", $diario->Ciudad->CiudadId);
+
+        $stmt->execute();
+
+    } catch(PDOException $e) 
+    {
+        echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "UPDATE Ciudad SET DiarioDefecto = 0 WHERE DiarioDefecto = 1 AND UsuarioId = :UsuarioId";
+    
+    try 
+    {
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam("UsuarioId", $diario->UsuarioId);
+
+        $stmt->execute();
+
+    } catch(PDOException $e) 
+    {
+        echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "UPDATE Ciudad SET DiarioDefecto = 1 WHERE CiudadId = :CiudadId";
+    
+    try 
+    {
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam("CiudadId", $diario->Ciudad->CiudadId);
+
+        $stmt->execute();
+
+    } catch(PDOException $e) 
+    {
+        echo $e;
         echo '[{"Estatus": "Fallo"}]';
         $db->rollBack();
         $app->status(409);
@@ -463,7 +595,7 @@ function GetEtiquetaPorDiario($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT DiarioId, EtiquetaId, Nombre FROM EtiquetaDiarioVista WHERE UsuarioId = ".$id;
+    $sql = "SELECT DiarioId, EtiquetaId, Nombre, Visible FROM EtiquetaDiarioVista WHERE UsuarioId = ".$id;
 
     try 
     {

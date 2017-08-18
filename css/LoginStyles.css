@@ -42,7 +42,7 @@
 
 .entrada:disabled
 {
-    background: rgba(0, 0, 0, 0.25);
+    background: #D8D8D8;
     cursor: not-allowed !important;
 }
 

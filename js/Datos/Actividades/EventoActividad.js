@@ -4,8 +4,8 @@ class EventoActividad
     {
         this.EventoActividadId = "";
         this.Notas = "";
-        this.Fecha = "";
         this.Hora = "";
+        this.Fecha = "";
         this.Cantidad = "";
         this.Costo = "";
         this.Actividad = "";
@@ -61,6 +61,15 @@ function SetEventoActividad(data)
     evento.Costo = data.Costo;
     evento.Cantidad = data.Cantidad;
     evento.FechaFormato = TransformarFecha(data.Fecha);
+    
+    if(data.Hora !== null)
+    {
+        evento.HoraFormato = convertTo24Hour(data.Hora);
+    }
+    else
+    {
+        evento.HoraFormato  = null;
+    }
     
     if(data.Notas !== null)
     {
@@ -277,6 +286,34 @@ function GetDate()
     return fecha;
 }
 
+
+function convertTo24Hour(time) 
+{
+    if(time.indexOf('PM')  != -1) 
+    {
+        var horaAux = time.slice(0,2);
+        var hora;
+
+        hora = parseInt(horaAux);
+        
+        if(hora != 12)
+        {
+            hora += 12;
+        }
+        
+        hora = hora.toString();
+        
+        time = time.replace(horaAux, hora);
+        time = time.replace("PM", "");
+    }
+    else
+    {
+        time = time.replace("12", "00");
+        time = time.replace("AM", "");
+    }
+    
+    return time;
+}
 
 var dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
     var meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiempre", "Octubre", "Noviembre", "Diciembre"];

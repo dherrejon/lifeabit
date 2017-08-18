@@ -4,11 +4,12 @@ class Diario
     {
         this.DiarioId = "";
         this.Fecha = "";
-        this.Hora = "";
         this.Notas = "";
+        this.Ciudad = new Ciudad();
         
         this.Etiqueta = [];
         this.Tema = [];
+        this.Imagen = [];
     }
 }
 
@@ -24,7 +25,7 @@ function GetDiario($http, $q, CONFIG, usuarioId)
         {
             if(data[0].Estatus == "Exito")
             {
-                q.resolve(data[1].Diario); 
+                q.resolve(data[1].Diario);
             }
             else
             {
@@ -47,6 +48,15 @@ function SetDiario(data)
     diario.Notas = data.Notas;
     
     diario.FechaFormato = TransformarFecha(data.Fecha);
+
+    if(data.Hora !== null && data.Hora !== undefined)
+    {
+        diario.HoraFormato = convertTo24Hour(data.Hora);
+    }
+    else
+    {
+        diario.HoraFormato  = null;
+    }
     
     if(data.Notas !== null && data.Notas !== undefined)
     {
@@ -62,6 +72,15 @@ function SetDiario(data)
         for(var k=0; k<data.Etiqueta.length; k++)
         {
             diario.Etiqueta[k] = data.Etiqueta[k];
+            
+            if(data.Etiqueta[k].Visible == "1")
+            {
+                data.Etiqueta[k].Visible = true;
+            }
+            else if(data.Etiqueta[k].Visible == "0")
+            {
+                data.Etiqueta[k].Visible = false;
+            }
         }
     }
     
@@ -72,6 +91,8 @@ function SetDiario(data)
             diario.Tema[k] = data.Tema[k];
         }
     }
+    
+    diario.Ciudad = SetCiudad(data);
     
     return diario;
 }
