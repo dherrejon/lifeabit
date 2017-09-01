@@ -263,6 +263,14 @@
                            <span class="textoDetalle"> {{detalle.FechaCreacionFormato}} </span>             
                        </div>
                     </div>
+                    
+                     <!-- Frecuencia y Fecha de creación -->
+                    <div class="row" ng-if="detalle.Hora.length > 0">
+                       <div class="col-sm-12"> 
+                           <b> Hora:  </b>
+                           <span class="textoDetalle"> {{detalle.Hora}} </span>             
+                       </div>
+                    </div>
                 
                 
                     <!--Notas -->
@@ -576,6 +584,20 @@
                             </div>
                          </div>
                     </div> 
+                </div>
+                <br>
+                
+                <div class="row">
+                    <!-- Hora -->
+                    <div class="col-sm-12 etiquetaDropdownList" >
+                        <label class="">Hora</label><br>
+                        <div class="row" >
+                            <div class="col-xs-12" >
+                                <input type="text"  id="horaDiario" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraDiario(this)"/>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Etiqueta -->
@@ -1196,14 +1218,14 @@
                     </div>
                 </div>
                 
-                 <br>
+                 <br><br>
                  
                  
                 <!-- lugar -->
                 <div class="row">
                     
                     <!-- Lugar -->
-                     <div class="col-sm-12 etiquetaDropdownList" id="lugarEventoPanel">
+                     <div class="col-sm-6 etiquetaDropdownList" id="lugarEventoPanel">
                         <label>Lugar</label>
                         <a class="btn btn-block dropdownListModal" ng-click="MostrarLugar()">{{nuevoEvento.Lugar.Nombre}} <span class="caret"></span></a>
                         
@@ -1250,12 +1272,29 @@
                             </div>
                          </div>
                     </div> 
+                    
+                    <br class="hidden-sm hidden-md hidden-lg">
+                    
+                    <!-- Ciudad-->
+                     <div class="col-sm-6 etiquetaDropdownList">
+
+                         <label>Ciudad</label>
+                        <div class="input-group">
+                            <input type="text"  class="form-control entrada" ng-model="buscarCiudad" uib-typeahead="c as (c.Ciudad + ' (' + c.AbreviacionPais + ')') for c in FiltrarBuscarCiudad($viewValue) | limitTo:5" typeahead-on-select="CambiarCiudad()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-no-results="noResultados"> 
+                            <span class="input-group-addon entrada" ng-click="QuitaCiudad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                            <span class="input-group-addon entrada" ng-click="AbrirAgregarCiudad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                        </div>
+
+                        <div ng-if="noResultados">
+                            Sin Resultado
+                        </div>
+
+                    </div>
                 </div>
-                <br>
-                
-                 <!-- Pais y Estado-->
-                <div class="row">
-                   <!-- pais -->
+            
+                 
+                <!--<div class="row">
+                   <!-- pais
                     <div class="col-sm-6 etiquetaDropdownList" id="paisEventoPanel">
                         <label>Pais</label>
                         <a class="btn btn-block dropdownListModal" ng-click="MostrarPais()">{{nuevoEvento.Ciudad.Pais}} <span class="caret"></span></a>
@@ -1305,7 +1344,7 @@
                     </div> 
                         
                     <br class="hidden-md hidden-lg hidden-sm">
-                    <!-- Estado-->
+                    <!-- Estado
                     <div class="col-sm-6 etiquetaDropdownList" id="estadoEventoPanel">
                         <label>Estado</label>
                         <a class="btn btn-block dropdownListModal" ng-click="MostrarEstado()" ng-class="{disabled:(nuevoEvento.Ciudad.Pais.length == 0)}">
@@ -1351,11 +1390,10 @@
                             </div>
                          </div>
                     </div>          
-                </div>
-                <br>
+                </div>-->
                 
                 <!-- Ciudad -->
-                <div class="row">
+                <!--<div class="row">
                     <div class="col-sm-12 etiquetaDropdownList" id="ciudadEventoPanel">
                     
                         <label>Ciudad</label>
@@ -1402,7 +1440,7 @@
                          </div>
 
                    </div>             
-                </div>
+                </div>-->
                 <br>
                 <div class="row">
                     <div class="col-sm-12">

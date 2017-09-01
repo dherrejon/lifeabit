@@ -10,6 +10,7 @@ class Diario
         this.Etiqueta = [];
         this.Tema = [];
         this.Imagen = [];
+        this.ImagenSrc = [];
     }
 }
 
@@ -31,6 +32,24 @@ function GetDiario($http, $q, CONFIG, usuarioId)
             {
                 q.resolve([], []);
             }
+             
+        }).error(function(data, status){
+            q.resolve([], []);
+     }); 
+    return q.promise;
+}
+
+function GetImagenDiario($http, $q, CONFIG, usuarioId)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetImagenDiario/' + usuarioId,
+
+      }).success(function(data)
+        {
+            q.resolve(data);
              
         }).error(function(data, status){
             q.resolve([], []);
@@ -101,16 +120,45 @@ function AgregarDiario($http, CONFIG, $q, diario)
 {
     var q = $q.defer();
     
+    var fd = new FormData();
+    
+    for(var k=0; k<diario.ImagenSrc.length; k++)
+    {
+        fd.append('file[]', diario.ImagenSrc[k]);
+    }
+    
+    if(diario.Imagen.length > 0)
+    {
+        for(var k=0; k<diario.Imagen.length; k++)
+        {
+            if(diario.Imagen[k].Eliminada === undefined)
+            {
+                diario.Imagen[k].Eliminada = false;
+            }
+        }
+    }
+
+    var Diario = jQuery.extend({}, diario);
+    Diario.AgregarImagen = diario.ImagenSrc.length;
+    
+    fd.append('diario', JSON.stringify(Diario));
+    
     $http({      
           method: 'POST',
           url: CONFIG.APIURL + '/AgregarDiario',
-          data: diario
+          data: fd,
+          headers: 
+          {
+            "Content-type": undefined 
+          }
 
       }).success(function(data)
         {
+
             q.resolve(data);
+            
         }).error(function(data, status){
-            q.resolve([{Estatus:status}]);
+            q.resolve(status);
 
      }); 
     return q.promise;
@@ -119,17 +167,52 @@ function AgregarDiario($http, CONFIG, $q, diario)
 function EditarDiario($http, CONFIG, $q, diario)
 {
     var q = $q.defer();
+    
+    var fd = new FormData();
+    
+    for(var k=0; k<diario.ImagenSrc.length; k++)
+    {
+        fd.append('file[]', diario.ImagenSrc[k]);
+    }
+    
+    if(diario.Imagen.length > 0)
+    {
+        for(var k=0; k<diario.Imagen.length; k++)
+        {
+            if(diario.Imagen[k].Eliminada === undefined)
+            {
+                diario.Imagen[k].Eliminada = false;
+            }
+        }
+    }
+
+    var Diario = jQuery.extend({}, diario);
+    Diario.AgregarImagen = diario.ImagenSrc.length;
+    
+    fd.append('diario', JSON.stringify(Diario));
 
     $http({      
-          method: 'PUT',
+          method: 'POST',
           url: CONFIG.APIURL + '/EditarDiario',
-          data: diario
+          data: fd,
+          headers: 
+          {
+            "Content-type": undefined 
+          }
 
       }).success(function(data)
         {
-            q.resolve(data);    
+            if(data[0].Estatus == "Exitoso")
+            {
+                q.resolve(data);
+            }
+            else
+            {
+                q.resolve([{Estatus: "Error"}]);
+            }  
         }).error(function(data, status){
-            q.resolve([{Estatus:status}]);
+            q.resolve([{Estatus: status}]);
+        console.log(data);
 
      }); 
     return q.promise;
@@ -181,6 +264,24 @@ function GetEtiquetaPorDiario($http, $q, CONFIG, usuarioId)
     $http({      
           method: 'GET',
           url: CONFIG.APIURL + '/GetEtiquetaPorDiario/' + usuarioId,
+
+      }).success(function(data)
+        {
+            q.resolve(data);
+             
+        }).error(function(data, status){
+            q.resolve([{Estatus: status}]);
+     }); 
+    return q.promise;
+}
+
+function GetImagenEtiqueta($http, $q, CONFIG, id)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetImagenEtiqueta/' + id,
 
       }).success(function(data)
         {

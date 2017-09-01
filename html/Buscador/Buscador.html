@@ -192,7 +192,7 @@
                     <a ng-repeat="actividad in actividad | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(diario.FechaFormato)}}" ng-click="GetActividadPorId(actividad.ActividadId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                         <!-- indicador -->
                         <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
-                            {{actividad.Nombre}}
+                             {{actividad.Nombre}}
                         </span>
                     </a>
                 </div>

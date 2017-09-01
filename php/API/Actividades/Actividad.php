@@ -50,7 +50,7 @@ function AgregarActividad()
         $app->stop();
     }*/
 
-    $sql = "INSERT INTO Actividad (UsuarioId, Nombre, Notas, FechaCreacion) VALUES(:UsuarioId, :Nombre, :Notas, :FechaCreacion)";
+    $sql = "INSERT INTO Actividad (UsuarioId, Nombre, Notas, FechaCreacion, Hora) VALUES(:UsuarioId, :Nombre, :Notas, :FechaCreacion, STR_TO_DATE( :Hora, '%h:%i %p' ))";
     
     try 
     {
@@ -62,6 +62,7 @@ function AgregarActividad()
         $stmt->bindParam("Nombre", $actividad->Nombre);
         $stmt->bindParam("Notas", $actividad->Notas);
         $stmt->bindParam("FechaCreacion", $actividad->FechaCreacion);
+        $stmt->bindParam("Hora", $actividad->Hora);
 
         $stmt->execute();
         
@@ -300,7 +301,7 @@ function EditarActividad()
          $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
     }*/
 
-    $sql = "UPDATE Actividad SET Nombre = :Nombre, Notas = :Notas WHERE ActividadId = ".$actividad->ActividadId;
+    $sql = "UPDATE Actividad SET Nombre = :Nombre, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ) WHERE ActividadId = ".$actividad->ActividadId;
     
     try 
     {
@@ -310,6 +311,7 @@ function EditarActividad()
         
         $stmt->bindParam("Nombre", $actividad->Nombre);
         $stmt->bindParam("Notas", $actividad->Notas);
+        $stmt->bindParam("Hora", $actividad->Hora);
 
         $stmt->execute();
 

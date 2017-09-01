@@ -170,7 +170,7 @@ app.controller("BucadorController", function($scope, $window, $http, $rootScope,
         
         GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
         {
-            
+            console.log(data);   
             for(var k=0; k<data.length; k++)
             {
                 data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
@@ -182,7 +182,7 @@ app.controller("BucadorController", function($scope, $window, $http, $rootScope,
             }
              
             $scope.detalle = data;
-        
+            
         }).catch(function(error)
         {
             alert(error);

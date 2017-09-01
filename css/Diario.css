@@ -232,3 +232,11 @@
     background: rgba(0, 0, 0, 0.15);
     cursor: not-allowed !important;
 }
+
+.infoCenterCell
+{
+    height:50px; 
+    align-items: center; 
+    display: flex;  
+    flex-wrap: wrap;
+}

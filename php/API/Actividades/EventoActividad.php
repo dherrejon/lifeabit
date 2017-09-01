@@ -170,6 +170,44 @@ function AgregarEventoActividad()
             $app->status(409);
             $app->stop();
         }
+        
+        $sql = "UPDATE Divisa SET PorDefecto = 0 WHERE PorDefecto = 1 AND UsuarioId = :UsuarioId";
+    
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("UsuarioId", $evento->UsuarioId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+
+        $sql = "UPDATE Divisa SET PorDefecto = 1 WHERE DivisaId = :DivisaId";
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("DivisaId", $evento->Divisa->DivisaId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
     }
     
     echo '[{"Estatus": "Exitoso"}, {"Id":"'.$eventoId.'"}]';
@@ -381,6 +419,44 @@ function EditarEventoActividad()
         } catch(PDOException $e) 
         {
             //echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+        
+         $sql = "UPDATE Divisa SET PorDefecto = 0 WHERE PorDefecto = 1 AND UsuarioId = :UsuarioId";
+    
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("UsuarioId", $evento->UsuarioId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+
+        $sql = "UPDATE Divisa SET PorDefecto = 1 WHERE DivisaId = :DivisaId";
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("DivisaId", $evento->Divisa->DivisaId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
             echo '[{"Estatus": "Fallo"}]';
             $db->rollBack();
             $app->status(409);

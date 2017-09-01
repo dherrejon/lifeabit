@@ -24,6 +24,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.nota = [];
     $scope.diario = [];
     $scope.actividad = [];
+    $scope.imagen = [];
     $scope.detalle = [];
     $scope.tipoDetalle = "";
     $scope.verDetalle = false;
@@ -35,9 +36,9 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.buscarConcepto = "";
     $scope.campoBuscar = "Conceptos";
     
-    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Notas"];
+    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Imagenes", "Notas"];
     $scope.appFiltro = "Todo";
-    $scope.verApp = {actividad:true, diario: true, nota:true};
+    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true};
     
     //------------------- Catálogos (coneptos) -----------------------------------
     $scope.GetTemaActividad = function()              
@@ -109,6 +110,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 $scope.nota = data[1].Notas;
                 $scope.diario = data[2].Diario;
                 $scope.actividad = data[3].Actividad;
+                $scope.imagen = data[4].Imagen;
             }
             else
             {
@@ -133,8 +135,10 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             for(var k=0; k<data.length; k++)
             {
                 data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
+                
+                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
             }
-             
+
             $scope.detalle = data;
         
         }).catch(function(error)
@@ -155,15 +159,16 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             for(var k=0; k<data.length; k++)
             {
                 data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
+                
+                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
             }
-             
+            
             $scope.detalle = data;
         
         }).catch(function(error)
         {
             alert(error);
         });
-        
     };
     
     $scope.GetActividadPorId = function(id)
@@ -182,10 +187,78 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 {
                     data[k].Evento[i].NotasHTML = $sce.trustAsHtml( data[k].Evento[i].NotasHTML);
                 }
+                
+                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
             }
              
             $scope.detalle = data;
         
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
+    $scope.GetActividadPorId = function(id)
+    {
+        var datos = {Id:id};
+        $scope.tipoDetalle = "Actividad";
+        
+        GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
+        {
+            
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
+                
+                for(var i=0; i<data[k].Evento.length; i++)
+                {
+                    data[k].Evento[i].NotasHTML = $sce.trustAsHtml( data[k].Evento[i].NotasHTML);
+                }
+                
+                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
+            }
+             
+            $scope.detalle = data;
+        
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
+    $scope.GetImagenEtiqueta = function(imagen)
+    {
+        $scope.tipoDetalle = "Imagen";
+        
+        GetImagenEtiqueta($http, $q, CONFIG, imagen.ImagenId).then(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                imagen.Etiqueta = data[1].Etiqueta;
+                imagen.Tema = data[2].Tema;
+            }
+            else
+            {
+                imagen.Etiqueta = [];
+                imagen.Tema = [];
+            }
+            
+            for(var k=0; k<imagen.Etiqueta.length; k++)
+            {
+                if(imagen.Etiqueta[k].Visible == "1")
+                {
+                    imagen.Etiqueta[k].Visible = true;
+                }
+                else
+                {
+                    imagen.Etiqueta[k].Visible = false;
+                }
+            }
+            
+            imagen.EtiquetaVisible = $scope.GetEtiquetaVisible(imagen.Etiqueta);
+            $scope.detalle[0] = imagen;
+
         }).catch(function(error)
         {
             alert(error);
@@ -217,6 +290,22 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     {
         $scope.detalleEvento = evento;
         $('#DetalleEvento').modal('toggle');
+    };
+    
+    
+    $scope.GetEtiquetaVisible = function(etiqueta)
+    {
+        var visible = [];
+        
+        for(var k=0; k<etiqueta.length; k++)
+        {
+            if(etiqueta[k].Visible)
+            {
+                visible.push(etiqueta[k]);
+            }
+        }
+        
+        return visible;
     };
     
     //----------------- buscar concepto ----------------
@@ -489,6 +578,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
          $scope.nota = [];
          $scope.diario = [];
          $scope.actividad = [];
+         $scope.imagen = [];
      };
     
     $scope.CambiarAppFiltro = function(app)

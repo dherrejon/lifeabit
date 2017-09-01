@@ -287,7 +287,6 @@ function GetNotasFiltro()
     }
 }
 
-
 function AgregarNota()
 {
     $request = \Slim\Slim::getInstance()->request();
@@ -702,9 +701,31 @@ function EditarNota()
         
     $count= 0;
     $imagenId = [];
+    
+    $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/";
+        if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+
     if($countFile > 0)
     {
-            
+        $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/";
+        if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
         for($k=0; $k<$countFile; $k++)
         {
             if($_FILES['file']['error'][$k] == 0)
@@ -739,6 +760,7 @@ function EditarNota()
                 $imagenId[$k] = 0;
             }
             
+            move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
         }
         
         

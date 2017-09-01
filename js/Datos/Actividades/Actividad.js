@@ -47,6 +47,7 @@ function SetActividad(data)
     actividad.Nombre = data.Nombre;
     actividad.FechaCreacion = data.FechaCreacion;
     actividad.Notas = data.Notas;
+    actividad.Hora = data.Hora;
     
     actividad.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
     

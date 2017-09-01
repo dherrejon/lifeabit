@@ -22,7 +22,7 @@ app.controller("AdministrarEtiquetaController", function($scope, $window, $http,
     /*----------------------- Usuario logeado --------------------------*/
     $scope.InicializarControlador = function()
     {
-        if($scope.usuarioLogeado.Aplicacion != "Mis Actividades" && $scope.usuarioLogeado.Aplicacion != "Mi Diario" && $scope.usuarioLogeado.Aplicacion != "Mis Notas")
+        if($scope.usuarioLogeado.Aplicacion != "Home" && $scope.usuarioLogeado.Aplicacion != "Mis Actividades" && $scope.usuarioLogeado.Aplicacion != "Mi Diario" && $scope.usuarioLogeado.Aplicacion != "Mis Notas")
         {
             $rootScope.IrPaginaPrincipal();
         }

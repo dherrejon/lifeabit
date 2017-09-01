@@ -218,6 +218,31 @@
                     </a>
                 </div>
                 
+                <!-- Imagenes -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.imagen = !verApp.imagen">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Imagenes ({{imagen.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.imagen "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.imagen "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.imagen && appFiltro == 'Todo') || appFiltro == 'Imagenes'"> <!-- ng-if="agrupar == 'Titulo'" -->
+                    <br ng-show="imagen.length > 0">
+                      <div ng-repeat="img in imagen | orderBy:'Nombre' " > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                       <div style="padding-left: 12px; padding-right: 12px">
+                             <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
+                               <div class="imgContainer" >
+                                    <div class="crop">
+                                         <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="GetImagenEtiqueta(img)"/>
+                                     </div>
+                                </div>
+                                <div style="height: 15px"></div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Notas -->
                <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
                     <a  class="btn labelConcepto"  ng-click="verApp.nota = !verApp.nota">
@@ -263,7 +288,7 @@
         <br>
         
         <div ng-repeat="detalle in detalle">
-            <div class="row">
+            <div class="row" >
                 <div class="col-xs-12">
                     <div >
                         
@@ -289,10 +314,10 @@
                     <div ng-if="verDetalle">
 
                         <!-- Etiquetas -->
-                        <div class="row" ng-if="detalle.Etiqueta.length > 0">
+                        <div class="row" ng-if="detalle.EtiquetaVisible.length > 0">
                            <div class="col-sm-12"> 
                                <b> Etiquetas:  </b>
-                               <span ng-repeat="etiqueta in detalle.Etiqueta | orderBy:'Nombre'">
+                               <span ng-repeat="etiqueta in detalle.EtiquetaVisible | orderBy:'Nombre'">
                                    <span class="textoDetalle" ng-if="!$last">{{etiqueta.Nombre}},</span>
                                    <span class="textoDetalle" ng-if="$last">{{etiqueta.Nombre}}.</span>
                                </span>             
@@ -317,6 +342,7 @@
                                <span class="textoDetalle">{{detalle.FechaFormato}}</span>             
                            </div>
                         </div>
+                        
 
                         <div ng-if="tipoDetalle == 'Actividad'">
                         <!-- Frecuencia y Fecha de creación -->
@@ -336,6 +362,14 @@
                             <div class="row">
                                <div class="col-sm-12"> 
                                    <b> Fecha de alta:  </b>
+                                   <span class="textoDetalle"> {{detalle.FechaCreacionFormato}} </span>             
+                               </div>
+                            </div>
+                            
+                            <!-- Frecuencia y Fecha de creación -->
+                            <div class="row" ng-if="detalle.Hora.length > 0">
+                               <div class="col-sm-12"> 
+                                   <b> Hora:  </b>
                                    <span class="textoDetalle"> {{detalle.FechaCreacionFormato}} </span>             
                                </div>
                             </div>
@@ -477,6 +511,12 @@
 
                   </div>
                </div>
+            </div>
+            
+            <div class="row" ng-if="tipoDetalle == 'Imagen'">
+                <div class="col-xs-12">
+                    <img class="center-block img-responsive" style="width:80%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{detalle.Nombre}}"/><br>
+                </div>
             </div>
              
          </div>

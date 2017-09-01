@@ -33,6 +33,10 @@ function GetBuscador()
     $sqlEtiquetaBaseActividad1 = " SELECT e.ActividadId FROM EtiquetaActividadVista e WHERE EtiquetaId IN ";
     $sqlEtiquetaBaseActividad2 = " GROUP BY e.ActividadId";
     
+    $sqlEtiquetaImagen = "";
+    $sqlEtiquetaBaseImagen1 = " SELECT e.ImagenId FROM EtiquetaImagenVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseImagen2 = " GROUP BY e.ImagenId";
+    
     if($numEtiqueta > 0)
     {
         //Equivalencias
@@ -83,12 +87,14 @@ function GetBuscador()
                 $sqlEtiquetaNota .= $sqlEtiquetaBaseNota1.$whereEtiqueta.$sqlEtiquetaBaseNota2;
                 $sqlEtiquetaDiario .= $sqlEtiquetaBaseDiario1.$whereEtiqueta.$sqlEtiquetaBaseDiario2;
                 $sqlEtiquetaActividad .= $sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
+                $sqlEtiquetaImagen .= $sqlEtiquetaBaseImagen1.$whereEtiqueta.$sqlEtiquetaBaseImagen2;
             }
             else
             {
                 $sqlEtiquetaNota .= " UNION ALL ".$sqlEtiquetaBaseNota1.$whereEtiqueta.$sqlEtiquetaBaseNota2;
                 $sqlEtiquetaDiario .= " UNION ALL ".$sqlEtiquetaBaseDiario1.$whereEtiqueta.$sqlEtiquetaBaseDiario2;
                 $sqlEtiquetaActividad .= " UNION ALL ".$sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
+                $sqlEtiquetaImagen .= " UNION ALL ".$sqlEtiquetaBaseImagen1.$whereEtiqueta.$sqlEtiquetaBaseImagen2;
             }
         }
     }
@@ -122,6 +128,16 @@ function GetBuscador()
                     WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema.
                 
                     ") x ON x.ActividadId = a.ActividadId GROUP BY a.ActividadId HAVING count(*) = ".($numEtiqueta+1);
+        
+            $sqlImagen = "SELECT i.ImagenId, i.Nombre FROM Imagen i 
+                    INNER JOIN ("
+                        .$sqlEtiquetaImagen.
+                
+                    " UNION ALL SELECT t.ImagenId FROM TemaImagenVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.ImagenId HAVING count(*) = ".$numTema.
+                
+                    ") x ON x.ImagenId = i.ImagenId GROUP BY i.ImagenId HAVING count(*) = ".($numEtiqueta+1);
+        
     }
     else if($numEtiqueta > 0 || $numTema > 0)
     {
@@ -141,6 +157,11 @@ function GetBuscador()
                     INNER JOIN ("
                         .$sqlEtiquetaActividad.
                     ") x ON x.ActividadId = a.ActividadId GROUP BY a.ActividadId HAVING count(*) = ".$numEtiqueta;
+            
+            $sqlImagen = "SELECT i.ImagenId, i.Nombre FROM Imagen i 
+                    INNER JOIN ("
+                        .$sqlEtiquetaImagen.
+                    ") x ON x.ImagenId = i.ImagenId GROUP BY i.ImagenId HAVING count(*) = ".$numEtiqueta;
         }
         else if($numTema > 0)
         {
@@ -158,6 +179,11 @@ function GetBuscador()
                     INNER JOIN (
                         SELECT t.ActividadId FROM TemaActividadVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema."
                     ) x ON x.ActividadId = a.ActividadId";
+            
+            $sqlImagen = "SELECT i.ImagenId, i.Nombre FROM Imagen i
+                    INNER JOIN (
+                        SELECT t.ImagenId FROM TemaImagenVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ImagenId HAVING count(*) = ".$numTema."
+                    ) x ON x.ImagenId = i.ImagenId";
         }
     }
 
@@ -192,7 +218,7 @@ function GetBuscador()
     //diario
     try 
     {
-        $db = getConnection();
+        //$db = getConnection();
         $stmt = $db->query($sqlDiario);
         $diario = $stmt->fetchAll(PDO::FETCH_OBJ);
 
@@ -209,12 +235,12 @@ function GetBuscador()
     //actividad
     try 
     {
-        $db = getConnection();
+        //$db = getConnection();
         $stmt = $db->query($sqlActividad);
         $actividad = $stmt->fetchAll(PDO::FETCH_OBJ);
         
-        $db = null;
-        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}]';
+        //$db = null;
+        //echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}]';
  
     } 
     catch(PDOException $e) 
@@ -223,6 +249,33 @@ function GetBuscador()
         echo '[ { "Estatus": '.$e.' } ]';
         $app->status(409);
         $app->stop();
+    }
+    
+    //Imagen
+    if($filtro->fecha == "")
+    {
+        try 
+        {
+            $db = getConnection();
+            $stmt = $db->query($sqlImagen);
+            $imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            $db = null;
+            echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}]';
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo($e);
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    else
+    {
+        $db = null;
+        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'},  {"Imagen":[]}]';
     }
 }
 
@@ -255,7 +308,7 @@ function GetDiarioPorId()
     {
         for($k=0; $k<$numDiario; $k++)
         {
-            $sql = "SELECT EtiquetaId, Nombre FROM EtiquetaDiarioVista WHERE DiarioId = ".$diario[$k]->DiarioId;
+            $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaDiarioVista WHERE DiarioId = ".$diario[$k]->DiarioId;
             
             try 
             {
@@ -322,7 +375,7 @@ function GetActividadPorId()
     {
         for($k=0; $k<$numActividad; $k++)
         {
-            $sql = "SELECT EtiquetaId, Nombre FROM EtiquetaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
+            $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
             
             try 
             {

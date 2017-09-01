@@ -88,6 +88,7 @@ function SetEventoActividad(data)
         evento.Ciudad.Ciudad = data.Ciudad;
         evento.Ciudad.Estado = data.Estado;
         evento.Ciudad.Pais = data.Pais;
+        evento.Ciudad.AbreviacionPais = data.AbreviacionPais;
     }
     
     if(data.LugarId !== null)

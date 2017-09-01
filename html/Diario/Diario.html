@@ -394,7 +394,56 @@
                                         <p style="font-size:12pt" ng-bind-html="diario.NotasHTML"></p>
                                     </div>
                                     
-                                    <!-- Notas -->
+                                    <!--<div ng-repeat="img in diario.Imagen">
+                                        <div style="padding-left: 12px; padding-right: 12px">
+                                             <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
+                                               <div class="imgContainer" >
+                                                    <div class="crop">
+                                                         <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, false, false, diario.Imagen, null, $index)"/>
+                                                     </div>
+                                                </div>
+                                                <div style="height: 15px"></div>
+                                             </div>
+                                         </div>
+                                    </div>-->
+
+                                    <div class="col-xs-12" style="padding-left: 12px; padding-right: 12px" ng-if="diario.Imagen.length > 0">
+                                         <div id="detalleImagen" class="carousel fdi-Carousel slide">
+                                             <!-- Carousel items -->
+                                             <div class="carousel fdi-Carousel slide" id="eventCarousel" data-interval="1000">
+                                                <div class="carousel-inner onebyone-carosel">
+
+                                                    <!-- Imagenes -->
+                                                    <div class="item active" ng-repeat="i in diario.iImg track by $index">
+                                                        <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
+                                                           <div class="imgContainer" >
+                                                                <div class="crop">
+                                                                     <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{diario.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, diario.Imagen, null, i)"/>
+                                                                 </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                     <!-- Navigation -->
+                                                    <a class="left carousel-control"  ng-click="CambiarIndiceDetalle(-1, diario);" ng-if="carroselIntervalo < diario.Imagen.length">
+                                                        <span class="glyphicon glyphicon-chevron-left"></span>
+                                                    </a>
+                                                    <a class="right carousel-control"  ng-click="CambiarIndiceDetalle(1, diario);" ng-if="carroselIntervalo < diario.Imagen.length">
+                                                        <span class="glyphicon glyphicon-chevron-right"></span>
+                                                    </a>
+                                                </div>
+
+
+
+                                            </div>
+                                         </div>
+                                     </div>
+               
+                                    <div class="col-xs-12">
+                                        <br>
+                                    </div>
+                                    
+                                    <!-- Divider -->
                                     <div class="col-xs-12" >
                                         <div style="border-bottom: 1px solid #1859b2;"></div>
                                     </div>
@@ -512,7 +561,7 @@
                              <label>Ciudad</label>
                             <div class="input-group">
                                 <input type="text"  class="form-control entrada" ng-model="buscarCiudad" uib-typeahead="c as (c.Ciudad + ' (' + c.AbreviacionPais + ')') for c in FiltrarBuscarCiudad($viewValue) | limitTo:5" typeahead-on-select="CambiarCiudad()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-no-results="noResultados"> 
-                                <span class="input-group-addon entrada" ng-click="buscarCiudad = ''" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="QuitaCiudad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
                                 <span class="input-group-addon entrada" ng-click="AbrirAgregarCiudad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
                             </div>
                             
@@ -580,7 +629,7 @@
                            <!--lista de etiquetas Seleccionados -->
                            <div ng-if="nuevoDiario.Etiqueta.length > 0" >
                                 <b>Etiquetas</b><br>
-                                 <span ng-repeat="etiqueta in nuevoDiario.Etiqueta | orderBy:'Nombre'" >
+                                 <span ng-repeat="etiqueta in nuevoDiario.Etiqueta | orderBy:'Nombre'" ng-if="etiqueta.Visible">
                                      <div class="btn-group" role="group" style="margin-bottom:8px">
 
 
@@ -677,21 +726,56 @@
 
                                 <tbody  style="cursor: pointer">
 
-                                    <tr   ng-repeat="img in nuevaNota.ImagenSrc" ng-if="nuevaNota.ImagenSrc.length > 0">
-                                      <td><img class="img-responsive imagenPrevisualizarModal center-block track by $index" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 0)"/></td>
-                                      <td class="hidden-xs">  {{img.name}} </td>
-                                      <td class="hidden-xs">  {{(img.size/1000000).toFixed(2)}} MB </td>
-                                      <td class="text-center">  
-                                          <a class="btn btnQuitarImg" ng-click="nuevaNota.ImagenSrc.splice($index,1)">
+                                    <tr   ng-repeat="img in nuevoDiario.ImagenSrc" ng-if="nuevoDiario.ImagenSrc.length > 0">
+                                      
+                                      <td class="text-center">
+                                          <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarImagen(img, 'prev')">
+                                            <span >
+                                             <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                             <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                            </span>
+                                         </a>
+                                      </td>
+                                     
+                                      <td style="width: 100px; max-width: 100px">
+                                          <div class="imgContainer" style="height:50px">
+                                              <a style="overflow: hidden !important; max-height: 50px">
+                                                <img class="img-responsive" style="width: 100%" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevoDiario.Imagen, nuevoDiario.ImagenSrc, $index, 0)"/>
+                                              </a>
+                                          </div>
+                                        </td>
+
+                                      <td class="hidden-xs"> <span class="infoCenterCell">{{img.name}}</span> </td>
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{(img.size/1000000).toFixed(2)}} MB</span> </td>
+                                      <td class="text-center">
+                                          <a class="btn btnQuitarImg" ng-click="nuevoDiario.ImagenSrc.splice($index,1)">
                                              <span class="fa fa-times-circle"></span>
                                          </a>
                                       </td>
+                                      
+                                                   
                                     </tr>
 
-                                    <tr ng-repeat="img in nuevaNota.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
-                                      <td ><img class="img-responsive imagenPrevisualizarModal center-block track by $index" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 1)"/></td>
-                                      <td class="hidden-xs">  {{img.Nombre}} </td>
-                                      <td class="hidden-xs">  {{(img.Size/1000000).toFixed(2)}} MB </td>
+                                    <tr ng-repeat="img in nuevoDiario.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
+                                     <td class="text-center">
+                                          <a class="btn operacionEvento infoCenterCell" ng-click="EtiquetarImagen(img, 'img')" style="font-size: 13pt;">
+                                            <span >
+                                             <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                             <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                            </span>
+                                         </a>
+                                      </td>
+                                      
+                                      <td style="width: 100px">
+                                        <div class="imgContainer" style="height:50px">
+                                             <a style="overflow: hidden !important; max-height: 50px">
+                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoDiario.Imagen, nuevoDiario.ImagenSrc, $index, 1)"/>
+                                             </a>
+                                        </div>
+                                      </td>
+                                      
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{img.Nombre}}</span> </td>
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{(img.Size/1000000).toFixed(2)}} MB </span></td>
                                       <td class="text-center">  
                                           <a class="btn btnQuitarImg" ng-click="img.Eliminada = true">
                                              <span class="fa fa-times-circle"></span>
@@ -705,7 +789,7 @@
                        </div>
                     </div>
                                              
-                     <div class="row"  ng-if="(fotoEliminada = (nuevaNota.Imagen | filter:{Eliminada:'true'}  ).length) > 0">
+                     <div class="row"  ng-if="(fotoEliminada = (nuevoDiario.Imagen | filter:{Eliminada:'true'}  ).length) > 0">
                        <div class="col-xs-12">
 
                            <a class="btn botonDetallesActividad" ng-click="showEliminada = !showEliminada">
@@ -717,10 +801,17 @@
 
                                 <tbody  style="cursor: pointer">
 
-                                    <tr ng-repeat="img in nuevaNota.Imagen"  ng-if="img.Eliminada == true">
-                                      <td ><img class="img-responsive imagenPrevisualizarModal center-block track by $index" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(false, false, true, nuevaNota.Imagen, null, $index)"/></td>
-                                      <td class="hidden-xs">  {{img.Nombre}} </td>
-                                      <td class="hidden-xs">  {{(img.Size/1000000).toFixed(2)}} MB </td>
+                                    <tr ng-repeat="img in nuevoDiario.Imagen"  ng-if="img.Eliminada == true">
+                                      <td style="width: 100px">
+                                          <div class="imgContainer" style="height:50px">
+                                              <a style="overflow: hidden !important; max-height: 50px">
+                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoDiario.Imagen, null, $index)"/>
+                                              </a>
+                                          </div>
+                                      </td>
+                                    
+                                      <td class="hidden-xs " > <span class="infoCenterCell">{{img.Nombre}}</span> </td>
+                                        <td class="hidden-xs"> <span class="infoCenterCell"> {{(img.Size/1000000).toFixed(2)}} MB </span></td>
                                       <td class="text-center">  
                                           <a class="btn btnAgregarImg" ng-click="img.Eliminada = false">
                                              <span class="fa fa-check-circle"></span>
@@ -1093,12 +1184,50 @@
 
         </div>
     </div>
+    
+     <!---------- VerImagen ---------------->
+    <div class="modal fade sombraDivModal" id="verImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-md modalPrincipal">
+          
+          <div class="row">
+                <div class="col-xs-12">
+                    <a class="pull-right" data-dismiss="modal" aria-label="Close"> <span class="fa fa-times changeImage">    </span></a>
+                </div>
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="myCarousel2" class="carousel  slide">
+  
+                      <!-- Items -->
+                      <div class="carousel-inner">
+                        <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
+                        </div>
+                      </div>
+                      <!-- Navigation -->
+                       <a class="left carousel-control"  ng-click="changeImageViewed(-1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control"  ng-click="changeImageViewed(1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
      
 </div>
  
  <!-- otros html -->
 <div ng-include=" 'html/Actividades/Administrar/Ciudad/AgregarCiudad.html' "> </div>
 
+<div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
   

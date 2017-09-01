@@ -638,6 +638,84 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
     };
     
+    //-------- Filtro Ciudad -------------
+    $scope.FiltrarBuscarCiudad = function(buscarCiudad)
+    {
+        
+        var ciudad = [];
+        
+        
+        if(buscarCiudad !== undefined)
+        {
+            for(var k=0; k<$scope.ciudad.length; k++)
+            {
+                //pais
+                var index = $scope.ciudad[k].Pais.toLowerCase().indexOf(buscarCiudad.toLowerCase());
+
+                if(index >= 0)
+                {
+                    if(index === 0)
+                    {
+                        ciudad.push($scope.ciudad[k]);
+                        continue;
+                    }
+                    else
+                    {
+                        if($scope.ciudad[k].Pais[index-1] == " ")
+                        {
+                            ciudad.push($scope.ciudad[k]);
+                            continue;
+                        }
+                    }
+                }
+                
+                //Estado
+                index = $scope.ciudad[k].Estado.toLowerCase().indexOf(buscarCiudad.toLowerCase());
+
+                if(index >= 0)
+                {
+                    if(index === 0)
+                    {
+                        ciudad.push($scope.ciudad[k]);
+                        continue;
+                    }
+                    else
+                    {
+                        if($scope.ciudad[k].Estado[index-1] == " ")
+                        {
+                            ciudad.push($scope.ciudad[k]);
+                            continue;
+                        }
+                    }
+                }
+                
+                //Ciudad
+                index = $scope.ciudad[k].Ciudad.toLowerCase().indexOf(buscarCiudad.toLowerCase());
+
+                if(index >= 0)
+                {
+                    if(index === 0)
+                    {
+                        ciudad.push($scope.ciudad[k]);
+                        continue;
+                    }
+                    else
+                    {
+                        if($scope.ciudad[k].Ciudad[index-1] == " ")
+                        {
+                            ciudad.push($scope.ciudad[k]);
+                            continue;
+                        }
+                    }
+                }
+                
+                
+            }
+        }
+        
+        return ciudad;
+    };
+    
     $scope.BuscarTema = function(tema)
     {
         return $scope.FiltrarBuscarTema(tema, $scope.buscarConcepto);
@@ -900,6 +978,18 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.LimpiarFiltroFecha();
     };
     
+    //Ciudad
+    $scope.CambiarCiudad = function()
+    {
+        $scope.nuevoEvento.Ciudad = $scope.buscarCiudad;
+    };
+    
+    $scope.QuitaCiudad = function()
+    {
+        $scope.nuevoEvento.Ciudad = new Ciudad();
+        $scope.buscarCiudad = "";
+    };
+    
     /*-----------------Abrir Panel Agregar-Editar termino-------------------*/
     $scope.AbrirActividad = function(operacion, actividad)
     {
@@ -910,18 +1000,27 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.nuevaActividad = new Actividad();
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
+            
+            document.getElementById("horaDiario").value = "";
+            $('#horaDiario').data("DateTimePicker").clear();
         }
         else if(operacion == "Editar")
         {
             $scope.nuevaActividad = $scope.SetActvidad(actividad);
             $scope.ActivarDesactivarTema(actividad.Tema);
             $scope.ActivarDesactivarEtiqueta(actividad.Etiqueta);
+            
+            $('#horaDiario').data("DateTimePicker").clear();
+            document.getElementById("horaDiario").value = $scope.nuevaActividad.Hora;
         }
         else if(operacion == "Copiar")
         {
             $scope.nuevaActividad = $scope.CopiarActividad(actividad);
             $scope.ActivarDesactivarTema(actividad.Tema);
             $scope.ActivarDesactivarEtiqueta(actividad.Etiqueta);
+            
+            $('#horaDiario').data("DateTimePicker").clear();
+            document.getElementById("horaDiario").value = $scope.nuevaActividad.Hora;
         }
         
         $scope.inicioActividad = jQuery.extend({}, $scope.nuevaActividad);
@@ -975,6 +1074,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         actividad.FechaCreacion = data.FechaCreacion;
         actividad.FechaCreacionFormato = data.FechaCreacionFormato;
         actividad.Notas = data.Notas;
+        actividad.Hora = data.Hora;
         
         if(data.Notas !== null && data.Notas !== undefined)
         {
@@ -1042,6 +1142,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             
             actividad.Etiqueta[k].EtiquetaId = data.Etiqueta[k].EtiquetaId;
             actividad.Etiqueta[k].Nombre = data.Etiqueta[k].Nombre;
+            actividad.Etiqueta[k].Visible = data.Etiqueta[k].Visible;
         }
         
         for(var k=0; k<data.Tema.length; k++)
@@ -1605,6 +1706,24 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         
     };
     
+    //----------- Hora -------------
+    $('#horaDiario').datetimepicker(
+    {
+        locale: 'es',
+        format: 'hh:mm A',
+        showClear: true,
+        showClose: true,
+        toolbarPlacement: 'bottom'
+    });
+    
+    $scope.CambiarHoraDiario = function(element) 
+    {
+        $scope.$apply(function($scope) 
+        {
+            $scope.nuevaActividad.Hora = element.value;
+        });
+    };
+    
     //-------------------- Terminar Actividad -------------------
     $scope.TerminarActividad = function(actividadInvalida)
     {
@@ -1618,6 +1737,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.QuitarEtiquetaNoVisible();
             $scope.AgregarEtiquetaOcultar();
             
+            $scope.nuevaActividad.Hora = $scope.SetNullHora($scope.nuevaActividad.Hora);
             $scope.nuevaActividad.UsuarioId = $rootScope.UsuarioId;
             if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
             {
@@ -2260,9 +2380,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             $scope.nuevoEvento = new EventoActividad();
             
-            $scope.IniciarEvento(actividad);
+           
             document.getElementById("horaEvento").value = "";
             $('#horaEvento').data("DateTimePicker").clear();
+            
+            $scope.SetValoresDefecto(actividad);
+            $scope.IniciarEvento(actividad);
         }
         else if($scope.operacion == "Editar")
         {
@@ -2271,11 +2394,52 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $('#horaEvento').data("DateTimePicker").clear();
             document.getElementById("fechaEvento").value = $scope.nuevoEvento.Fecha;
             document.getElementById("horaEvento").value = $scope.nuevoEvento.Hora;
+
+            if(evento.Ciudad.CiudadId !== null && evento.Ciudad.CiudadId !== undefined)
+            {
+                if(evento.Ciudad.CiudadId.length > 0)
+                {
+                    $scope.buscarCiudad = SetCiudad(evento.Ciudad);
+                }
+                else
+                {
+                    $scope.buscarCiudad = "";
+                }
+            }
+            else
+            {
+                $scope.buscarCiudad = "";
+            }
         }
         
         $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
         
         $('#modalEvento').modal('toggle');
+    };
+    
+    $scope.SetValoresDefecto = function(actividad)
+    {
+        /*for(var k=0; k<$scope.ciudad.length; k++)
+        {
+            if($scope.ciudad[k].DiarioDefecto == "1")
+            {
+                $scope.buscarCiudad = SetCiudad($scope.ciudad[k]);
+                $scope.nuevoEvento.Ciudad = SetCiudad($scope.ciudad[k]);
+                break;
+            }
+        }*/
+
+        for(var k=0; k<$scope.divisa.length; k++)
+        {
+            if($scope.divisa[k].PorDefecto == "1")
+            {
+                $scope.CambiarDivisa($scope.divisa[k]);
+                break;
+            }
+        }
+        
+        $scope.nuevoEvento.Hora = actividad.Hora;
+        document.getElementById("horaEvento").value = $scope.nuevoEvento.Hora;
     };
     
     $scope.IniciarEvento = function(actividad)
@@ -2420,49 +2584,34 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.mostrarEstado = false;
     };
     
-    $scope.CambiarCiudad = function(ciudad)
+    /*$scope.CambiarCiudad = function(ciudad)
     {
         $scope.nuevoEvento.Ciudad.CiudadId = ciudad.CiudadId;
         $scope.nuevoEvento.Ciudad.Ciudad = ciudad.Ciudad;
         
         
         $scope.mostrarCiudad = false;
-    };
+    };*/
     
     //-------- Agregar Ciudad ----------
-    $scope.AbrirAgregarCiudad = function(campo)
+    $scope.AbrirAgregarCiudad = function()
     {
-        console.log("actividad");
-        $scope.campoCiudad = campo;
-        CIUDAD.AgregarCiudad($scope.nuevoEvento.Ciudad, campo);
+        //console.log("actividad");
+        //$scope.campoCiudad = campo;
+        //CIUDAD.AgregarCiudad($scope.nuevoEvento.Ciudad, 'Pais');
+        CIUDAD.AgregarCiudad(new Ciudad(), "Pais");
     };
     
     $scope.$on('TerminarCiudad',function()
     {   
         $scope.mensaje = "Ciudad Agregada";
-        $scope.ciudad.push(CIUDAD.GetCiudad());
-        $scope.SetPaisEstado($scope.ciudad);
         
-        $scope.mostrarPais = false;
-        $scope.mostrarEstado = false;
-        $scope.mostrarCiudad = false;
+        var city = CIUDAD.GetCiudad();
+        city.DiarioDefecto = "0";
         
-        var ciudad = CIUDAD.GetCiudad();
-        $scope.nuevoEvento.Ciudad = SetCiudad(ciudad);
-        
-        if($scope.campoCiudad == "Pais")
-        {
-            $scope.CambiarPais(ciudad.Pais);
-            $scope.CambiarEstado(ciudad.Estado);
-        }
-        else if($scope.campoCiudad == "Pais")
-        {
-            $scope.CambiarEstado(ciudad.Estado);
-        }
-
-        $scope.CambiarCiudad(ciudad);
-        
-        
+        $scope.ciudad.push(city);
+        $scope.buscarCiudad = city;
+        $scope.nuevoEvento.Ciudad = SetCiudad(city);
 
         $scope.EnviarAlerta('Evento');
            
@@ -2587,6 +2736,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         else
         {*/
+            $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
             $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
             if($scope.operacion == "Agregar")
             {
@@ -2771,6 +2921,23 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 }
             }
         }
+        
+        
+        //Divisa Defecto
+        if(evento.Divisa.DivisaId.length > 0)
+        {
+            for(var k=0; k<$scope.divisa.length; k++)
+            {
+                if(evento.Divisa.DivisaId == $scope.divisa[k].DivisaId)
+                {
+                    $scope.divisa[k].PorDefecto = "1";
+                }
+                else
+                {
+                    $scope.divisa[k].PorDefecto = "0";
+                }
+            }
+        }
     };
     
     $scope.SetEvento = function(data)
@@ -2806,6 +2973,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             evento.Ciudad.Ciudad = data.Ciudad.Ciudad;
             evento.Ciudad.Estado = data.Ciudad.Estado;
             evento.Ciudad.Pais = data.Ciudad.Pais;
+            evento.Ciudad.AbreviacionPais = data.Ciudad.AbreviacionPais;
         }
 
         if(data.Lugar.LugarId !== null)

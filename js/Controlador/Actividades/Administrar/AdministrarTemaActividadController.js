@@ -27,7 +27,7 @@ app.controller("AdministrarTemaActividadController", function($scope, $window, $
     /*----------------------- Usuario logeado --------------------------*/
     $scope.InicializarControlador = function()
     {
-        if($scope.usuarioLogeado.Aplicacion != "Mis Actividades" && $scope.usuarioLogeado.Aplicacion != "Mi Diario" && $scope.usuarioLogeado.Aplicacion != "Mis Notas" && $scope.usuarioLogeado.Aplicacion != "Mis Conocimientos")
+        if($scope.usuarioLogeado.Aplicacion != "Home" && $scope.usuarioLogeado.Aplicacion != "Mis Actividades" && $scope.usuarioLogeado.Aplicacion != "Mi Diario" && $scope.usuarioLogeado.Aplicacion != "Mis Notas" && $scope.usuarioLogeado.Aplicacion != "Mis Conocimientos")
         {
             $rootScope.IrPaginaPrincipal();
         }

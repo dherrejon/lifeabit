@@ -28,27 +28,78 @@ function GetDiario($id)
     }
 }
 
+function GetImagenDiario($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenDiarioVista WHERE DiarioId = ".$id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        echo '[ { "Estatus": "Exito"}, {"Imagen":'.json_encode($imagen).'} ]'; 
+        $db = null;
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $countImg = count($imagen);
+    
+    
+    /*if($countImg > 0)
+    {
+        
+        for($k=0; $k<$countImg; $k++)
+        {
+            $sql = "SELECT TemaActividadId, Tema FROM TemaImagenVista WHERE ImagenId = ".$imagen[$k]->ImagenId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $imagen[$k]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                echo($sql);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+
+             $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaImagenVista WHERE ImagenId = ".$imagen[$k]->ImagenId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $imagen[$k]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                echo($sql);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }*/
+}
+
 function AgregarDiario()
 {
     $request = \Slim\Slim::getInstance()->request();
-    $diario = json_decode($request->getBody());
+    $diario = json_decode($_POST['diario']);
     global $app;
-    
-    //$cancion = json_decode($_POST['cancion']);
-    
-    /*if($_FILES['file']['error'] == 0)
-    {
-        $name = $_FILES['file']['name'];
-
-        $archivo = addslashes(file_get_contents($_FILES['file']['tmp_name']));
-        
-         $sql = "INSERT INTO Cancion (UsuarioId, Titulo, Cancionero, NombreArchivo) VALUES(:UsuarioId, :Titulo, '".$archivo."', :NombreArchivo)";
-    }
-    else
-    {
-        echo '[ { "Estatus": "No se puedo leer el archivo" } ]';
-        $app->stop();
-    }*/
 
     $sql = "INSERT INTO Diario (UsuarioId, Notas, Fecha, Hora) VALUES(:UsuarioId, :Notas, :Fecha, STR_TO_DATE( :Hora, '%h:%i %p' ))";
     
@@ -76,6 +127,292 @@ function AgregarDiario()
         $db->rollBack();
         $app->status(409);
         $app->stop();
+    }
+    
+    $countFile = 0;
+    if($diario->AgregarImagen > 0)
+    {
+        $countFile = count($_FILES['file']['name']);
+    }
+        
+    $count= 0;
+    $imagenId = [];
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$diario->UsuarioId."/IMG/";
+        if(!is_dir("ArchivosUsuario/".$diario->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$diario->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['file']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['file']['name'][$k];
+                $size = $_FILES['file']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES ('".$imagen."', '".$name."', '".$ext."', ".$size.", ".$diario->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $imagenId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //$uploadfile = $_FILES['file']['name'];
+                move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($diario->ImagenSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$diario->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$diario->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($diario->ImagenSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$diario->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $imagenId[$k] = 0;
+            }
+            
+        }
+        
+        
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ImagenPorDiario (DiarioId, ImagenId) VALUES";
+            
+            //Imagen del diario
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($imagenId[$k] != 0)
+                {
+                    $sql .= " (".$diarioId.", ".$imagenId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+     $countImg = count($diario->Imagen);
+    
+    if($countImg>0)  
+    {    
+        $sql = "INSERT INTO ImagenPorDiario (DiarioId, ImagenId) VALUES";
+        
+        $count = 0;
+        for($k=0; $k<$countImg; $k++)
+        {
+            if(!$diario->Imagen[$k]->Eliminada)
+            {
+                $count++;
+                $sql .= " (".$diarioId.", ".$diario->Imagen[$k]->ImagenId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+            
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countImg; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorImagen WHERE ImagenId =".$diario->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($diario->Imagen[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$diario->Imagen[$k]->Etiqueta[$i]->EtiquetaId.", ".$diario->Imagen[$k]->ImagenId.", '".$diario->Imagen[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorImagen WHERE ImagenId =".$diario->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($diario->Imagen[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$diario->Imagen[$k]->Tema[$i]->TemaActividadId.", ".$diario->Imagen[$k]->ImagenId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+        
+       
     }
     
     $sql = "INSERT INTO DiarioCiudad (DiarioId, CiudadId) VALUES(:DiarioId, :CiudadId)";
@@ -229,13 +566,20 @@ function AgregarDiario()
             }
         }
         
-        $sql = "INSERT INTO EtiquetaPorDiario (DiarioId, EtiquetaId) VALUES";
+        $sql = "INSERT INTO EtiquetaPorDiario (DiarioId, EtiquetaId, Visible) VALUES";
         
         
         /*Etiqueta de la actividad*/
         for($k=0; $k<$countEtiqueta; $k++)
         {
-            $sql .= " (".$diarioId.", ".$diario->Etiqueta[$k]->EtiquetaId."),";
+            if($diario->Etiqueta[$k]->Visible)
+            {
+                $sql .= " (".$diarioId.", ".$diario->Etiqueta[$k]->EtiquetaId.", true),";
+            }
+            else
+            {
+                $sql .= " (".$diarioId.", ".$diario->Etiqueta[$k]->EtiquetaId.", false),";
+            }
         }
 
         $sql = rtrim($sql,",");
@@ -264,38 +608,19 @@ function AgregarDiario()
         $db = null;
         echo '[{"Estatus": "Exitoso"}, {"DiarioId":"'.$diarioId.'"}, {"Etiqueta":'.json_encode($diario->Etiqueta).'}, {"Tema":'.json_encode($diario->Tema).'}]';
     }
+    
+    
 }
-
 
 function EditarDiario()
 {
-    $request = \Slim\Slim::getInstance()->request();
-    $diario = json_decode($request->getBody());
     global $app;
+    $request = \Slim\Slim::getInstance()->request();
+
+    $diario = json_decode($_POST['diario']);
     
     //$cancion = json_decode($_POST['cancion']);
     
-    /*if($cancion->ArchivoSeleccionado)
-    {
-        if($_FILES['file']['error'] == 0)
-        {
-            $name = $_FILES['file']['name'];
-
-            $archivo = addslashes(file_get_contents($_FILES['file']['tmp_name']));
-
-             $sql = "UPDATE Cancion SET Titulo = :Titulo, Cancionero = '".$archivo."', NombreArchivo = '".$cancion->NombreArchivo."' WHERE CancionId = ".$cancion->CancionId;
-        }
-        else
-        {
-            echo '[ { "Estatus": "No se puedo leer el archivo" } ]';
-            $app->stop();
-        }
-    }
-    else
-    {
-         $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
-    }*/
-
     $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' )  WHERE DiarioId = ".$diario->DiarioId;
     
     try 
@@ -393,7 +718,7 @@ function EditarDiario()
         $app->stop();
     }
     
-    $sql = "DELETE FROM TemaPorDiario WHERE DiarioId=".$diario->DiarioId;
+    $sql = "DELETE FROM TemaPorDiario WHERE DiarioId =".$diario->DiarioId;
     try 
     {
         $stmt = $db->prepare($sql); 
@@ -409,7 +734,7 @@ function EditarDiario()
         $app->stop();
     }
     
-    $sql = "DELETE FROM EtiquetaPorDiario WHERE DiarioId=".$diario->DiarioId;
+    $sql = "DELETE FROM EtiquetaPorDiario WHERE DiarioId =".$diario->DiarioId;
     try 
     {
         $stmt = $db->prepare($sql); 
@@ -424,7 +749,305 @@ function EditarDiario()
         $app->status(409);
         $app->stop();
     }
+    
+    $sql = "DELETE FROM ImagenPorDiario WHERE DiarioId =".$diario->DiarioId;
+    try 
+    {
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+        
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        //echo $e;
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $countFile = 0;
+    if($diario->AgregarImagen > 0)
+    {
+        $countFile = count($_FILES['file']['name']);
+    }
+        
+    $count= 0;
+    $imagenId = [];
+    if($countFile > 0)
+    {
+         $dir = "ArchivosUsuario/".$diario->UsuarioId."/IMG/";
+        if(!is_dir("ArchivosUsuario/".$diario->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$diario->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+            
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['file']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['file']['name'][$k];
+                $size = $_FILES['file']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Imagen (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', ".$size.", ".$diario->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $imagenId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": ".$e."}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+            
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($diario->ImagenSrc[$k]->Etiqueta);
 
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$diario->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$diario->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $countTema = count($diario->ImagenSrc[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$diario->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $imagenId[$k] = 0;
+            }
+        }
+        
+        
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ImagenPorDiario (DiarioId, ImagenId) VALUES";
+            
+            //Imagen de la diario
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($imagenId[$k] != 0)
+                {
+                    $sql .= " (".$diario->DiarioId.", ".$imagenId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+    
+    $countImg = count($diario->Imagen);
+    
+    if($countImg>0)  
+    {    
+        $sql = "INSERT INTO ImagenPorDiario (DiarioId, ImagenId) VALUES";
+        
+        $count = 0;
+        /*Artista de cancion*/
+        for($k=0; $k<$countImg; $k++)
+        {
+            if(!$diario->Imagen[$k]->Eliminada)
+            {
+                $count++;
+                $sql .= " (".$diario->DiarioId.", ".$diario->Imagen[$k]->ImagenId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+            
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countImg; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorImagen WHERE ImagenId =".$diario->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($diario->Imagen[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$diario->Imagen[$k]->Etiqueta[$i]->EtiquetaId.", ".$diario->Imagen[$k]->ImagenId.", '".$diario->Imagen[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorImagen WHERE ImagenId =".$diario->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($diario->Imagen[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$diario->Imagen[$k]->Tema[$i]->TemaActividadId.", ".$diario->Imagen[$k]->ImagenId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+    }
     
     $countTema = count($diario->Tema);
     
@@ -519,13 +1142,20 @@ function EditarDiario()
             }
         }
         
-        $sql = "INSERT INTO EtiquetaPorDiario (DiarioId, EtiquetaId) VALUES";
+        $sql = "INSERT INTO EtiquetaPorDiario (DiarioId, EtiquetaId, Visible) VALUES";
         
         
         /*Etiqueta del diario*/
         for($k=0; $k<$countEtiqueta; $k++)
         {
-            $sql .= " (".$diario->DiarioId.", ".$diario->Etiqueta[$k]->EtiquetaId."),";
+            if($diario->Etiqueta[$k]->Visible)
+            {
+                $sql .= " (".$diario->DiarioId.", ".$diario->Etiqueta[$k]->EtiquetaId.", true),";
+            }
+            else
+            {
+                $sql .= " (".$diario->DiarioId.", ".$diario->Etiqueta[$k]->EtiquetaId.", false),";
+            }
         }
 
         $sql = rtrim($sql,",");
@@ -555,7 +1185,6 @@ function EditarDiario()
         $db = null;
         echo '[{"Estatus": "Exitoso"},  {"Etiqueta":'.json_encode($diario->Etiqueta).'}, {"Tema":'.json_encode($diario->Tema).'}]';
     }
-    
 }
 
 function BorrarDiario()

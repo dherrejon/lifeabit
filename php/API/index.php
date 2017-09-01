@@ -285,11 +285,12 @@
     /*-----------------------  Diario ------------------------------------------*/
     $app->get('/GetDiario/:id', $seguridad, $ChecarSesion, 'GetDiario');
     $app->post('/AgregarDiario', $seguridad, $ChecarSesion, 'AgregarDiario');
-    $app->put('/EditarDiario', $seguridad, $ChecarSesion, 'EditarDiario');
+    $app->post('/EditarDiario', $seguridad, $ChecarSesion, 'EditarDiario');
     $app->delete('/BorrarDiario', $seguridad, $ChecarSesion, 'BorrarDiario');
 
     $app->get('/GetEtiquetaPorDiario/:id', $seguridad, $ChecarSesion, 'GetEtiquetaPorDiario');
     $app->get('/GetTemaPorDiario/:id', $seguridad, $ChecarSesion, 'GetTemaPorDiario');
+    $app->get('/GetImagenDiario/:id', $seguridad, $ChecarSesion, 'GetImagenDiario');
 
     //---------------------------------------------------------------------------------------------------------------Notas
 
@@ -317,6 +318,7 @@
     /*-----------------------  Imagenes ------------------------------------------*/
     $app->post('/GetGaleriaFotos', $seguridad, $ChecarSesion, 'GetGaleriaFotos');
     $app->post('/GetFototeca', $seguridad, $ChecarSesion, 'GetFototeca');
+    $app->get('/GetImagenEtiqueta/:id', $seguridad, $ChecarSesion, 'GetImagenEtiqueta');
 
 
     $app->run(); 

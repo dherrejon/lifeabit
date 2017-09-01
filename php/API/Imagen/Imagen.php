@@ -59,4 +59,45 @@ function GetFototeca()
     }
 }
 
+function GetImagenEtiqueta($id)
+{
+    $request = \Slim\Slim::getInstance()->request();
+    global $app;
+
+    $sql = "SELECT TemaActividadId, Tema FROM TemaImagenVista WHERE ImagenId = ".$id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+    } 
+    catch(PDOException $e) 
+    {
+        echo($sql);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+     $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaImagenVista WHERE ImagenId = ".$id;
+
+    try 
+    {
+        $stmt = $db->query($sql);
+        $etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        echo '[ { "Estatus": "Exito"}, {"Etiqueta":'.json_encode($etiqueta).'}, {"Tema":'.json_encode($tema).'} ]'; 
+        $db = null;
+    } 
+    catch(PDOException $e) 
+    {
+        echo($sql);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
+
 ?>

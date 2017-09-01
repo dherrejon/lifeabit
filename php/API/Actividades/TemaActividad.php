@@ -45,7 +45,9 @@ function AgregarTemaActividad()
 
         $stmt->execute();
         
-        echo '[{"Estatus": "Exitoso"}, {"Id": "'.$db->lastInsertId().'"}]';
+        $tema->TemaActividadId = $db->lastInsertId();
+        
+        echo '[{"Estatus": "Exitoso"}, {"Id": "'.$db->lastInsertId().'"}, {"Tema":'.json_encode($tema).'}]';
         $db = null;
 
     } catch(PDOException $e) 

@@ -4,6 +4,7 @@ class Divisa
     {
         this.DivisaId = "";
         this.Divisa = "";
+        this.PorDefecto = "";
     }
 }
 
@@ -43,6 +44,7 @@ function SetDivisa(data)
     
     divisa.DivisaId = data.DivisaId;
     divisa.Divisa = data.Divisa;
+    divisa.PorDefecto = data.PorDefecto;
     
     return divisa;
 }

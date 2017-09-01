@@ -1,0 +1,213 @@
+<div ng-controller="EtiquetaImagenController as etiquetaImg"> 
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="EtiquetaImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitosoImg">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+            <form name="imagenForma">
+               
+               <div class="row">
+                   
+                   <div class="col-xs-8 col-sm-10">
+                        <!--<button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarEtiquetaModal()"><span aria-hidden="true">&times;</span></button>-->
+                       <br><br>
+                        <span class="tituloModal">Etiquetar Imagen</span>
+                    </div>
+                    <div class="col-xs-4 col-sm-2">
+                        <div class="btn-group-vertical pull-right" role="group" >
+                            <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                            <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarEtiquetaImagen()"><span class="fa fa-check"></span></a>
+                        </div>
+                    </div>
+                </div>
+                <br><br>
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                       <div class="imgContainer center-block" style="max-height:150px; height: auto; overflow: hidden !important; width: 200px">
+                            <img style="width: 100%" ng-if="tipo == 'img'" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{imagen.Nombre}}"/>
+                            <img style="width: 100%" ng-if="tipo == 'prev'" class="img-responsive center-block" src="{{imagen.Src}}"/>
+                       </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                        <br>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="divisorGris1"></div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                        <b>Etiquetas y Temas</b><br><br>
+                        <span ng-if="(imagen.Etiqueta.length + imagen.Tema.length) == 0" class="textoGris" style="font-size:13pt"> Sin Etiquitas y Temas</span>
+                        
+                        <div class="row" ng-if="(imagen.Etiqueta.length + imagen.Tema.length) > 0">
+
+                             <div class="col-sm-12" id="temaPanel">
+
+                               <!--lista de etiquetas Seleccionados -->
+                               <div ng-if="imagen.Etiqueta.length > 0" >
+                                     <span ng-repeat="etiqueta in imagen.Etiqueta | orderBy:'Nombre' track by $index" ng-if="etiqueta.Visible == '1'">
+                                         <div class="btn-group" role="group" style="margin-bottom:8px">
+
+
+                                          <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
+
+                                          <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
+                                                <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
+                                                     <span class="fa fa-pencil"> </span> Editar
+                                                </a></li>
+
+                                                 <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
+                                                     <span class="fa fa-clone"> </span> Equivalencias
+                                                </a></li>
+
+
+                                            </ul>
+
+                                          <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                                        </div>
+                                     </span>
+                                     <br>
+                                </div>
+
+                                <!--lista de temas Seleccionados -->
+                                <div ng-if="imagen.Tema.length > 0">
+                                     <span ng-repeat="tema in imagen.Tema | orderBy:'Tema'">
+                                         <div class="btn-group" role="group" style="margin-bottom:8px">
+                                          <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
+                                          <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
+                                        </div>
+                                     </span>
+                                 </div>
+                             </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="divisorGris1"></div>
+                        <br>
+                    </div>
+                </div>
+                
+                <!-- Etiqueta y Tema -->
+                <div class="row">
+
+                     <div class="col-sm-12" id="etiquetaPanel">
+                        <label class="etiquetaNormal">Etiquetas</label><br>
+
+                         <!-- Buscar Etiqueta -->
+                         <div class="input-group">
+                            <input type="text" required class="entrada form-control" name="etiqueta" ng-model="buscarConceptoImg" placeholder="Etiqueta" ng-maxlength="120"  data-toggle="dropdown" id="temaImg" autocomplete="off"/>
+                            <span class="input-group-btn">
+                                <a class="btn close cerrarModal"  ng-click="LimpiarBuscar()" type="button"><span class="fa fa-times-circle"></span></a>
+                            </span>
+                        </div>
+
+                         <!-- lista de etiquetas -->
+                         <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarConceptoImg.length > 0">
+
+                            <table  class="table table-responsive">
+                                <tbody  style="cursor: pointer">
+
+                                   <!-- Etiquetas -->
+                                    <tr ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.ShowImg">
+                                      <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta, '1')">{{etiqueta.Nombre}}</td>
+                                    </tr>
+
+                                    <!-- Temas -->
+                                    <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.ShowImg">
+                                      <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <br>
+
+                
+
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block"  data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarEtiquetaImagen()">TERMINAR</a>
+                    </div>
+                </div>
+            <br>
+            </form> 
+            
+        </div>
+    </div>
+
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeEtiquetaImg">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Alertas -->
+    <div class="alertaMensaje" id="alertaEditarExitosoImg">
+        <div class="alert alertaExtito">
+            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+            <strong style="display: inline-block;">{{mensaje}}</strong>
+        </div>
+    </div>
+    
+</div>
+
+    

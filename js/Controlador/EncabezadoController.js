@@ -399,5 +399,15 @@ var EncabezadoNotas =
 var EncabezadoAplicaciones =
 { 
     titulo:"Life@Bit", 
+    opcion: [ 
+                    { texto:"Inicio", tipo:"link", referencia:"#Aplicacion", show: true},
+                    { texto:"Administrar", tipo:"dropdown", show: true,
+                                            elemento:
+                                            [
+                                                {texto:"Etiquetas", referencia:"#Etiqueta", funcion:"", show:true},
+                                                {texto:"Temas", referencia:"#TemaActividad", funcion:"", show:true},
+                                            ]},
+                    
+              ] 
                         
 } ;
