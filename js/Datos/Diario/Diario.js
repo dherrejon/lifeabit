@@ -14,13 +14,14 @@ class Diario
     }
 }
 
-function GetDiario($http, $q, CONFIG, usuarioId)     
+function GetDiario($http, $q, CONFIG, datos)     
 {
     var q = $q.defer();
 
     $http({      
-          method: 'GET',
-          url: CONFIG.APIURL + '/GetDiario/' + usuarioId,
+          method: 'POST',
+          url: CONFIG.APIURL + '/GetDiario',
+          data: datos
 
       }).success(function(data)
         {
@@ -31,6 +32,38 @@ function GetDiario($http, $q, CONFIG, usuarioId)
             else
             {
                 q.resolve([], []);
+            }
+             
+        }).error(function(data, status){
+            q.resolve([], []);
+     }); 
+    return q.promise;
+}
+
+function GetFechaDiario($http, $q, CONFIG, usuarioId)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetFechaDiario/' + usuarioId,
+
+      }).success(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                var diario = [];
+                for(var k=0; k<data[1].Diario.length; k++)
+                {
+                    diario[k] = SetFechaDiario(data[1].Diario[k].Fecha);
+                }
+                data[1].Diario = diario;
+                
+                q.resolve(data);
+            }
+            else
+            {
+                q.resolve(data);
             }
              
         }).error(function(data, status){
@@ -65,6 +98,7 @@ function SetDiario(data)
     diario.Fecha = data.Fecha;
     diario.Hora = data.Hora;
     diario.Notas = data.Notas;
+    diario.Imagen = data.Imagen;
     
     diario.FechaFormato = TransformarFecha(data.Fecha);
 
@@ -114,6 +148,33 @@ function SetDiario(data)
     diario.Ciudad = SetCiudad(data);
     
     return diario;
+}
+
+function SetFechaDiario(data)
+{
+    var fecha = new Object();
+    
+    fecha.Fecha = fecha;
+    
+    var year = data.slice(0,4);
+    var mes = parseInt(data.slice(5,7))-1;
+    var dia = data.slice(8,10);
+    
+    fecha.Fecha = data;
+    fecha.Year = year;
+    fecha.Mes = meses[mes];
+    fecha.MesN = data.slice(5,7);
+    
+    fecha.MesYear = fecha.Mes + " " + year;
+    
+    var d = new Date(year, mes, dia);
+
+    fecha.Dia = dia + " " + dias[d.getDay()];
+    fecha.DiaN = dia;
+    
+    fecha.FechaFormato = TransformarFecha(data);
+    
+    return fecha;
 }
 
 function AgregarDiario($http, CONFIG, $q, diario)

@@ -1954,6 +1954,32 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         });
     };
     
+    //------------------- Borrar Etiqueta ------
+    $scope.BorraEtiqueta = function(etiqueta)
+    {
+        $scope.borrarEtiqueta = etiqueta;
+        ETIQUETA.BorrarEtiqueta(etiqueta);
+    };
+    
+    $scope.$on('EtiquetaBorrada',function()
+    {   
+        $scope.QuitarEtiqueta($scope.borrarEtiqueta);
+        
+        $scope.QuitarEtiquetaEtiquetas($scope.borrarEtiqueta);
+    });
+    
+    $scope.QuitarEtiquetaEtiquetas = function(etiqueta)
+    {
+        for(var k=0; k<$scope.etiqueta.length; k++)
+        {
+            if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+            {
+                $scope.etiqueta.splice(k,1);
+                break;
+            }
+        }
+    };
+    
     /*--------------------   Imagenes  ----------------*/
     /*$scope.CargarArchivo = function(element) 
     {

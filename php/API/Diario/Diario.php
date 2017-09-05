@@ -1,13 +1,14 @@
 <?php
 	
-function GetDiario($id)
+
+function GetFechaDiario($id)
 {
     global $app;
     global $session_expiration_time;
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT * FROM DiarioVista WHERE UsuarioId = ".$id;
+    $sql = "SELECT DISTINCT Fecha FROM Diario WHERE UsuarioId = ".$id;
 
     try 
     {
@@ -26,6 +27,86 @@ function GetDiario($id)
         $app->status(409);
         $app->stop();
     }
+}
+
+function GetDiario()
+{
+   
+    $request = \Slim\Slim::getInstance()->request();
+    $diario = json_decode($request->getBody());
+    global $app;
+
+    $sql = "SELECT * FROM DiarioVista WHERE UsuarioId = ".$diario->UsuarioId. " AND Fecha = '".$diario->Fecha."'";
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ);
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $countDiario = count($response);
+    
+    if($countDiario > 0)
+    {
+        for($k=0; $k<$countDiario; $k++)
+        {
+            $sql = "SELECT DiarioId, EtiquetaId, Nombre, Visible FROM EtiquetaDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $response[$k]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            $sql = "SELECT DiarioId, TemaActividadId, Tema FROM TemaDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $response[$k]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $response[$k]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+    echo '[ { "Estatus": "Exito"}, {"Diario":'.json_encode($response).'} ]'; 
+    $db = null;
 }
 
 function GetImagenDiario($id)
@@ -1216,7 +1297,6 @@ function BorrarDiario()
 }
 
 //------------- Otas operaciones -----------------
-
 function GetEtiquetaPorDiario($id)
 {
     global $app;

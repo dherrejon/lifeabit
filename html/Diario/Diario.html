@@ -175,15 +175,30 @@
                     
                 </div>
                 
+                
+                
+                <div ng-repeat="mes in mes | orderBy:['-Year', '-MesN']">
+                    <div class="row">
+                        <a  class="btn labelConcepto"  ng-click="CambiarVerMes(mes.MesYear)">
+                            <b class="col-xs-12 text-left"  style="white-space: normal; max-width: 90%; overflow: hidden;" >{{mes.MesYear}}</b>
+                            <span class="fa fa-angle-double-right" ng-if="verMes != mes.MesYear"></span>
+                            <span class="fa fa-angle-double-up" ng-if="verMes == mes.MesYear"></span>
+                        </a>
+                        
+                        <a ng-if="mes.MesYear == diario.MesYear && verMes == mes.MesYear" class="btn itemBarraLateral {{GetClaseDiario(diario.Fecha)}}" ng-repeat="diario in diario | orderBy:'-DiaN'" ng-click="VerDetalles(diario)" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                            <!-- indicador -->
+                            <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                                <button class="fechaIndicador" ng-if="(hoy == fecha.Fecha)">Hoy</button>
+                                {{diario.Dia}}
+                            </span>
+                        </a>
+                    
+                    </div>
+                </div>
+                
                 <!-- Fechas -->
-                <div class="row" ng-if="agruparDiario == 'Fecha'">
-                    <a class="btn itemBarraLateral {{GetClaseDiario(fecha.Fecha)}}" ng-repeat="fecha in fecha | orderBy:'-Fecha' | filter:{Fecha:buscarFecha}" ng-click="VerDetalles(fecha.Fecha, fecha.FechaFormato,  fecha.Diario, null)" ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
-                        <!-- indicador -->
-                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
-                            <button class="fechaIndicador" ng-if="(hoy == fecha.Fecha)">Hoy</button>
-                            {{fecha.FechaFormato}}
-                        </span>
-                    </a>
+                <div class="row"> 
+                    
                 </div>
                 
                 <!-- Etiquetas -->
@@ -243,7 +258,7 @@
                   
                    <div class="col-sm-12">
                       <!-- Nombre -->            
-                       <b class="tituloActividad"> {{detalleTitulo}} </b>
+                       <b class="tituloActividad"> {{fechaFormatoDetalle}} </b>
                        
                        <!-- Botones -->
                        <div class="pull-right btn-group">
@@ -382,8 +397,7 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        
-                                        <b style="font-size:12pt" ng-show="detalleAgrupado != 'Fecha'"> {{diario.FechaFormato}}<br></b>
+                                    
                                         <span class="textoGris btn botonAparente" ng-show="diario.Hora.length > 0"><span class="fa fa-clock-o"></span> {{diario.Hora}}</span>
                                         <span class="textoGris btn botonAparente" ng-show="diario.Ciudad.CiudadId != null"><span class="fa fa-map-marker"></span> {{diario.Ciudad.Ciudad}} ({{diario.Ciudad.AbreviacionPais}})</span>
                                          
@@ -643,7 +657,10 @@
                                              <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
                                                  <span class="fa fa-clone"> </span> Equivalencias
                                             </a></li>
-
+                                            
+                                            <li><a class=" dropdownOpcion2" ng-click="BorraEtiqueta(etiqueta)">
+                                                 <span class="fa fa-trash"> </span> Borrar
+                                            </a></li>
 
                                         </ul>
 

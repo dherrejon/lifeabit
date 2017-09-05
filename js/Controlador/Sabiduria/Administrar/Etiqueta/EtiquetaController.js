@@ -381,6 +381,12 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
                 $scope.mensaje = "Etiqueta borrada.";
                 $scope.EnviarAlerta('Vista');
                 
+                if($scope.exterior === true)
+                {
+                    ETIQUETA.EtiquetaBorrada();
+                    $scope.exterior = false;
+                }
+                
             }
             else
             {
@@ -468,6 +474,12 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         $scope.etiquetaInicial =  jQuery.extend({}, $scope.nuevaEtiqueta);
     });
     
+    $scope.$on('BorrarEtiqueta',function()
+    {
+        $scope.BorrarEtiqueta(ETIQUETA.GetEtiqueta());
+        $scope.exterior = true;
+    });
+    
 });
 
 app.factory('ETIQUETA',function($rootScope)
@@ -513,6 +525,18 @@ app.factory('ETIQUETA',function($rootScope)
   {
       return this.etiqueta;
   };
+    
+  service.BorrarEtiqueta = function(etiqueta)
+  {
+      this.etiqueta = etiqueta;
+      $rootScope.$broadcast('BorrarEtiqueta'); 
+  };
+    
+  service.EtiquetaBorrada = function()
+  {
+      $rootScope.$broadcast('EtiquetaBorrada'); 
+  };
+    
 
   return service;
 });
