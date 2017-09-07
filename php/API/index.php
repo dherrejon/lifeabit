@@ -283,7 +283,7 @@
     //---------------------------------------------------------------------------------------------------------------Diario
 
     /*-----------------------  Diario ------------------------------------------*/
-    $app->get('/GetFechaDiario/:id', $seguridad, $ChecarSesion, 'GetFechaDiario');
+    $app->post('/GetFechaDiario', 'GetFechaDiario');
     $app->post('/GetDiario', $seguridad, $ChecarSesion, 'GetDiario');
     $app->post('/AgregarDiario', $seguridad, $ChecarSesion, 'AgregarDiario');
     $app->post('/EditarDiario', $seguridad, $ChecarSesion, 'EditarDiario');

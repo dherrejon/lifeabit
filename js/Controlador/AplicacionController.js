@@ -590,11 +590,17 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     };
     
     //-- fecha filtro
-    $('#fechaFiltro').bootstrapMaterialDatePicker(
+    /*$('#fechaFiltro').bootstrapMaterialDatePicker(
     { 
         weekStart : 0, 
         time: false,
         format: "YYYY-MM-DD"
+    });*/
+    
+    $('#fechaFiltro').datetimepicker(
+    {
+        locale: 'es',
+        format: 'YYYY-MM-DD',
     });
     
     $scope.AbrirCalendario = function()
@@ -616,9 +622,17 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         $scope.$apply(function($scope) 
         {   
             $scope.filtro.fecha = element.value;
-            $scope.filtro.fechaFormato = TransformarFecha(element.value);
+            if($scope.filtro.fecha.length > 0)
+            {
+                $scope.filtro.fechaFormato = TransformarFecha(element.value);
+                $scope.GetBuscador();
+            }
+            else
+            {
+                $scope.filtro.fechaFormato  = "";
+            }
             
-            $scope.GetBuscador();
+            
         });
     };
     

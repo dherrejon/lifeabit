@@ -338,6 +338,21 @@ function GetDiarioPorId()
                 $app->status(409);
                 $app->stop();
             }
+            
+            $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenDiarioVista WHERE DiarioId = ".$diario[$k]->DiarioId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $diario[$k]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
         }
     }
     

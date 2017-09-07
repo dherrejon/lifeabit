@@ -40,24 +40,25 @@ function GetDiario($http, $q, CONFIG, datos)
     return q.promise;
 }
 
-function GetFechaDiario($http, $q, CONFIG, usuarioId)     
+function GetFechaDiario($http, $q, CONFIG, data)     
 {
     var q = $q.defer();
 
     $http({      
-          method: 'GET',
-          url: CONFIG.APIURL + '/GetFechaDiario/' + usuarioId,
+          method: 'POST',
+          url: CONFIG.APIURL + '/GetFechaDiario',
+          data: data
 
       }).success(function(data)
         {
             if(data[0].Estatus == "Exito")
             {
-                var diario = [];
+                /*var diario = [];
                 for(var k=0; k<data[1].Diario.length; k++)
                 {
                     diario[k] = SetFechaDiario(data[1].Diario[k].Fecha);
                 }
-                data[1].Diario = diario;
+                data[1].Diario = diario;*/
                 
                 q.resolve(data);
             }
@@ -67,7 +68,7 @@ function GetFechaDiario($http, $q, CONFIG, usuarioId)
             }
              
         }).error(function(data, status){
-            q.resolve([], []);
+            q.resolve([{Estatus: status}]);
      }); 
     return q.promise;
 }

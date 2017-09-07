@@ -102,7 +102,7 @@ function GetNotasPorId()
                 $app->stop();
             }
             
-            $sql = "SELECT ImagenId, Imagen, Nombre, Extension, Size FROM ImagenNotaVista WHERE NotaId = ".$nota[$k]->NotaId;
+            $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenNotaVista WHERE NotaId = ".$nota[$k]->NotaId;
             
             try 
             {
@@ -110,10 +110,10 @@ function GetNotasPorId()
                 
                 $response = $stmt->fetchAll(PDO::FETCH_OBJ);
                 
-                foreach ($response as $aux) 
+                /*foreach ($response as $aux) 
                 {
                     $aux->Imagen =  base64_encode($aux->Imagen);
-                }
+                }*/
                 
                 $nota[$k]->Imagen = $response;
             } 
@@ -352,9 +352,9 @@ function AgregarNota()
                 $name = $_FILES['file']['name'][$k];
                 $size = $_FILES['file']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
-                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                //$imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
-                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES ('".$imagen."', '".$name."', '".$ext."', ".$size.", ".$nota->UsuarioId.")";
+                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES (null, '".$name."', '".$ext."', ".$size.", ".$nota->UsuarioId.")";
                 
                 try 
                 {
@@ -735,9 +735,9 @@ function EditarNota()
                 $name = $_FILES['file']['name'][$k];
                 $size = $_FILES['file']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
-                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                //$imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
-                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES ('".$imagen."', '".$name."', '".$ext."', ".$size.", ".$nota->UsuarioId.")";
+                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES (null, '".$name."', '".$ext."', ".$size.", ".$nota->UsuarioId.")";
                 
                 try 
                 {

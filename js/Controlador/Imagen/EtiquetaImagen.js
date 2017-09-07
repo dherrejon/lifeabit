@@ -227,6 +227,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
             if(data[0].Estatus == "Exitoso")
             {
                 data[2].Etiqueta.Visible = $scope.verEtiqueta;
+                data[2].Etiqueta.filtro = true;
 
                 $scope.buscarConceptoImg = "";
 
@@ -600,10 +601,9 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
         
         $q.all(promesas).then(function(data)
         {
-            return;
+            IMAGEN.TerminarEtiquetasOcultas();
         });
     };
-    
     
     $scope.QuitarEtiquetaNoVisible = function()
     {
@@ -752,6 +752,11 @@ app.factory('IMAGEN',function($rootScope)
   {
       this.imagen = imagen;
       $rootScope.$broadcast('TerminarEtiquetaImagen');
+  };
+    
+  service.TerminarEtiquetasOcultas = function()
+  {
+      $rootScope.$broadcast('TerminarEtiquetaImagenOcultas');
   };
 
   return service;

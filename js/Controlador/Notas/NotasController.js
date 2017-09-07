@@ -218,7 +218,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         });
     };
     
-    $scope.GetGaleriaFotos = function(id, tipo)
+    /*$scope.GetGaleriaFotos = function(id, tipo)
     {
         if($scope.cargaAllImage)
         {
@@ -255,6 +255,30 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
                 alert(error);
             });
         }
+        
+    };*/
+    
+    $scope.GetGaleriaFotos = function()
+    {
+ 
+        var datos = [];
+        datos[0] = $rootScope.UsuarioId;
+
+
+        GetFototeca($http, $q, CONFIG, datos).then(function(data)
+        {
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].Seleccionada = false;
+            }
+
+            $scope.fototeca = data;
+
+
+        }).catch(function(error)
+        {
+            alert(error);
+        });
         
     };
     
@@ -1005,12 +1029,11 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     
     //------ Fecha ---
-    $('#fechaNota').bootstrapMaterialDatePicker(
-    { 
-        weekStart : 0, 
-        time: false,
-        format: "YYYY-MM-DD",
-        maxDate: new Date()
+    $('#fechaNota').datetimepicker(
+    {
+        locale: 'es',
+        format: 'YYYY-MM-DD',
+        maxDate: new Date(),
     });
     
     $scope.CambiarFechaNota = function(element) 

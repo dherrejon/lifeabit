@@ -2514,6 +2514,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $('#horaEvento').datetimepicker(
     {
         format: 'hh:mm A',
+        showClear: true,
+        showClose: true,
+        toolbarPlacement: 'bottom'
     });
     
     $scope.CambiarHoraEvento = function(element) 

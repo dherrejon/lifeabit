@@ -256,7 +256,7 @@
     width: 100%;
     left: 0px;
     top: 57px;
-    z-index: 6;
+    z-index: 6 !important;
 }
 
 .labelBuscar
@@ -275,6 +275,10 @@
     border-radius: 0px !important;
     color: #262626;
     background: white;
+    
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     
     outline: none !important;
     box-shadow: none !important;

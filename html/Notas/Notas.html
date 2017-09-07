@@ -348,7 +348,7 @@
                                              <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                                                <div class="imgContainer" >
                                                     <div class="crop">
-                                                         <img class="" style=" width:100%;" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
+                                                         <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
                                                      </div>
                                                 </div>
                                                 <div style="height: 15px"></div>
@@ -440,7 +440,7 @@
                                 <span class="fa fa-calendar"></span>
                             </a>
                             
-                            <input type="text"  id="fechaNota" class="fechaDisabled pull-right"  onchange="angular.element(this).scope().CambiarFechaNota(this)"/>
+                            <input type="text"  id="fechaNota" class="fechaDisabled pull-right"  onblur="angular.element(this).scope().CambiarFechaNota(this)"/>
                             
                             <div class="fechaNota pull-right" >
                                 {{nuevaNota.FechaFormato}}
@@ -719,7 +719,14 @@
                             <tbody  style="cursor: pointer">
                                
                                 <tr   ng-repeat="img in nuevaNota.ImagenSrc" ng-if="nuevaNota.ImagenSrc.length > 0">
-                                  <td><img class="img-responsive imagenPrevisualizarModal center-block track by $index" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 0)"/></td>
+                                  <td style="width: 100px; max-width: 100px">
+                                      <div class="imgContainer" style="height:50px">
+                                          <a style="overflow: hidden !important; max-height: 50px">
+                                            <img class="img-responsive" style="width: 100%" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 0)"/>
+                                          </a>
+                                      </div>
+                                    </td>
+                                        
                                   <td class="hidden-xs">  {{img.name}} </td>
                                   <td class="hidden-xs">  {{(img.size/1000000).toFixed(2)}} MB </td>
                                   <td class="text-center">  
@@ -730,7 +737,16 @@
                                 </tr>
                                 
                                 <tr ng-repeat="img in nuevaNota.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
-                                  <td ><img class="img-responsive imagenPrevisualizarModal center-block track by $index" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 1)"/></td>
+                                  
+                                  
+                                  <td style="width: 100px">
+                                    <div class="imgContainer" style="height:50px">
+                                         <a style="overflow: hidden !important; max-height: 50px">
+                                            <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 1)"/>
+                                         </a>
+                                    </div>
+                                  </td>
+                                  
                                   <td class="hidden-xs">  {{img.Nombre}} </td>
                                   <td class="hidden-xs">  {{(img.Size/1000000).toFixed(2)}} MB </td>
                                   <td class="text-center">  
@@ -759,7 +775,13 @@
                             <tbody  style="cursor: pointer">
                                 
                                 <tr ng-repeat="img in nuevaNota.Imagen"  ng-if="img.Eliminada == true">
-                                  <td ><img class="img-responsive imagenPrevisualizarModal center-block track by $index" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(false, false, true, nuevaNota.Imagen, null, $index)"/></td>
+                                  <td style="width: 100px">
+                                      <div class="imgContainer" style="height:50px">
+                                          <a style="overflow: hidden !important; max-height: 50px">
+                                              <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevaNota.Imagen, null, $index)"/>
+                                          </a>
+                                      </div>
+                                  </td>
                                   <td class="hidden-xs">  {{img.Nombre}} </td>
                                   <td class="hidden-xs">  {{(img.Size/1000000).toFixed(2)}} MB </td>
                                   <td class="text-center">  
@@ -998,7 +1020,7 @@
             <div ng-repeat="img in detalleNota.Imagen">
                  <div class="col-xs-6 col-sm-4 col-lg-3 ">
                     <div class="crop">
-                         <img class="img-responsive center-block" style="margin-bottom:15px; max-width:100%; height:150px;" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" ng-click="VerImganes(true, false, false, detalleNota.Imagen, null, $index)"/>
+                         <img class="img-responsive center-block" style="margin-bottom:15px; max-width:100%; height:150px;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, false, false, detalleNota.Imagen, null, $index)"/>
                      </div>
                  </div>
             </div>
@@ -1052,8 +1074,6 @@
                  </div><br>
             </div>
             
-            
-
         </div>
     </div>
     
@@ -1121,6 +1141,43 @@
         <div class="modal-dialog modal-md modalPrincipal">
           
           <div class="row">
+                <div class="col-xs-12">
+                    <a class="pull-right" data-dismiss="modal" aria-label="Close"> <span class="fa fa-times changeImage">    </span></a>
+                </div>
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="myCarousel2" class="carousel  slide">
+  
+                      <!-- Items -->
+                      <div class="carousel-inner">
+                        <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
+                        </div>
+                      </div>
+                      <!-- Navigation -->
+                       <a class="left carousel-control"  ng-click="changeImageViewed(-1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control"  ng-click="changeImageViewed(1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!---------- VerImagen ---------------->
+    <!-- <div class="modal fade sombraDivModal" id="verImagen2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-md modalPrincipal">
+          
+          <div class="row">
                 
                 <div class="col-xs-6">
                     <a ng-click="changeImageViewed(-1);"> <span class="fa fa-chevron-left changeImage"></span></a>
@@ -1136,17 +1193,67 @@
                         
             <div class="row">
                 <div class="col-xs-12">
-                    <img   ng-if="iImg <= iLmt" class="img-responsive center-block" href="" ng-src="data:image/{detalleImagen[iImg].Extension};base64,{{detalleImagen[iImg].Imagen}}"/>
+                    <img   ng-if="iImg <= iLmt" class="img-responsive center-block" href="" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{detalleImagen[iImg].Nombre}}"/>
                     <img   ng-if="iImg > iLmt" class="img-responsive center-block" href="" src="{{detalleImagen[iImg].Src}}"/>
                 </div>
             </div>            
             <br>
 
         </div>
-    </div>
+    </div> -->
     
     <!---------- fototeca ---------------->
     <div class="modal fade sombraDivModal" id="fototeca" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-lg modalPrincipal">
+         
+            <div class="row">
+                
+                <div class="col-xs-12">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" ng-click="AgregarImagenes()" ><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+            </div>
+            <br>
+          
+            <div class="row">
+                 <div ng-repeat="img in fototeca">
+                    <!-- Imagenes -->
+                    <div style="padding-left: 12px;  padding-right: 12px">
+                         <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px;  padding-right: 3px">
+                           <div class="imgContainer" >
+                                <div class="crop center-block">
+
+                                    <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
+                                        <span class="fa fa-check-circle" ></span>
+                                    </a>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                 </div>
+                            </div>
+                            <div style="height: 15px"></div>
+                         </div>
+                     </div>
+                </div>     
+            </div>            
+            <br>
+            <!---- botones de operacion -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="AgregarImagenes()" >TERMINAR</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!---------- fototeca ---------------->
+    <div class="modal fade sombraDivModal" id="fototeca2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
         <br>    <br>   <br>
         <div class="modal-dialog modal-lg modalPrincipal">
          
@@ -1168,7 +1275,7 @@
                            <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                 <span class="fa fa-check-circle" ></span>
                             </a>
-                            <img class="img-responsive center-block imgFototecaSel" style="margin-bottom:15px; max-width:100%; height:120px;" ng-src="data:image/{{img.Extension}};base64,{{img.Imagen}}" data-toggle="modal" data-target="#verFototeca" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                            <img class="img-responsive center-block imgFototecaSel" style="margin-bottom:15px; max-width:100%; height:120px;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" data-toggle="modal" data-target="#verFototeca" ng-click="AgregarQuitarImagenFototeca(img)"/>
                          </div>
                      </div>
                 </div>

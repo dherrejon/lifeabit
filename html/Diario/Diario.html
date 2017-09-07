@@ -1,236 +1,215 @@
 <div ng-controller="DiarioController as diario" >
    
     <div class="container-fluid">
-        <div class="row">
+       
+       
+       <!-- Barra de Busqueda -->
+        <div class="barraBuscarInformacion" ng-show="anchoPantalla > 767 || detalle.length == 0">
 
-            <div class="col-sm-3 col-xs-12 barraLateralActividad" ng-show="anchoPantalla > 767 || detalle.DiarioId.length == 0">
-               
+            <div class="row ">
+               <div class="col-xs-12">
+
+                   <div class="input-group input-group-lg" style="color: black">
+
+                         <!-- Agregar -->
+                         <span class="input-group-btn ">
+                               <button type="button" class="btn botonBuscarFiltro botonAgregarBusqueda" ng-click="AbrirDiario('Agregar', null, null)">
+                                    <span class="fa fa-plus"></span> <span class="hidden-xs"> Agregar</span>
+                               </button>
+                          </span>
+
+                         <!-- Span Buscar -->
+                          <span class="input-group-btn">
+                               <!--<button type="button" class="btn botonBuscarFiltro dropdown-toggle widthConcepto" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="hidden-xs"><span class="fa fa-search"></span> {{campoBuscar}}</span>
+                                    <span class="hidden-md hidden-sm hidden-lg" ng-show="campoBuscar=='Fecha'"><span class="fa fa-calendar-o"></span></span>
+                                    <span class="hidden-md hidden-sm hidden-lg" ng-show="campoBuscar=='Conceptos'"><span class="fa fa-comment-o"></span></span>
+                               </button>
+                                <ul class="dropdown-menu dropdown-menu-left" style=" border-radius:0px">
+
+                                 <li><a href="" ng-click="CambiarCampoBuscar('Conceptos')" class="dropdownOpcion2">
+                                      Conceptos
+                                  </a></li>
+
+                                  <li><a href="" ng-click="CambiarCampoBuscar('Fecha')" class="dropdownOpcion2"> 
+                                      Fecha
+                                  </a></li>
+                                </ul>-->
+                                
+                                <span type="button" class="btn botonBuscarFiltro">
+                                    <span class="fa fa-search"></span> <span class="hidden-xs">Buscar</span>
+                               </span>
+                          </span>
+
+                          <!-- entradas -->
+                          <!--<input type="text" id="fechaFiltro" class="form-control"  style="display: block; position: fixed; width:1%; border-color: transparent; z-index: -9999999;" onblur="angular.element(this).scope().CambiarFechaBuscar(this)" autocomplete="off"/>--> 
+                          
+                          <input type="text" ng-show="campoBuscar=='Conceptos'" placeholder="Concepto" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConcepto" id="buscarConcepto" autocomplete="off">
+                            
+                          <!--<button ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscar text-left" ng-click="AbrirCalendario()" >{{filtro.fechaFormato}}</button>-->
+
+                          <div ng-show="buscarConcepto.length > 0" class="dropdown-menu modalAgregarDropdown conceptosBuscar">
+
+                             <li><a href="" ng-click="SetFiltroEtiqueta(etiqueta)" class="dropdownOpcion2 text-left" ng-repeat="etiqueta in etiqueta | filter:BuscarEtiquetaFiltro | orderBy:'Nombre'" ng-show="etiqueta.filtro">
+                                  {{etiqueta.Nombre}}
+                              </a></li>
+
+                              <li><a href="" ng-click="SetFiltroTema(tema)" class="dropdownOpcion2" ng-repeat="tema in tema | filter:BuscarTemaFiltro | orderBy:'Nombre'"  ng-show="tema.filtro"> 
+                                  {{tema.Tema}}
+                              </a></li>
+
+                          </div>
+
+                          <!-- limpiar texto -->
+                          <span class="input-group-btn">
+
+                             <button class="btn botonBuscarFiltro" ng-click="LimpiarBuscarFiltro()" style="border-width: 0px; border-right: 3px solid #1859b2; border-radius: 0px !important">
+                                   <span class="fa fa-times-circle" ></span>
+                                </button>
+                          </span>
+                    </div>
+
+               </div>
+            </div>
+
+        </div>
+            
+        
+        <div class="row">
+            <!-- Barra lateral -->    
+            <div class="col-sm-3 col-xs-12 barraLateralActividad" ng-show="anchoPantalla > 767 || detalle.length == 0">
                 
                 <!-- Separador -->
                 <div class="row" style="height:57px">
                    <div class="col-xs-12" >
                    </div>
                 </div>
-            
-                <div class="row panelOperacionBotonLateral" style="color:black">
-                   <div class="col-xs-12 ">        
-                        <!-- Filtrar -->
-                        <div class="pull-left" id="filtroPanel">
-
-                            <button class="btn  botonFiltrarBarraLateral text-center"  data-toggle="modal" data-target="#modalFiltro">
-                               <span class="fa fa-filter"></span>
-                           </button>
-                        </div>
-                    
-                      
-                       <!-- Agregar -->
-                       <a class="btn  botonOperacionBarraLateral pull-right" ng-click="AbrirDiario('Agregar', null, null)">
-                           <span class="fa fa-plus"></span><span> Agregar</span>
-                       </a>
-                       
-                   </div>
-                </div>
                 
-                <!-- Agrupador -->
-                <div class="row panelOperacionBotonLateral" style="color:black">
-                   <div class="col-xs-12">
-                       
-                        <div class="btn-group btn-group-justified">
-                          
-                           <!-- Fecha -->
-                           <div class="btn-group">
-                               <button class="btn botonAgrupador"  ng-click="CambiarAgruparDiario('Fecha')" ng-class="{Activo: agruparDiario == 'Fecha'}">
-                                   <!--<span class="fa fa-calendar-o"></span>-->
-                                    <span> Fecha</span>
-                               </button>
+                
+                
+                <div class="row">
+                    <div class="col-xs-12" style="width: 100%">
+
+                      <!-- Separador -->
+                        <div class="row" style="height:74px">
+                           <div class="col-xs-12  text-center" >
                            </div>
-                           
-                           <!-- Concepto -->
-                           <div class="btn-group">
-                               <button class="btn botonAgrupador"  ng-click="CambiarAgruparDiario('Conceptos')" ng-class="{Activo: agruparDiario == 'Conceptos'}">
-                                   <!--<span class="fa fa-lightbulb-o "></span>-->
-                                    <span > Conceptos</span>
-                               </button>
-                            </div>
-                           
-                           <!-- Etiqueta -->
-                           <!--<div class="btn-group">
-                               <button class="btn botonAgrupador"  ng-click="CambiarAgruparDiario('Etiquetas')" ng-class="{Activo: agruparDiario == 'Etiquetas'}">
-                                   <span class="fa fa-tag"></span>
-                                    <span ng-show="agruparDiario == 'Etiquetas'"> Etiquetas</span>
-                               </button>
-                            </div>
-                           
-                           <!-- Temas
-                           <div class="btn-group">
-                               <button class="btn botonAgrupador"  ng-click="CambiarAgruparDiario('Temas')" ng-class="{Activo: agruparDiario == 'Temas'}">
-                                   <span class="fa fa-comment-o"></span>
-                                    <span ng-show="agruparDiario == 'Temas'"> Temas</span>
-                               </button>
-                            </div>-->
-                            
-                        </div>    
-                        
-                        <!--<button class="btn btn-block botonOperacionBarraLateral" data-toggle="dropdown">
-                            {{agruparDiario}}
-                            <span class="fa fa-caret-down"></span>
-                        </button>
-                        
-                        <ul class="dropdown-menu barraNavegacionDropdown" style="width:90%; border: 2px solid  #2076ed; left:5%">
-                            <li><a class="dropdownOpcion2" ng-click="CambiarAgruparDiario('Fecha')"> Fecha </a></li>
-                            <li><a class="dropdownOpcion2" ng-click="CambiarAgruparDiario('Etiquetas')"> Etiquetas </a></li>
-                            <li><a class="dropdownOpcion2" ng-click="CambiarAgruparDiario('Temas')"> Temas </a></li>
-                        </ul>-->
-                       
-                   </div>
-                </div>
-                
-                <!-- buscar -->
-                <div class="row panelOperacionBotonLateral" style="padding-top:5px; padding-bottom:5px">
-
-                    <div class="col-xs-12">
-                       
-                       <!-- fecha -->
-                        <div class="input-group" ng-show ="agruparDiario == 'Fecha'">
-                            <input type="text" class="buscarTexto form-control" onchange="angular.element(this).scope().CambiarFechaBuscar(this)" placeholder="Buscar Fecha" id="fechaBuscar">
-                            <span class="input-group-btn">
-                                <a class="btn limpiarTextoBoton"  ng-click="LimpiarBuscar(1)" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
                         </div>
-                        
-                         <!-- concepto -->
-                        <div class="input-group" ng-show="agruparDiario == 'Conceptos'">
-                            <input type="text" class="buscarTexto form-control" placeholder="Buscar Concepto" ng-model="buscarConceptoBarra">
-                            <span class="input-group-btn">
-                                <a class="btn limpiarTextoBoton"  ng-click="buscarConceptoBarra = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>
-                        
-                        <!-- etiqueta -->
-                        <!--<div class="input-group" ng-show="agruparDiario == 'Etiquetas'">
-                            <input type="text" class="buscarTexto form-control" placeholder="Buscar Etiqueta" ng-model="buscarEtiquetaBarra">
-                            <span class="input-group-btn">
-                                <a class="btn limpiarTextoBoton"  ng-click="buscarEtiquetaBarra = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>
-                        
-                        <!-- tema
-                        <div class="input-group" ng-show="agruparDiario == 'Temas'">
-                            <input type="text" class="buscarTexto form-control" placeholder="Buscar Tema" ng-model="buscarTemaBarra">
-                            <span class="input-group-btn">
-                                <a class="btn limpiarTextoBoton" ng-click="buscarTemaBarra = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>-->
-                        
-                        
                     </div>
                 </div>
                 
                 <!-- Fitros -->
-                <div class="row verFitros" ng-show="(filtro.tema.length + filtro.frecuencia.length + filtro.etiqueta.length) > 0">
+                <div class="row" ng-show="(anchoPantalla > 767 || detalle.length == 0) && (filtro.tema.length + filtro.etiqueta.length) > 0">
+                   <div class="col-xs-12" style="width: 100%">
 
-                    <div class="col-xs-12">
-                        <button class="btn botonFalsoTitulo"><b>Filtro</b></button>
-                        
-                        <!-- Botones -->
-                       <div class="pull-right btn-group">
-                          
-                            <!-- Limpiar filtro -->
-                            <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="LimpiarFiltro()" >
-                               <span class="fa fa-ban"></span>
-                           </button>
 
-                           <!-- Ver Detalles -->
-                           <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()">
-                               <b class="fa fa-angle-double-right" ng-if="!verFiltro"></b>
-                               <b class="fa fa-angle-double-up" ng-if="verFiltro"></b>
-                           </button>
+                        <div class="row verFitros" >
+
+                            <div class="col-xs-12">
+
+                                <!-- Botones -->
+                               <div class="pull-right btn-group">
+
+                                    <!-- Limpiar filtro -->
+                                    <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="LimpiarFiltro()" >
+                                       <span class="fa fa-ban" style="font-size:14pt"></span>
+                                   </button>
+
+                                   <!-- Ver Detalles -->
+                                   <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()">
+                                       <b class="fa fa-angle-double-right" ng-if="!verFiltro" style="font-size:18pt"></b>
+                                       <b class="fa fa-angle-double-up" ng-if="verFiltro" style="font-size:18pt"></b>
+                                   </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Etiquetas -->
+                            <div class="col-xs-12" ng-show="filtro.etiqueta.length && verFiltro">
+                                <b> Etiquetas: </b><br>
+                                <span ng-repeat="etiqueta in filtro.etiqueta | orderBy:'Nombre'">
+                                    <div class="btn-group" role="group" style="margin-bottom:8px">
+                                        <a class="btn campoAgregado" ng-click="QuitaretiquetaFiltro(etiqueta)" style="font-size:10pt">{{etiqueta.Nombre}}</a>
+                                        <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitaretiquetaFiltro(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                                    </div>
+                                </span>
+                            </div>
+
+                            <!-- Temas -->
+                            <div class="col-xs-12" ng-show="filtro.tema.length > 0 && verFiltro">
+                                <b> Tema: </b><br>                        
+                                <span ng-repeat="tema in filtro.tema | orderBy:'Tema'" >
+                                    <div class="btn-group" role="group" style="margin-bottom:8px">
+                                        <a class="btn campoAgregado" ng-click="QuitarTemaFiltro(tema)" style="font-size:10pt">{{tema.Tema}}</a>
+                                        <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitarTemaFiltro(tema)"><span class="fa fa-times-circle"></span></a>
+                                    </div>
+                                </span>
+                            </div>
 
                         </div>
-                        
-                    </div>
-                    
-                    <!-- Etiquetas -->
-                    <div class="col-xs-12" ng-show="filtro.etiqueta.length > 0 && verFiltro">
-                        <b> Etiquetas: </b><br>
-                        <span ng-repeat="etiqueta in EtiquetaFiltrada | orderBy:'Nombre'" ng-if="etiqueta.Filtro">
-                            <span ng-if="!$last">{{etiqueta.Nombre}}, </span>
-                            <span ng-if="$last">{{etiqueta.Nombre}}.</span>
-                        </span>
-                    </div>
-                    
-                    <!-- Temas -->
-                    <div class="col-xs-12" ng-show="(filtro.tema.length > 0 || sinTemaFiltro)&& verFiltro">
-                        <b> Tema: </b><br>
-                        <span ng-if="sinTemaFiltro">
-                            <span ng-if="filtro.tema.length > 1">Sin Tema,</span>
-                            <span ng-if="filtro.tema.length  == 1">Sin Tema.</span>
-                        </span>
 
-                        <span ng-repeat="tema in temaFiltrado | orderBy:'Tema'" ng-if="tema.Filtro">
-                            <span ng-if="!$last">{{tema.Tema}}, </span>
-                            <span ng-if="$last">{{tema.Tema}}.</span>
-                        </span>
                     </div>
-                    
                 </div>
                 
-                
-                
-                <div ng-repeat="mes in mes | orderBy:['-Year', '-MesN']">
+                <div ng-if="diario.length > 0">
                     <div class="row">
-                        <a  class="btn labelConcepto"  ng-click="CambiarVerMes(mes.MesYear)">
-                            <b class="col-xs-12 text-left"  style="white-space: normal; max-width: 90%; overflow: hidden;" >{{mes.MesYear}}</b>
-                            <span class="fa fa-angle-double-right" ng-if="verMes != mes.MesYear"></span>
-                            <span class="fa fa-angle-double-up" ng-if="verMes == mes.MesYear"></span>
-                        </a>
-                        
-                        <a ng-if="mes.MesYear == diario.MesYear && verMes == mes.MesYear" class="btn itemBarraLateral {{GetClaseDiario(diario.Fecha)}}" ng-repeat="diario in diario | orderBy:'-DiaN'" ng-click="VerDetalles(diario)" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                       <div class="col-xs-12" style="padding-left: 0px; padding-right: 0px">
+                            <a class="btn labelConcepto dropdown-toggle" data-toggle="dropdown" aria-haspopup="true">
+                                <b>{{yearSel}} <span class="fa fa-caret-down pull-right"></span></b> 
+                           </a>
+
+                            <ul class="dropdown-menu dropdown-menu-right" style=" border-radius:0px">
+
+                                 <li ng-repeat="year in year | orderBy:'-Year'">
+                                     <a href="" ng-click="CambiarYear(year.Year)" class="dropdownOpcion2" >
+                                          {{year.Year}}
+                                      </a>
+                                  </li>
+
+                             </ul>
+                        </div>
+                    </div>   
+
+                    <div class="row">
+                       <div class="col-xs-12" style="padding-left: 0px; padding-right: 0px">
+                          <a class="btn labelConcepto dropdown-toggle" data-toggle="dropdown" aria-haspopup="true">
+                                <b>{{mesSel}} <span class="fa fa-caret-down pull-right"></span> </b>
+                           </a>
+
+                            <ul class="dropdown-menu dropdown-menu-right" style=" border-radius:0px">
+
+                                 <li ng-repeat="mes in mes | orderBy:'-MesN'" >
+                                    <a ng-if="mes.Year == yearSel" href=""  class="dropdownOpcion2" ng-click="CambiarMes(mes.Mes)">
+                                      {{mes.Mes}}
+                                    </a>
+                                </li>
+
+                             </ul>
+
+                       </div>
+                    </div>        
+
+                    <div class="row">
+                        <a ng-if="diario.Mes == mesSel && diario.Year == yearSel" class="btn itemBarraLateral {{GetClaseDiario(diario.Fecha)}}" ng-repeat="diario in diario | orderBy:'-DiaN'" ng-click="VerDetalles(diario)" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                             <!-- indicador -->
                             <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
-                                <button class="fechaIndicador" ng-if="(hoy == fecha.Fecha)">Hoy</button>
                                 {{diario.Dia}}
+                                <button class="fechaIndicador" ng-if="(hoy == diario.Fecha)">Hoy</button>
                             </span>
                         </a>
-                    
                     </div>
                 </div>
                 
-                <!-- Fechas -->
-                <div class="row"> 
-                    
-                </div>
-                
-                <!-- Etiquetas -->
-                <div class="row" ng-if="agruparDiario == 'Conceptos'">
-                    <a  class="btn labelConcepto"  ng-click="CambiarVerConcepto('etiqueta')">
-                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Etiquetas </b>
-                        <span class="fa fa-angle-double-right" ng-if="!verConcepto.etiqueta"></span>
-                        <span class="fa fa-angle-double-up" ng-if="verConcepto.etiqueta"></span>
-                    </a>
-                </div>
-                
-                <!-- Etiquetas -->
-                <div class="row" ng-if="agruparDiario == 'Conceptos'">
-                    <a class="btn itemBarraLateral" ng-class="GetClaseDiario(etiqueta.Nombre)" ng-repeat="etiqueta in etiquetaF | orderBy:'Nombre' | filter:BuscarEtiquetaBarra" ng-click="VerDetalles(etiqueta.Nombre, etiqueta.Nombre, etiqueta.Diario, 'Etiquetas')" ng-if="(etiqueta.Diario | filter:FiltrarDiario).length > 0" ng-show="verConcepto.etiqueta">
-                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;" >{{etiqueta.Nombre}}</span>
-                    </a>
-                </div>
-                
-                <!-- Temas -->
-                <div class="row" ng-if="agruparDiario == 'Conceptos'">
-                    <a  class="btn labelConcepto"  ng-click="CambiarVerConcepto('tema')">
-                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Temas</b>
-                        <span class="fa fa-angle-double-right" ng-if="!verConcepto.tema"></span>
-                        <span class="fa fa-angle-double-up" ng-if="verConcepto.tema"></span>
-                    </a>
-                </div>
-                
-                <!-- Temas -->
-                <div class="row" ng-if="agruparDiario == 'Conceptos'">
-                    <a class="btn itemBarraLateral" ng-class="GetClaseDiario(tema.Tema)" ng-repeat="tema in temaF | orderBy:'Tema' | filter:BuscarTemaBarra" ng-click="VerDetalles(tema.Tema, tema.Tema, tema.Diario, 'Temas')" ng-if="(tema.Diario | filter:FiltrarDiario).length > 0" ng-show="verConcepto.tema">
-                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;" >{{tema.Tema}}</span>
-                    </a>
+                <div ng-if="diario.length == 0">
+                    <div class="row">
+                            <!-- indicador -->
+                            <span class="col-xs-12"  style="white-space: normal; overflow: hidden;">
+                                <b>Sin Resultados</b>
+                            </span>
+    
+                    </div>
                 </div>
                 
             </div>
@@ -240,7 +219,14 @@
             </div>
             
             <!-- Detalles -->
-            <div class="col-sm-9 col-xs-12 detallesActividadPanel" ng-show="detalle.length > 0" >
+            <div class="col-sm-9 col-xs-12 detallesActividadPanel" ng-show="detalle.length > 0" style="z-index: 0 !important">
+               
+                <div class="row hidden-xs">
+                    <div class="col-xs-12">
+                        <div style="height: 74px"></div>
+                    </div>
+                </div>
+                
                 <!-- Regresar -->
                 <div class="row" ng-show="anchoPantalla <= 767">
                     <div class="col-xs-12" style="background: #E6E6E6;">
@@ -280,11 +266,24 @@
                 </div>
                 <br>
                 
+                <div class="row" ng-show="filtro.tema.length > 0 || filtro.etiqueta.length > 0">
+                   <div class="col-xs-12 ">
+                        <div class="text-right" >
+                            <div class="checkbox">
+                                <label>
+                                    Ver todos
+                                    <input type="checkbox" ng-model="verTodos"  value="">
+                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Notas de la Fecha -->
                 <div class="row">
                    <div class="col-xs-12">
-                      <div ng-repeat="diario in detalle | filter:FiltrarDiario | orderBy:['-Fecha', 'HoraFormato']"> <!-- -->
-                        
+                      <div ng-repeat="diario in detalle  | orderBy:['-Fecha', 'HoraFormato']" ng-show="MostrarDetalle(diario.DiarioId)"> <!-- -->
                          <div class="" style="color: black">
                             
                              <!-- Fecha y Ciudad -->
@@ -431,7 +430,7 @@
                                                     <div class="item active" ng-repeat="i in diario.iImg track by $index">
                                                         <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                                                            <div class="imgContainer" >
-                                                                <div class="crop">
+                                                                <div class="crop center-block">
                                                                      <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{diario.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, diario.Imagen, null, i)"/>
                                                                  </div>
                                                             </div>
@@ -1091,7 +1090,6 @@
             </div>
             
             <br>
-           
             
             <!-- Separador -->
             <div class="row" ng-if="detalleDiario.Notas.length > 0">
@@ -1174,7 +1172,7 @@
                     <div style="padding-left: 12px;  padding-right: 12px">
                          <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px;  padding-right: 3px">
                            <div class="imgContainer" >
-                                <div class="crop">
+                                <div class="crop center-block">
 
                                     <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                         <span class="fa fa-check-circle" ></span>

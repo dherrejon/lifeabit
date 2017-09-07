@@ -1,14 +1,125 @@
 <?php
 	
-
-function GetFechaDiario($id)
+function GetFechaDiario()
 {
-    global $app;
-    global $session_expiration_time;
-
     $request = \Slim\Slim::getInstance()->request();
+    $filtro = json_decode($request->getBody());
+    global $app;
+    
+    $numTema = count($filtro->tema);
+    $numEtiqueta = count($filtro->etiqueta);
+    
+    
+    if($numEtiqueta == 0 && $numTema == 0)
+    {
+        $sql = "SELECT Fecha, DiarioId FROM Diario WHERE UsuarioId = ".$filtro->UsuarioId;
+    }
+    else
+    {
+        $sqlEtiquetaDiario = "";
+        $sqlEtiquetaBaseDiario1 = " SELECT e.DiarioId FROM EtiquetaDiarioVista e WHERE EtiquetaId IN ";
+        $sqlEtiquetaBaseDiario2 = " GROUP BY e.DiarioId";
+        
+        if($numTema > 0)
+        {
+            $whereTema = "(";
 
-    $sql = "SELECT DISTINCT Fecha FROM Diario WHERE UsuarioId = ".$id;
+            for($k=0; $k<$numTema; $k++)
+            {
+                $whereTema .= $filtro->tema[$k]->TemaActividadId. ",";
+            }
+            $whereTema = rtrim($whereTema,",");
+            $whereTema .= ")";
+        }
+        
+        if($numEtiqueta > 0)
+        {
+            //Equivalencias
+            for($k=0; $k<$numEtiqueta; $k++)
+            {
+                $sql = "SELECT IF(EtiquetaId1=".$filtro->etiqueta[$k]->EtiquetaId.", EtiquetaId2, EtiquetaId1) as EtiquetaId
+                        FROM EtiquetaEquivalenteVista
+                        WHERE EtiquetaId1 = ".$filtro->etiqueta[$k]->EtiquetaId." OR EtiquetaId2 =".$filtro->etiqueta[$k]->EtiquetaId;
+
+                try 
+                {
+                    $db = getConnection();
+                    $stmt = $db->query($sql);
+                    $filtro->etiqueta[$k]->Equivalente = $stmt->fetchAll(PDO::FETCH_OBJ);
+                } 
+
+                catch(PDOException $e) 
+                {
+                    echo($e);
+                    echo '[ { "Estatus": '.$e.' } ]';
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+
+
+
+            //Crear IN en el where de etiquetas        
+            for($k=0; $k<$numEtiqueta; $k++)
+            {
+                $whereEtiqueta = "(";
+                $whereEtiqueta .= $filtro->etiqueta[$k]->EtiquetaId. ",";
+
+
+                $numEquivalente = count($filtro->etiqueta[$k]->Equivalente);
+                for($i=0; $i<$numEquivalente; $i++)
+                {
+                    $whereEtiqueta .= $filtro->etiqueta[$k]->Equivalente[$i]->EtiquetaId. ",";
+                }
+
+                $whereEtiqueta = rtrim($whereEtiqueta,",");
+                $whereEtiqueta .= ")";
+
+                //$filtro->etiqueta[$k]->Where = $whereEtiqueta;
+
+                if($k==0)
+                {
+                    $sqlEtiquetaDiario .= $sqlEtiquetaBaseDiario1.$whereEtiqueta.$sqlEtiquetaBaseDiario2;;
+                }
+                else
+                {
+                    $sqlEtiquetaDiario .= " UNION ALL ".$sqlEtiquetaBaseDiario1.$whereEtiqueta.$sqlEtiquetaBaseDiario2;
+                }
+            }
+        }
+        
+        if($numEtiqueta > 0 && $numTema > 0)
+        {
+            $sql = "SELECT d.DiarioId, d.Fecha  FROM Diario d 
+                    INNER JOIN ("
+                         .$sqlEtiquetaDiario.
+
+                    " UNION ALL SELECT t.DiarioId FROM TemaDiarioVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.DiarioId HAVING count(*) = ".$numTema.
+
+                    ") x ON x.DiarioId = d.DiarioId GROUP BY d.DiarioId  HAVING count(*) = ".($numEtiqueta+1);
+
+        }
+        else if($numEtiqueta > 0 || $numTema > 0)
+        {
+            if($numEtiqueta > 0)
+            {
+                $sql = "SELECT d.DiarioId, d.Fecha FROM Diario d 
+                        INNER JOIN ("
+                             .$sqlEtiquetaDiario.
+                        ") x ON x.DiarioId = d.DiarioId GROUP BY d.DiarioId  HAVING count(*) = ".$numEtiqueta;
+
+            }
+            else if($numTema > 0)
+            {
+
+                $sql = "SELECT  d.DiarioId, d.Fecha FROM Diario d
+                        INNER JOIN (
+                            SELECT t.DiarioId FROM TemaDiarioVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.DiarioId HAVING count(*) = ".$numTema."
+                        ) x ON x.DiarioId = d.DiarioId";
+            }
+        }
+    }
 
     try 
     {

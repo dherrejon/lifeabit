@@ -240,3 +240,53 @@
     display: flex;  
     flex-wrap: wrap;
 }
+
+.botonAgregarBusqueda
+{
+    border-right: 2px solid #1859b2;
+    border-width: 0px 3px 0px 0px;
+    border-radius: 0px;
+    
+}
+
+.botonAgregarBusqueda:hover
+{
+    border-right: 2px solid #1859b2;
+    border-width: 0px 2px 0px 0px;
+    border-radius: 0px;
+    
+    background: #d2e4fb;
+}
+
+.conceptosBuscar
+{
+    margin-left: 230px;
+    padding: 5px;
+}
+
+.widthConcepto
+{
+    width: 133px;
+}
+
+@media (max-width: 767px)
+{
+    .conceptosBuscar
+    {
+        margin-left: 100px;
+    }
+    
+    .widthConcepto
+    {
+        width: auto;
+    }
+}
+
+.overflowPoints
+{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
