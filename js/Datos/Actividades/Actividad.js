@@ -14,13 +14,14 @@ class Actividad
     }
 }
 
-function GetActividad($http, $q, CONFIG, usuarioId)     
+function GetActividad($http, $q, CONFIG, filtro)     
 {
     var q = $q.defer();
 
     $http({      
-          method: 'GET',
-          url: CONFIG.APIURL + '/GetActividad/' + usuarioId,
+          method: 'POST',
+          url: CONFIG.APIURL + '/GetActividad',
+          data:filtro
 
       }).success(function(data)
         {

@@ -1,13 +1,24 @@
 <?php
 	
-function GetActividad($id)
+function GetActividad()
 {
-    global $app;
-    global $session_expiration_time;
-
     $request = \Slim\Slim::getInstance()->request();
-
-    $sql = "SELECT * FROM ActividadVista WHERE UsuarioId = ".$id;
+    $filtro = json_decode($request->getBody());
+    global $app;
+    
+    
+    if(strlen($filtro->fecha->Fecha) > 0)
+    {
+        $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a
+                        
+                        INNER JOIN (SELECT DISTINCT e.ActividadId FROM EventoActividad e WHERE  Fecha = '". $filtro->fecha->Fecha."') x
+                        ON x.ActividadId = a.ActividadId
+                        WHERE UsuarioId = '".$filtro->UsuarioId ."'";
+    }
+    else
+    {
+        $sql = "SELECT ActividadId, Nombre FROM Actividad WHERE UsuarioId = '".$filtro->UsuarioId ."'";
+    }
 
     try 
     {
@@ -27,6 +38,8 @@ function GetActividad($id)
         $app->stop();
     }
 }
+
+
 
 function AgregarActividad()
 {

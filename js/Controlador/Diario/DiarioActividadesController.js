@@ -466,7 +466,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             
             if(campo == "Fecha")
             {
-                $scope.buscarConcepto = "";
+                $scope.buscarConceptoBarra = "";
                 $scope.AbrirCalendario();
             }
             
@@ -676,28 +676,28 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     //tema
     $scope.BuscarTemaFiltro = function(tema)
     {
-        return $scope.FiltrarBuscarTema(tema, $scope.buscarConcepto);
+        return $scope.FiltrarBuscarTema(tema, $scope.buscarConceptoBarra);
     };
     
     //etiqueta
     $scope.BuscarEtiquetaFiltro = function(etiqueta)
     {
-        return $scope.FiltrarBuscarEtiqueta(etiqueta, $scope.buscarConcepto);
+        return $scope.FiltrarBuscarEtiqueta(etiqueta, $scope.buscarConceptoBarra);
     };
     
     $('#buscarConcepto').keydown(function(e)
     {
         switch(e.which) {
             case 13:
-               var index = $scope.buscarConcepto.indexOf(" ");
+               var index = $scope.buscarConceptoBarra.indexOf(" ");
                
                if(index == -1)
                 {
-                    $scope.AgregarEtiquetaFiltro($scope.buscarConcepto);
+                    $scope.AgregarEtiquetaFiltro($scope.buscarConceptoBarra);
                 }
                 else
                 {
-                    var etiquetas = $scope.buscarConcepto.split(" ");
+                    var etiquetas = $scope.buscarConceptoBarra.split(" ");
                     for(var k=0; k<etiquetas.length; k++)
                     {
                         if(etiquetas[k] != "")
@@ -727,7 +727,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
                 }
                 else
                 {
-                    $scope.buscarConcepto = "";
+                    $scope.buscarConceptoBarra = "";
                 }
                 
             }
@@ -740,7 +740,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         etiqueta.filtro = false;
         $scope.filtro.etiqueta.push(etiqueta);
             
-        $scope.buscarConcepto = "";
+        $scope.buscarConceptoBarra = "";
         document.getElementById('buscarConcepto').focus();
         
         $scope.GetFechaDiario($scope.filtro);
@@ -751,7 +751,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         tema.filtro = false;
         $scope.filtro.tema.push(tema);
         
-        $scope.buscarConcepto = "";
+        $scope.buscarConceptoBarra = "";
         document.getElementById('buscarConcepto').focus();
         
         $scope.GetFechaDiario($scope.filtro);
@@ -820,7 +820,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         
         $scope.verFiltro = true;
         
-        $scope.buscarConcepto = "";
+        $scope.buscarConceptoBarra = "";
         
         $scope.verTodos = false;
         
@@ -831,7 +831,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     
     $scope.LimpiarBuscarFiltro = function()
     {
-        $scope.buscarConcepto = "";
+        $scope.buscarConceptoBarra = "";
         //$scope.LimpiarFiltroFecha();
         
         if($scope.campoBuscar == "Conceptos")

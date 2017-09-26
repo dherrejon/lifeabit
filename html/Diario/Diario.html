@@ -44,11 +44,11 @@
                           <!-- entradas -->
                           <!--<input type="text" id="fechaFiltro" class="form-control"  style="display: block; position: fixed; width:1%; border-color: transparent; z-index: -9999999;" onblur="angular.element(this).scope().CambiarFechaBuscar(this)" autocomplete="off"/>--> 
                           
-                          <input type="text" ng-show="campoBuscar=='Conceptos'" placeholder="Concepto" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConcepto" id="buscarConcepto" autocomplete="off">
+                          <input type="text" ng-show="campoBuscar=='Conceptos'" placeholder="Concepto" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConceptoBarra" id="buscarConcepto" autocomplete="off">
                             
                           <!--<button ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscar text-left" ng-click="AbrirCalendario()" >{{filtro.fechaFormato}}</button>-->
 
-                          <div ng-show="buscarConcepto.length > 0" class="dropdown-menu modalAgregarDropdown conceptosBuscar">
+                          <div ng-show="buscarConceptoBarra.length > 0" class="dropdown-menu modalAgregarDropdown conceptosBuscar">
 
                              <li><a href="" ng-click="SetFiltroEtiqueta(etiqueta)" class="dropdownOpcion2 text-left" ng-repeat="etiqueta in etiqueta | filter:BuscarEtiquetaFiltro | orderBy:'Nombre'" ng-show="etiqueta.filtro">
                                   {{etiqueta.Nombre}}

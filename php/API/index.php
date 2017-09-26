@@ -261,7 +261,7 @@
     $app->delete('/BorrarDivisa', $seguridad, $ChecarSesion, 'BorrarDivisa');
 
     /*-----------------------  Actividad ------------------------------------------*/
-    $app->get('/GetActividad/:id', $seguridad, $ChecarSesion, 'GetActividad');
+    $app->post('/GetActividad', $seguridad, $ChecarSesion, 'GetActividad');
     $app->post('/AgregarActividad', $seguridad, $ChecarSesion, 'AgregarActividad');
     $app->put('/EditarActividad', $seguridad, $ChecarSesion, 'EditarActividad');
     $app->delete('/BorrarActividad', $seguridad, $ChecarSesion, 'BorrarActividad');

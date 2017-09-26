@@ -38,10 +38,14 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.buscarFrecuenciaFiltro = "";
     
     $scope.mostrarFiltro = "etiqueta";
-    $scope.filtro = {tema:[], etiqueta:[], frecuencia:[]};
+    $scope.filtro = {tema:[], etiqueta:[], frecuencia:[],  fecha:{Fecha:"", FechaFormato:"", Seleccion:""}};
     $scope.filtroFecha = {Fecha:"", FechaFormato:"", Seleccion:""};
     
     $scope.hoy = GetDate();
+    $scope.filtro.fecha.Fecha = $scope.hoy;
+    $scope.filtro.fecha.FechaFormato = TransformarFecha($scope.hoy);
+    $scope.filtro.fecha.Seleccion = "Hoy";
+    document.getElementById('fechaFiltro').value = $scope.hoy;
     
     /*--------- evento variables ------*/
      $scope.eventoActividad = [];
@@ -67,23 +71,24 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     /*------------------ Catálogos -----------------------------*/
     $scope.GetActividad = function()              
     {
-        GetActividad($http, $q, CONFIG, $rootScope.UsuarioId).then(function(data)
+        $scope.filtro.UsuarioId = $rootScope.UsuarioId;
+        GetActividad($http, $q, CONFIG, $scope.filtro).then(function(data)
         {
-            var actividad = []; 
+            /*var actividad = []; 
             for(var k=0; k<data.length; k++)
             {
                 actividad[k] = SetActividad(data[k]);
                 
                 //Notas
                 actividad[k].NotasHTML = $sce.trustAsHtml(actividad[k].NotasHTML);
-            }
+            }*/
             
-            $scope.actividad = actividad;
+            $scope.actividad = data;
 
-            var sql = "SELECT DISTINCT FrecuenciaId, NombreFrecuencia as Nombre FROM ? WHERE FrecuenciaId IS NOT NULL";
-            $scope.frecuenciaF = alasql(sql, [data]);
+            //var sql = "SELECT DISTINCT FrecuenciaId, NombreFrecuencia as Nombre FROM ? WHERE FrecuenciaId IS NOT NULL";
+            //$scope.frecuenciaF = alasql(sql, [data]);
             
-            $scope.GetEtiquetaPorActividad($scope.actividad);
+            //$scope.GetEtiquetaPorActividad($scope.actividad);
         }).catch(function(error)
         {
             alert(error);
@@ -305,13 +310,50 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         });
     };
     
+    //------ Actividad -------
+    $scope.GetActividadPorId = function(id)
+    {
+        var datos = {Id:id};
+        
+        GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
+        {
+            //console.log(data);
+            for(var k=0; k<data.length; k++)
+            {   
+                //Notas
+                data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
+            }
+            
+            $scope.detalle = data[0];
+            $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible($scope.detalle.Etiqueta);
+            
+            
+            if(data.length > 0)
+            {
+                 var eventoActividad = []; 
+                for(var k=0; k<data[0].Evento.length; k++)
+                {
+                    //Notas
+                    data[0].Evento[k].NotasHTML = $sce.trustAsHtml(data[0].Evento[k].NotasHTML);
+                }
+
+                $scope.eventoActividad = data[0].Evento;
+                //console.log($scope.eventoActividad);
+            }
+           
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
     //----------- Detalles -------------------
     $scope.VerDetalles = function(actividad, editar)
     {
         if(actividad.ActividadId != $scope.detalle.ActividadId)
         {
-            $scope.detalle = actividad;
-            $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible(actividad.Etiqueta);
+            $scope.GetActividadPorId(actividad.ActividadId);
+            //$scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible(actividad.Etiqueta);
             $scope.verDetalle = false;
 
             if($rootScope.anchoPantalla <= 767)
@@ -320,13 +362,13 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             }
         
         
-            $scope.eventoActividad = [];
-            $scope.GetEventoActividad(actividad.ActividadId);
+            //$scope.eventoActividad = [];
+            //$scope.GetEventoActividad(actividad.ActividadId);
         }
         else if(editar === true)
         {
-            $scope.detalle = actividad;
-            $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible(actividad.Etiqueta);
+            $scope.GetActividadPorId(actividad.ActividadId);
+            //$scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible(actividad.Etiqueta);
         }
         
     };
@@ -931,11 +973,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.verFiltro = !$scope.verFiltro;
     };
     
-    $('#fechaFiltro').bootstrapMaterialDatePicker(
+    $('#fechaFiltro').datetimepicker(
     { 
-        weekStart : 0, 
-        time: false,
-        format: "YYYY-MM-DD",
+        locale: 'es',
+        format: 'YYYY-MM-DD',//"dd DD/MMM/YYYY",
     });
     
     $scope.AbrirCalendario = function()
@@ -945,20 +986,27 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.FiltroFechaHoy = function()
     {
-        if($scope.filtroFecha.Seleccion != "Hoy")
+        if($scope.filtro.fecha.Seleccion != "Hoy")
         {
-            $scope.filtroFecha.Seleccion = "Hoy";
-            $scope.filtroFecha.Fecha = $scope.hoy;
-            $scope.filtroFecha.FechaFormato = TransformarFecha($scope.hoy);
+            $scope.filtro.fecha.Seleccion = "Hoy";
+            $scope.filtro.fecha.Fecha = $scope.hoy;
+            $scope.filtro.fecha.FechaFormato = TransformarFecha( $scope.hoy);
             
-            document.getElementById("fechaFiltro").value = $scope.hoy;
+            $scope.GetActividad();
+            //$scope.filtro.FechaFormato = TransformarFecha($scope.hoy);
+            
+            //document.getElementById("fechaFiltro").value = $scope.hoy;
         }
         
     };
     
     $scope.LimpiarFiltroFecha = function()
     {
-        $scope.filtroFecha = {Fecha:"", FechaFormato:"", Seleccion:""};
+        if($scope.filtro.fecha.Fecha !== "")
+        {
+            $scope.filtro.fecha = {Fecha:"", FechaFormato:"", Seleccion:""};
+            $scope.GetActividad();
+        }
         
     };
     
@@ -966,9 +1014,19 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         $scope.$apply(function($scope) 
         {   
-            $scope.filtroFecha.Seleccion = "Calendario";
-            $scope.filtroFecha.Fecha = element.value;
-            $scope.filtroFecha.FechaFormato = TransformarFecha(element.value);
+            //console.log(element.value);
+            if(element.value != $scope.hoy)
+            {
+                $scope.filtro.fecha.Seleccion = "Calendario";
+            }
+            else
+            {
+                $scope.filtro.fecha.Seleccion = "Hoy";
+            }
+            $scope.filtro.fecha.Fecha = element.value;
+            $scope.filtro.fecha.FechaFormato = "";
+            $scope.filtro.fecha.FechaFormato = TransformarFecha($scope.filtro.fecha.Fecha);
+            $scope.GetActividad();
         });
     };
     
@@ -976,6 +1034,44 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         $scope.LimpiarBuscarFiltro();
         $scope.LimpiarFiltroFecha();
+    };
+    
+    $scope.CambiarFechaBtn = function(val, fecha)
+    {
+        var year = fecha.slice(0,4);
+        var mes = parseInt(fecha.slice(5,7)-1);
+        var dia = fecha.slice(8,10);
+        
+        var nd = new Date(year, mes, dia);
+        nd.setDate(nd.getDate()+val);
+        
+        year = nd.getFullYear();
+        mes = parseInt(nd.getMonth())+1;
+        dia = parseInt(nd.getDate());
+        
+        if(mes < 10)
+        {
+            mes = "0" + mes;
+        }
+        if(dia < 10)
+        {
+            dia = "0" + dia;
+        }
+        
+        $scope.filtro.fecha.Fecha = year + "-" + mes + "-" + dia;
+        $scope.filtro.fecha.FechaFormato = TransformarFecha($scope.filtro.fecha.Fecha);
+        document.getElementById('fechaFiltro').value = $scope.filtro.fecha.Fecha;
+        
+        if($scope.filtro.fecha.Fecha != $scope.hoy)
+        {
+            $scope.filtro.fecha.Seleccion = "Calendario";
+        }
+        else
+        {
+            $scope.filtro.fecha.Seleccion = "Hoy";
+        }
+        
+        $scope.GetActividad();
     };
     
     //Ciudad
@@ -1067,6 +1163,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.SetActvidad = function(data)
     {
+        //console.log(data);
         var actividad = new Actividad();
         
         actividad.ActividadId = data.ActividadId;
@@ -1119,6 +1216,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         actividad.Nombre = data.Nombre;
         
         actividad.Notas = data.Notas;
+        actividad.Hora = data.Hora;
         
         if(data.Notas !== null && data.Notas !== undefined)
         {
@@ -1785,10 +1883,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.EnviarAlerta('Vista');
                 
                 $scope.nuevaActividad.ActividadId = data[1].ActividadId;
-                $scope.nuevaActividad.FechaCreacion = data[2].FechaCreacion;
-                $scope.nuevaActividad.FechaCreacionFormato = TransformarFecha(data[2].FechaCreacion);
-                $scope.nuevaActividad.Etiqueta = data[3].Etiqueta;
-                $scope.nuevaActividad.Tema = data[4].Tema;
+                //$scope.nuevaActividad.FechaCreacion = data[2].FechaCreacion;
+                //$scope.nuevaActividad.FechaCreacionFormato = TransformarFecha(data[2].FechaCreacion);
+                //$scope.nuevaActividad.Etiqueta = data[3].Etiqueta;
+                //$scope.nuevaActividad.Tema = data[4].Tema;
                 
                 
                 $scope.SetNuevaActividad($scope.nuevaActividad);
@@ -1848,86 +1946,25 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.SetNuevaActividad = function(actividad)
     {
-        var nact = [];
-        nact[0] = $scope.SetActvidad(actividad);
-        
-        //Etiqueta y tema Filtro
-        //$scope.GetEtiquetaPorActividad(nact);
-        
-        //frecuencia filtro
-        var sql = "SELECT COUNT(*) as num FROM ? WHERE FrecuenciaId = '" + actividad.Frecuencia.FrecuenciaId + "'";
-        var count = alasql(sql, [$scope.frecuenciaF]);
-        
-        if(count[0].num === 0)
-        {
-           $scope.frecuenciaF.push(nact[0].Frecuencia);
-        }
-        
-        //tema
-        var sqlBase = "SELECT COUNT(*) as num FROM ? WHERE TemaActividadId= '";
-        for(var k=0; k<actividad.Tema.length; k++)
-        {
-            sql = sqlBase + actividad.Tema[k].TemaActividadId + "'";
-            
-            //tema Filtro
-            count = alasql(sql, [$scope.temaF]);
-            
-            if(count[0].num === 0)
-            {
-               $scope.temaF.push(actividad.Tema[k]);
-            }
-            
-            //tema Dropdownlist
-            count = alasql(sql, [$scope.tema]);
-            
-            if(count[0].num === 0)
-            {
-               $scope.tema.push(actividad.Tema[k]);
-            }
-        }
-        
-        //etiqueta
-        sqlBase = "SELECT COUNT(*) as num FROM ? WHERE EtiquetaId= '";
-        for(var k=0; k<actividad.Etiqueta.length; k++)
-        {
-            sql = sqlBase + actividad.Etiqueta[k].EtiquetaId + "'";
-            
-            //etiqueta Filtro
-            count = alasql(sql, [$scope.etiquetaF]);
-            
-            if(count[0].num === 0)
-            {
-               $scope.etiquetaF.push(actividad.Etiqueta[k]);
-            }
-            
-            //etiqueta Dropdownlist
-            count = alasql(sql, [$scope.etiqueta]);
-            
-            if(count[0].num === 0)
-            {
-               $scope.etiqueta.push(actividad.Etiqueta[k]);
-            }
-        
-        }
+        var nact = new Object();
+        nact.Nombre = actividad.Nombre;
+        nact.ActividadId = actividad.ActividadId;
         
         //agregar y editar
         if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
         {
-            var index = $scope.actividad.length;
-            nact[0].Fecha = [];
-            $scope.actividad[index] = nact[0];
-            $scope.VerDetalles($scope.actividad[index]);
+            $scope.actividad.push(nact);
+            $scope.VerDetalles(nact);
         }
         else if($scope.operacion == "Editar")
         {
+            $scope.VerDetalles(nact, true);
+            
             for(var k=0; k<$scope.actividad.length; k++)
             {
                 if($scope.actividad[k].ActividadId == actividad.ActividadId)
                 {
-                    var fecha = $scope.actividad[k].Fecha;
-                    $scope.actividad[k] = nact[0];
-                    $scope.actividad[k].Fecha = fecha;
-                    $scope.VerDetalles($scope.actividad[k], true);
+                    $scope.actividad[k].Nombre = nact.Nombre;
                     break;
                 }
             }
@@ -2019,7 +2056,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.mensaje = "Actividad borrada.";
                 $scope.EnviarAlerta('Vista');
                 
-                $scope.QuitarFiltros();
+                //$scope.QuitarFiltros();
                 
             }
             else
@@ -2476,9 +2513,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.nuevoEvento.Fecha = GetDate();
         $scope.nuevoEvento.FechaFormato = TransformarFecha($scope.nuevoEvento.Fecha);
         
-        $scope.nuevoEvento.Lugar = SetLugar(actividad.Lugar);
+        $scope.nuevoEvento.Lugar = SetLugar($scope.detalle.Lugar);
 
         document.getElementById("fechaEvento").value = $scope.nuevoEvento.Fecha;
+        $('#horaEvento').data("DateTimePicker").clear();
     };
     
     $scope.CerrarRegistrarEvento = function()
@@ -2858,99 +2896,20 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             var nuevoEvento = $scope.SetEvento(evento);
             $scope.eventoActividad.push(nuevoEvento);
-            
-            for(var k=0; k<$scope.actividad.length; k++)
-            {
-                if($scope.actividad[k].ActividadId == nuevoEvento.ActividadId)
-                {
-                    var fecha = new Object();
-                    fecha.ActividadId = nuevoEvento.ActividadId;
-                    fecha.Fecha = nuevoEvento.Fecha;
-                    
-                    $scope.actividad[k].Fecha.push(fecha);
-                    break;
-                }
-            }
         }
         else if($scope.operacion == "Editar")
         {
-            var quitarFecha = true; //Eliminar fecha de la actividad
-            var agregarFecha = true; //Agregar fecha de la actividad
-            var fechaEliminar = "";
             
             for(var k=0; k<$scope.eventoActividad.length; k++)
             {
                 if($scope.eventoActividad[k].EventoActividadId == evento.EventoActividadId)
-                {
-                    //operaciones de fechas
-                    if($scope.eventoActividad[k].Fecha != evento.Fecha)
-                    {
-                        fechaEliminar = $scope.eventoActividad[k].Fecha;
-                        for(var i=0; i<$scope.eventoActividad.length; i++)
-                        {
-                            //Validar si la fecha del evento actual existe en otros eventos
-                            if(k!=i && fechaEliminar == $scope.eventoActividad[i].Fecha)
-                            {
-                                quitarFecha = false;
-                                if(!agregarFecha)
-                                {
-                                    break;
-                                }
-                            }
-                            //Validar que la nueva fecha no exita en otros 
-                            if(k!=i && $scope.eventoActividad[i].Fecha == evento.Fecha)
-                            {
-                                agregarFecha = false;
-                                if(!quitarFecha)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        agregarFecha = false;
-                    }
-                                    
+                {          
                     $scope.eventoActividad[k] = $scope.SetEvento(evento);
                     
                     break;
                 }
             }
-            
-            if(agregarFecha || quitarFecha)
-            {
-                for(var k=0; k<$scope.actividad.length; k++)
-                {
-                    if($scope.actividad[k].ActividadId == evento.ActividadId)
-                    {
-                        if(agregarFecha)
-                        {
-                           var nfecha = new Object();
-                            nfecha.ActividadId = evento.ActividadId;
-                            nfecha.Fecha = evento.Fecha;
-                            
-                            $scope.actividad[k].Fecha.push(nfecha);
-                        }
-
-                        if(quitarFecha)
-                        {
-                            for(var j=0; j<$scope.actividad[k].Fecha.length; j++)
-                            {
-                                if($scope.actividad[k].Fecha[j].Fecha == fechaEliminar)
-                                {
-                                    $scope.actividad[k].Fecha.splice(j,1);
-                                    break;
-                                }
-                            }
-                        }    
-                        break;
-                    }
-                }
-            }
         }
-        
         
         //Divisa Defecto
         if(evento.Divisa.DivisaId.length > 0)
