@@ -6,8 +6,152 @@ function GetActividad()
     $filtro = json_decode($request->getBody());
     global $app;
     
+    $numTema = count($filtro->tema);
+    $numEtiqueta = count($filtro->etiqueta);
     
-    if(strlen($filtro->fecha->Fecha) > 0)
+    if($numEtiqueta == 0 && $numTema == 0 && strlen($filtro->fecha->Fecha) == 0)
+    {
+        $sql = "SELECT  ActividadId, Nombre FROM Actividad WHERE UsuarioId = ".$filtro->UsuarioId;
+    }
+    else
+    {
+        $sqlEtiquetaActividad = "";
+        $sqlEtiquetaBaseActividad1 = " SELECT e.ActividadId FROM EtiquetaActividadVista e WHERE EtiquetaId IN ";
+        $sqlEtiquetaBaseActividad2 = " GROUP BY e.ActividadId";
+        
+        if($numTema > 0)
+        {
+            $whereTema = "(";
+
+            for($k=0; $k<$numTema; $k++)
+            {
+                $whereTema .= $filtro->tema[$k]->TemaActividadId. ",";
+            }
+            $whereTema = rtrim($whereTema,",");
+            $whereTema .= ")";
+        }
+        
+        if($numEtiqueta > 0)
+        {
+            //Equivalencias
+            for($k=0; $k<$numEtiqueta; $k++)
+            {
+                $sql = "SELECT IF(EtiquetaId1=".$filtro->etiqueta[$k]->EtiquetaId.", EtiquetaId2, EtiquetaId1) as EtiquetaId
+                        FROM EtiquetaEquivalenteVista
+                        WHERE EtiquetaId1 = ".$filtro->etiqueta[$k]->EtiquetaId." OR EtiquetaId2 =".$filtro->etiqueta[$k]->EtiquetaId;
+
+                try 
+                {
+                    $db = getConnection();
+                    $stmt = $db->query($sql);
+                    $filtro->etiqueta[$k]->Equivalente = $stmt->fetchAll(PDO::FETCH_OBJ);
+                } 
+
+                catch(PDOException $e) 
+                {
+                    echo($e);
+                    echo '[ { "Estatus": '.$e.' } ]';
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+
+
+
+            //Crear IN en el where de etiquetas        
+            for($k=0; $k<$numEtiqueta; $k++)
+            {
+                $whereEtiqueta = "(";
+                $whereEtiqueta .= $filtro->etiqueta[$k]->EtiquetaId. ",";
+
+
+                $numEquivalente = count($filtro->etiqueta[$k]->Equivalente);
+                for($i=0; $i<$numEquivalente; $i++)
+                {
+                    $whereEtiqueta .= $filtro->etiqueta[$k]->Equivalente[$i]->EtiquetaId. ",";
+                }
+
+                $whereEtiqueta = rtrim($whereEtiqueta,",");
+                $whereEtiqueta .= ")";
+
+                //$filtro->etiqueta[$k]->Where = $whereEtiqueta;
+
+                if($k==0)
+                {
+                    $sqlEtiquetaActividad .= $sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
+                }
+                else
+                {
+                    $sqlEtiquetaActividad .= " UNION ALL ".$sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
+                }
+            }
+        }
+        
+        if($numEtiqueta > 0 && $numTema > 0)
+        {
+            $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a 
+                    INNER JOIN ("
+                        .$sqlEtiquetaActividad.
+                
+                    " UNION ALL SELECT t.ActividadId FROM TemaActividadVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema.
+                
+                    ") x ON x.ActividadId = a.ActividadId";
+            
+            
+            if(strlen($filtro->fecha->Fecha) > 0)
+            {
+                $sql .= " WHERE a.ActividadId IN (SELECT aa.ActividadId FROM Actividad aa
+
+                            INNER JOIN (SELECT DISTINCT e.ActividadId FROM EventoActividad e WHERE  Fecha = '". $filtro->fecha->Fecha."') y
+                            ON y.ActividadId = aa.ActividadId
+                            WHERE UsuarioId = '".$filtro->UsuarioId ."')";
+            }
+            
+            $sql .= " GROUP BY a.ActividadId HAVING count(*) = ".($numEtiqueta + 1);
+        }
+        else if($numEtiqueta > 0 || $numTema > 0)
+        {
+            if($numEtiqueta > 0)
+            {
+                $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a 
+                    INNER JOIN ("
+                        .$sqlEtiquetaActividad.
+                    ") x ON x.ActividadId = a.ActividadId ";
+
+            }
+            else if($numTema > 0)
+            {
+
+                $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a
+                    INNER JOIN (
+                        SELECT t.ActividadId FROM TemaActividadVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema."
+                    ) x ON x.ActividadId = a.ActividadId";
+            }
+            if(strlen($filtro->fecha->Fecha) > 0)
+            {
+                $sql .= " WHERE a.ActividadId IN (SELECT aa.ActividadId FROM Actividad aa
+
+                            INNER JOIN (SELECT DISTINCT e.ActividadId FROM EventoActividad e WHERE  Fecha = '". $filtro->fecha->Fecha."') y
+                            ON y.ActividadId = aa.ActividadId
+                            WHERE UsuarioId = '".$filtro->UsuarioId ."')";
+            }
+            if($numEtiqueta > 0)
+            {
+                $sql .= " GROUP BY a.ActividadId HAVING count(*) = ".$numEtiqueta;
+            }
+        }
+        else if(strlen($filtro->fecha->Fecha) > 0)
+        {
+            $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a
+
+                            INNER JOIN (SELECT DISTINCT e.ActividadId FROM EventoActividad e WHERE  Fecha = '". $filtro->fecha->Fecha."') x
+                            ON x.ActividadId = a.ActividadId
+                            WHERE UsuarioId = '".$filtro->UsuarioId ."'";
+        }
+    }
+    
+    /*if(strlen($filtro->fecha->Fecha) > 0)
     {
         $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a
                         
@@ -18,7 +162,7 @@ function GetActividad()
     else
     {
         $sql = "SELECT ActividadId, Nombre FROM Actividad WHERE UsuarioId = '".$filtro->UsuarioId ."'";
-    }
+    }*/
 
     try 
     {
@@ -32,7 +176,7 @@ function GetActividad()
     } 
     catch(PDOException $e) 
     {
-        //echo($e);
+        echo($sql);
         echo '[ { "Estatus": "Fallo" } ]';
         $app->status(409);
         $app->stop();

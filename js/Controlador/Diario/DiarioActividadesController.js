@@ -111,7 +111,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
                 sql = "SELECT DISTINCT Year FROM ? ORDER BY Year DESC";
                 $scope.year = alasql(sql, [$scope.mes]);
                 
-                if($scope.diario.length > 0 && $scope.detalle.length == 0)
+                if($scope.diario.length > 0 && $scope.detalle.length === 0)
                 {
                     $scope.yearSel = $scope.year[0].Year;
                     $scope.mesSel = $scope.mes[0].Mes;

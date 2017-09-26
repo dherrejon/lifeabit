@@ -18,7 +18,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $rootScope.CargarExterior = false;
     
-    $scope.buscarActividad = "";
     $scope.detalle = new Actividad();
     $scope.verDetalle = false;
     $scope.verFiltro = true;
@@ -40,6 +39,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.mostrarFiltro = "etiqueta";
     $scope.filtro = {tema:[], etiqueta:[], frecuencia:[],  fecha:{Fecha:"", FechaFormato:"", Seleccion:""}};
     $scope.filtroFecha = {Fecha:"", FechaFormato:"", Seleccion:""};
+    $scope.campoBuscar = "Conceptos";
+    $scope.buscarActividad = "";
+    $scope.buscarConcepto = "";
     
     $scope.hoy = GetDate();
     $scope.filtro.fecha.Fecha = $scope.hoy;
@@ -262,8 +264,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         GetTemaActividad($http, $q, CONFIG, $rootScope.UsuarioId).then(function(data)
         {
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].filtro = true;
+            }
             $scope.tema = data;
-        
+            
         }).catch(function(error)
         {
             alert(error);
@@ -286,6 +292,11 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         GetEtiqueta($http, $q, CONFIG, $rootScope.UsuarioId).then(function(data)
         {
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].filtro = true;
+            }
+            
             $scope.etiqueta = data;
         
         }).catch(function(error)
@@ -680,6 +691,64 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
     };
     
+    $scope.CambiarCampoBuscar = function(campo)
+    {
+        if(campo != $scope.campoBuscar)
+        {
+            $scope.campoBuscar = campo;
+            
+            $scope.buscarActividad = "";
+            $scope.buscarConceptoBarra = "";
+        }
+    };
+    
+    $scope.QuitarTemaFiltro = function(tema)
+    {
+        for(var k=0; k<$scope.tema.length; k++)
+        {
+            if($scope.tema[k].TemaActividadId == tema.TemaActividadId)
+            {
+                $scope.tema[k].filtro = true;
+                break;
+            }
+        }
+        
+        for(var k=0; k<$scope.filtro.tema.length; k++)
+        {
+            if($scope.filtro.tema[k].TemaActividadId == tema.TemaActividadId)
+            {
+                $scope.filtro.tema.splice(k,1);
+                break;
+            }
+        }
+        
+        $scope.GetActividad();
+    };
+    
+    $scope.QuitaretiquetaFiltro = function(etiqueta)
+    {
+        for(var k=0; k<$scope.etiqueta.length; k++)
+        {
+            if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+            {
+                $scope.etiqueta[k].filtro = true;
+                break;
+            }
+        }
+        
+        for(var k=0; k<$scope.filtro.etiqueta.length; k++)
+        {
+            if($scope.filtro.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+            {
+                $scope.filtro.etiqueta.splice(k,1);
+                break;
+            }
+        }
+        
+        $scope.GetActividad();
+        
+    };
+    
     //-------- Filtro Ciudad -------------
     $scope.FiltrarBuscarCiudad = function(buscarCiudad)
     {
@@ -765,7 +834,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.BuscarTemaFiltro = function(tema)
     {
-        return $scope.FiltrarBuscarTema(tema, $scope.buscarTemaFiltro);
+        return $scope.FiltrarBuscarTema(tema, $scope.buscarConceptoBarra);
     };
     
     $scope.BuscarEtiqueta = function(etiqueta)
@@ -773,34 +842,20 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         return $scope.FiltrarBuscarEtiqueta(etiqueta, $scope.buscarConcepto);
     };
     
-    $scope.BuscarEtiquetaFiltro = function(etiqueta)
+    $scope.BuscarEtiquetaFiltro = function(etiqueta)//buscarConceptoFiltro
     {
-        return $scope.FiltrarBuscarEtiqueta(etiqueta, $scope.buscarEtiquetaFiltro);
-    };
-    
-    $scope.BuscarFrecuenciaFiltro = function(frecuencia)
-    {
-        return $scope.FiltrarBuscarFrecuencia(frecuencia, $scope.buscarFrecuenciaFiltro);
+        return $scope.FiltrarBuscarEtiqueta(etiqueta, $scope.buscarConceptoBarra);
     };
     
     $scope.SetFiltroTema = function(tema)
     {
-        var sql = "SELECT * FROM ? WHERE Filtro = true";
-        
-        $scope.temaFiltrado = alasql(sql, [$scope.temaF]);
-        
-        $scope.buscarTemaFiltro = "";
-        
-        for(var k=0; k<$scope.filtro.tema.length; k++)
-        {
-            if(tema == $scope.filtro.tema[k])
-            {
-                $scope.filtro.tema.splice(k,1);
-                return;
-            }
-        }
-        
+        tema.filtro = false;
         $scope.filtro.tema.push(tema);
+        
+        $scope.buscarConceptoBarra = "";
+        document.getElementById('buscarConcepto').focus();
+        
+        $scope.GetActividad();
     };
     
     $scope.SetFiltroFrecuencia = function(frecuencia)
@@ -825,62 +880,97 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.SetFiltroEtiqueta = function(etiqueta)
     {
-        var sql = "SELECT * FROM ? WHERE Filtro = true";
-        
-        $scope.EtiquetaFiltrada = alasql(sql, [$scope.etiquetaF]);
-        
-        $scope.buscarEtiquetaFiltro = "";
-        
-        for(var k=0; k<$scope.filtro.etiqueta.length; k++)
-        {
-            if(etiqueta == $scope.filtro.etiqueta[k])
-            {
-                $scope.filtro.etiqueta.splice(k,1);
-                return;
-            }
-        }
-        
+        etiqueta.filtro = false;
         $scope.filtro.etiqueta.push(etiqueta);
+            
+        $scope.buscarConceptoBarra = "";
+        document.getElementById('buscarConcepto').focus();
+        
+        $scope.GetActividad();
     };
-    
     
     
     $scope.LimpiarFiltro = function()
     {
-        $scope.filtro = {tema:[], etiqueta:[], frecuencia:[]};
+        $scope.filtro = {tema:[], etiqueta:[], frecuencia:[],  fecha:{Fecha:"", FechaFormato:"", Seleccion:""}};
         
-        for(var k=0; k<$scope.etiquetaF.length; k++)
+        for(var k=0; k<$scope.etiqueta.length; k++)
         {
-            $scope.etiquetaF[k].Filtro = false;
+            $scope.etiqueta[k].filtro = true;
         }
         
-        for(var k=0; k<$scope.temaF.length; k++)
+        for(var k=0; k<$scope.tema.length; k++)
         {
-            $scope.temaF[k].Filtro = false;
+            $scope.tema[k].filtro = true;
         }
-        
-        for(var k=0; k<$scope.frecuenciaF.length; k++)
-        {
-            $scope.frecuenciaF[k].Filtro = false;
-        }
-        
-        $scope.sinTemaFiltro = false;
         
         $scope.verFiltro = true;
         
-        $scope.buscarEtiquetaFiltro = "";
-        $scope.buscarTemaFiltro = "";
-        $scope.buscarFrecuenciaFiltro = "";
+        $scope.buscarConceptoBarra = "";
+        
+        //$scope.verTodos = false;
+        
+        $scope.GetActividad();
+        
+        //document.getElementById("fechaFiltro").value = "";
     };
     
     $scope.LimpiarBuscarFiltro = function()
     {
-        $scope.buscarEtiquetaFiltro = "";
-        $scope.buscarFrecuenciaFiltro = "";
-        $scope.buscarTemaFiltro = "";
+        $scope.buscarConceptoBarra = "";
+        $scope.buscarActividad = "";
     };
     
     //Presionar enter
+    $('#buscarConcepto').keydown(function(e)
+    {
+        switch(e.which) {
+            case 13:
+               var index = $scope.buscarConceptoBarra.indexOf(" ");
+               
+               if(index == -1)
+                {
+                    $scope.AgregarEtiquetaFiltro($scope.buscarConceptoBarra);
+                }
+                else
+                {
+                    var etiquetas = $scope.buscarConceptoBarra.split(" ");
+                    for(var k=0; k<etiquetas.length; k++)
+                    {
+                        if(etiquetas[k] != "")
+                        {
+                            $scope.AgregarEtiquetaFiltro(etiquetas[k]);
+                        }
+                    }
+                }
+               $scope.$apply();
+              break;
+
+            default:
+                return;
+        }
+        e.preventDefault(); // prevent the default action (scroll / move caret)
+    });
+    
+    $scope.AgregarEtiquetaFiltro = function(etiqueta)
+    {
+        for(var k=0; k<$scope.etiqueta.length; k++)
+        {
+            if($scope.etiqueta[k].Nombre.toLowerCase() == etiqueta.toLowerCase())
+            {
+                if($scope.etiqueta[k].filtro)
+                {
+                    $scope.SetFiltroEtiqueta($scope.etiqueta[k]);
+                }
+                else
+                {
+                    $scope.buscarConceptoBarra = "";
+                }
+                
+            }
+        }
+    };
+    
     $('#bucarEtiquetaFiltro').keydown(function(e)
     {
         switch(e.which) {
@@ -988,6 +1078,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         if($scope.filtro.fecha.Seleccion != "Hoy")
         {
+            document.getElementById("fechaFiltro").value = $scope.hoy;
             $scope.filtro.fecha.Seleccion = "Hoy";
             $scope.filtro.fecha.Fecha = $scope.hoy;
             $scope.filtro.fecha.FechaFormato = TransformarFecha( $scope.hoy);
@@ -1012,9 +1103,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.CambiarFechaFiltro = function(element) 
     {
-        $scope.$apply(function($scope) 
-        {   
-            //console.log(element.value);
+        if(element.value != $scope.filtro.fecha.Fecha)
+        {
             if(element.value != $scope.hoy)
             {
                 $scope.filtro.fecha.Seleccion = "Calendario";
@@ -1027,7 +1117,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.filtro.fecha.FechaFormato = "";
             $scope.filtro.fecha.FechaFormato = TransformarFecha($scope.filtro.fecha.Fecha);
             $scope.GetActividad();
-        });
+        }
+        
+        $scope.$apply();
+
     };
     
     $scope.BuscarFiltroActividad = function()
@@ -1953,21 +2046,23 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         //agregar y editar
         if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
         {
-            $scope.actividad.push(nact);
+            //$scope.actividad.push(nact);
             $scope.VerDetalles(nact);
+            $scope.GetActividad();
         }
         else if($scope.operacion == "Editar")
         {
             $scope.VerDetalles(nact, true);
             
-            for(var k=0; k<$scope.actividad.length; k++)
+            $scope.GetActividad();
+            /*for(var k=0; k<$scope.actividad.length; k++)
             {
                 if($scope.actividad[k].ActividadId == actividad.ActividadId)
                 {
                     $scope.actividad[k].Nombre = nact.Nombre;
                     break;
                 }
-            }
+            }*/
         }
     };
     
@@ -2926,6 +3021,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 }
             }
         }
+        
+        $scope.GetActividad();
     };
     
     $scope.SetEvento = function(data)
@@ -3030,6 +3127,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                         break;
                     }
                 }
+                
+                $scope.GetActividad();
                 
                 $scope.mensaje = "Evento borrado.";
                 $scope.EnviarAlerta('Vista');
