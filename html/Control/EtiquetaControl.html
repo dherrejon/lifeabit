@@ -1,0 +1,152 @@
+
+<div ng-controller="ControlEtiquetaController">
+    
+    <!-- Etiqueta typeahead -->
+    <br>
+    <div class="row">
+        <div class="col-sm-12 etiquetaDropdownList">
+
+            <label>Etiqueta</label>
+            <br>
+                <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
+                     <div class="btn-group" role="group" style="margin-bottom:8px">
+
+
+                      <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
+
+                      <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
+                            <!-- Editar -->
+                            <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
+                                 <span class="fa fa-pencil"> </span> Editar
+                            </a></li>
+
+                            <!-- Equivalencias -->
+                             <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
+                                 <span class="fa fa-clone"> </span> Equivalencias
+                            </a></li>
+
+                            <!-- Borrar -->
+                            <li><a class=" dropdownOpcion2" ng-click="BorraEtiqueta(etiqueta)">
+                                 <span class="fa fa-trash"> </span> Borrar
+                            </a></li>
+
+                        </ul>
+
+                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                    </div>
+                 </span>
+
+                <span ng-if="elemento.Tema.length > 0">                          
+                     <span ng-repeat="tema in elemento.Tema | orderBy:'Tema' track by $index">
+                         <div class="btn-group" role="group" style="margin-bottom:8px">
+                          <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
+                          <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
+                        </div>
+                     </span>  
+                 </span> 
+                 
+                 <div id="concepto">
+                     <div class="input-group">
+                        <input  type="text"  class="form-control entrada" ng-model="buscarConcepto" uib-typeahead="e as (e.Nombre + e.Tema) for e in FiltroConcepto($viewValue)  | limitTo:7" typeahead-on-select="SeleccionarEtiqueta()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-editable="true" typeahead-no-results="noResultados" ng-keypress="PressKeyConcepto($event)" id="nuevoConcepto" autocomplete="off"> 
+                        <span class="input-group-addon entrada" ng-click="QuitarEtiquetaBuscar()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                    </div>
+
+                    <div ng-if="noResultados">
+                        Sin Resultado
+                    </div>
+                 </div>
+                
+                
+
+        </div>
+    </div>
+
+    <!-- Etiqueta -->
+    <!--<div class="row">
+
+         <div class="col-sm-12" id="etiquetaPanel">
+            <label class="etiquetaNormal">Etiquetas</label><br>
+
+             <!-- Buscar Etiqueta --
+             <div class="input-group">
+                <input type="text" required class="entrada form-control" name="etiqueta" ng-model="buscarConcepto" placeholder="Etiqueta" ng-maxlength="300"  data-toggle="dropdown" id="nuevoConcepto" autocomplete="off"/>
+                <span class="input-group-btn">
+                    <a class="btn close cerrarModal"  ng-click="buscarConcepto = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                </span>
+            </div>
+
+             <!-- lista de etiquetas --
+             <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarConcepto.length > 0">
+
+                <table  class="table table-responsive">
+                    <tbody  style="cursor: pointer">
+
+                       <!-- Etiquetas --
+                        <tr   ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.show">
+                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta, true)">{{etiqueta.Nombre}}</td>
+                        </tr>
+
+                         <!-- Temas --
+                        <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
+                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>-->
+    <!--<br>
+    
+    <div class="row" >
+         <div class="col-xs-12">
+
+              <!--lista de etiquetas Seleccionados --
+              <div ng-if="elemento.Etiqueta.length > 0" >
+                <b>Etiquetas</b><br>
+                 <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
+                     <div class="btn-group" role="group" style="margin-bottom:8px">
+
+
+                      <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
+
+                      <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
+                            <!-- Editar --
+                            <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
+                                 <span class="fa fa-pencil"> </span> Editar
+                            </a></li>
+
+                            <!-- Equivalencias --
+                             <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
+                                 <span class="fa fa-clone"> </span> Equivalencias
+                            </a></li>
+
+                            <!-- Borrar --
+                            <li><a class=" dropdownOpcion2" ng-click="BorraEtiqueta(etiqueta)">
+                                 <span class="fa fa-trash"> </span> Borrar
+                            </a></li>
+
+                        </ul>
+
+                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                    </div>
+                 </span>
+                 <br><br>
+             </div>
+
+             <!--lista de etiquetas Seleccionados --
+            <div ng-if="elemento.Tema.length > 0">
+                 <b>Temas</b><br>                            
+                 <span ng-repeat="tema in elemento.Tema | orderBy:'Tema' track by $index">
+                     <div class="btn-group" role="group" style="margin-bottom:8px">
+                      <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
+                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
+                    </div>
+                 </span>  
+             </div>                     
+         </div>
+
+    </div>-->
+    
+</div>

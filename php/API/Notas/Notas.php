@@ -35,18 +35,18 @@ function GetNotasPorId()
     global $app;
     
     
-    if($datos->Tipo == "Nota")
-    {
-        $sql = "SELECT * FROM Nota WHERE NotaId = ".$datos->Id;
-    }
-    else if($datos->Tipo == "Etiqueta")
+    //if($datos->Tipo == "Nota")
+    //{
+    $sql = "SELECT * FROM Nota WHERE NotaId = ".$datos->Id;
+    //}
+    /*else if($datos->Tipo == "Etiqueta")
     {
         $sql = "SELECT * FROM Nota n INNER JOIN EtiquetaPorNota en ON en.NotaId = n.NotaId WHERE en.EtiquetaId = " .$datos->Id;
     }
     else if($datos->Tipo == "Tema")
     {
         $sql = "SELECT * FROM Nota n INNER JOIN TemaPorNota tn ON tn.NotaId = n.NotaId WHERE tn.TemaActividadId = " .$datos->Id;
-    }
+    }*/
 
     try 
     {
@@ -142,6 +142,10 @@ function GetNotasFiltro()
     $numTema = count($filtro->tema);
     $numEtiqueta = count($filtro->etiqueta);
     
+    $sqlEtiquetaNota = "";
+    $sqlEtiquetaBaseNota1 = " SELECT e.NotaId FROM EtiquetaNotaVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseNota2 = " GROUP BY e.NotaId";
+    
     
     if($numTema > 0)
     {
@@ -149,7 +153,7 @@ function GetNotasFiltro()
         
         for($k=0; $k<$numTema; $k++)
         {
-            $whereTema .= $filtro->tema[$k]. ",";
+            $whereTema .= $filtro->tema[$k]->TemaActividadId. ",";
         }
         $whereTema = rtrim($whereTema,",");
         $whereTema .= ")";
@@ -158,58 +162,110 @@ function GetNotasFiltro()
     
     if($numEtiqueta > 0)
     {
-        $whereEtiqueta = "(";
+        //Equivalencias
+         for($k=0; $k<$numEtiqueta; $k++)
+         {
+            $sql = "SELECT IF(EtiquetaId1=".$filtro->etiqueta[$k]->EtiquetaId.", EtiquetaId2, EtiquetaId1) as EtiquetaId
+                    FROM EtiquetaEquivalenteVista
+                    WHERE EtiquetaId1 = ".$filtro->etiqueta[$k]->EtiquetaId." OR EtiquetaId2 =".$filtro->etiqueta[$k]->EtiquetaId;
+             
+            try 
+            {
+                $db = getConnection();
+                $stmt = $db->query($sql);
+                $filtro->etiqueta[$k]->Equivalente = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+             
+            catch(PDOException $e) 
+            {
+                echo($e);
+                echo '[ { "Estatus": '.$e.' } ]';
+                $app->status(409);
+                $app->stop();
+            }
+         }
         
+        
+        
+        //Crear IN en el where de etiquetas        
         for($k=0; $k<$numEtiqueta; $k++)
         {
-            $whereEtiqueta .= $filtro->etiqueta[$k]. ",";
+            $whereEtiqueta = "(";
+            $whereEtiqueta .= $filtro->etiqueta[$k]->EtiquetaId. ",";
+            
+            
+            $numEquivalente = count($filtro->etiqueta[$k]->Equivalente);
+            for($i=0; $i<$numEquivalente; $i++)
+            {
+                $whereEtiqueta .= $filtro->etiqueta[$k]->Equivalente[$i]->EtiquetaId. ",";
+            }
+            
+            $whereEtiqueta = rtrim($whereEtiqueta,",");
+            $whereEtiqueta .= ")";
+            
+            //$filtro->etiqueta[$k]->Where = $whereEtiqueta;
+            
+            if($k==0)
+            {
+                $sqlEtiquetaNota .= $sqlEtiquetaBaseNota1.$whereEtiqueta.$sqlEtiquetaBaseNota2;
+            }
+            else
+            {
+                $sqlEtiquetaNota .= " UNION ALL ".$sqlEtiquetaBaseNota1.$whereEtiqueta.$sqlEtiquetaBaseNota2;
+            }
         }
-        $whereEtiqueta = rtrim($whereEtiqueta,",");
-        $whereEtiqueta .= ")";
-        
     }
     
     
     if($numEtiqueta > 0 && $numTema > 0)
     {
          $sql = "SELECT n.NotaId, n.Titulo, n.FechaModificacion FROM Nota n
-                    INNER JOIN (
-                    
-                    SELECT e.NotaId FROM EtiquetaNotaVista e   
-                    INNER JOIN (SELECT t.NotaId FROM TemaNotaVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.NotaId HAVING count(*) = ".$numTema.") y ON y.NotaId = e.NotaId
-                        
-                    WHERE e.EtiquetaId IN ".$whereEtiqueta." GROUP BY e.NotaId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.NotaId = n.NotaId";
+                    INNER JOIN ("
+                        .$sqlEtiquetaNota.
+             
+                    " UNION ALL SELECT t.NotaId FROM TemaNotaVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.NotaId HAVING count(*) = ".$numTema.
+             
+                    ") x ON x.NotaId = n.NotaId";
+        
+        if($filtro->fecha != "")
+        {
+            $sql .= " WHERE  Fecha = '". $filtro->fecha."'";
+        }
+        
+        $sql .= " GROUP BY n.NotaId  HAVING count(*) = ".($numEtiqueta+1);
     }
     else if($numEtiqueta > 0 || $numTema > 0)
     {
         if($numEtiqueta > 0)
         {
             $sql = "SELECT n.NotaId, n.Titulo, n.FechaModificacion FROM Nota n 
-                    INNER JOIN (
-                        SELECT e.NotaId FROM EtiquetaNotaVista e WHERE e.EtiquetaId in ".$whereEtiqueta." GROUP BY e.NotaId HAVING count(*) = ".$numEtiqueta."
-                    ) x ON x.NotaId = n.NotaId";
+                    INNER JOIN ("
+                        .$sqlEtiquetaNota.
+                    ") x ON x.NotaId = n.NotaId";
         }
         else if($numTema > 0)
         {
-            $sql = "SELECT n.NotaId, n.Titul, n.FechaModificaciono FROM Nota n
+            $sql = "SELECT n.NotaId, n.Titulo, n.FechaModificacion FROM Nota n
                     INNER JOIN (
                         SELECT t.NotaId FROM TemaNotaVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.NotaId HAVING count(*) = ".$numTema."
                     ) x ON x.NotaId = n.NotaId";
+        }
+        
+        if($filtro->fecha != "")
+        {
+            $sql .= " WHERE  Fecha = '". $filtro->fecha."'";
+        }
+        if($numEtiqueta > 0)
+        {
+            $sql .= " GROUP BY n.NotaId  HAVING count(*) = ".$numEtiqueta;
         }
     }
     else
     {
         $sql = "SELECT n.NotaId, n.Titulo, n.FechaModificacion FROM Nota n WHERE UsuarioId = ".$filtro->usuarioId;
-    }
-    
-    if($filtro->fecha != "")
-    {
-        if($numEtiqueta > 0 || $numTema > 0)
-        {
-            $sql .= " WHERE  Fecha = '". $filtro->fecha."'";
-        }
-        else
+        
+        if($filtro->fecha != "")
         {
             $sql .= " AND  Fecha = '". $filtro->fecha."'";
         }
@@ -220,7 +276,9 @@ function GetNotasFiltro()
         $db = getConnection();
         $stmt = $db->query($sql);
         $nota = $stmt->fetchAll(PDO::FETCH_OBJ);
- 
+        
+        echo '[{"Estatus": "Exito"},  {"Notas":'.json_encode($nota).'}]';
+        $db = null;
     } 
     catch(PDOException $e) 
     {
@@ -230,61 +288,6 @@ function GetNotasFiltro()
         $app->stop();
     }
     
-    $numNota = count($nota);
-    
-    if($numNota > 0)
-    {
-        $inNota = "(";
-        
-        for($k=0; $k<$numNota; $k++)
-        {
-            $inNota .= $nota[$k]->NotaId. ",";
-        }
-        $inNota = rtrim($inNota,",");
-        $inNota .= ")";
-        
-        $sql = "SELECT DISTINCT EtiquetaId, Nombre FROM EtiquetaNotaVista WHERE NotaId IN ".$inNota;
-        
-        try 
-        {
-            $db = getConnection();
-            $stmt = $db->query($sql);
-            $etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-        } 
-        catch(PDOException $e) 
-        {
-            echo($sql);
-            echo '[ { "Estatus": "Fallo" } ]';
-            $app->status(409);
-            $app->stop();
-        }
-        
-        $sql = "SELECT DISTINCT TemaActividadId, Tema FROM TemaNotaVista WHERE NotaId IN ".$inNota;
-        
-        try 
-        {
-            $db = getConnection();
-            $stmt = $db->query($sql);
-            $tema = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-        } 
-        catch(PDOException $e) 
-        {
-            echo($sql);
-            echo '[ { "Estatus": "Fallo" } ]';
-            $app->status(409);
-            $app->stop();
-        }
-        
-        
-        echo '[{"Estatus": "Exito"},  {"Notas":'.json_encode($nota).'}, {"Etiquetas":'.json_encode($etiqueta).'}, {"Temas":'.json_encode($tema).'}]';
-    }
-    else
-    {
-        $db = null;
-        echo '[{"Estatus": "Vacio"}]';
-    }
 }
 
 function AgregarNota()
@@ -316,6 +319,25 @@ function AgregarNota()
     } catch(PDOException $e) 
     {
         echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "SELECT FechaModificacion FROM Nota WHERE NotaId = ".$notaId;
+    
+    try 
+    {
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        $nota->FechaModificacion = $response[0]->FechaModificacion;
+
+    } 
+    catch(PDOException $e) 
+    {
+        //echo $e;
         echo '[{"Estatus": "Fallo"}]';
         $db->rollBack();
         $app->status(409);
@@ -567,7 +589,7 @@ function AgregarNota()
             $stmt = $db->prepare($sql);
             $stmt->execute();
             
-            echo '[{"Estatus": "Exitoso"}, {"NotaId":"'.$notaId.'"}, {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}]';
+            echo '[{"Estatus": "Exitoso"}, {"NotaId":"'.$notaId.'"}, {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}, {"FechaModificacion": "'.$nota->FechaModificacion.'"}]';
             $db->commit();
             $db = null;
         } 
@@ -584,7 +606,7 @@ function AgregarNota()
     {
         $db->commit();
         $db = null;
-        echo '[{"Estatus": "Exitoso"}, {"NotaId":"'.$notaId.'"}, {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}]';
+        echo '[{"Estatus": "Exitoso"}, {"NotaId":"'.$notaId.'"}, {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}, {"FechaModificacion": "'.$nota->FechaModificacion.'"}]';
     }
 }
 
@@ -613,6 +635,23 @@ function EditarNota()
         $stmt->execute();
 
     } catch(PDOException $e) 
+    {
+        //echo $e;
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "SELECT FechaModificacion FROM Nota WHERE NotaId = ".$nota->NotaId;
+    
+    try 
+    {
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $nota->FechaModificacion = $response[0]->FechaModificacion;
+    } 
+    catch(PDOException $e) 
     {
         //echo $e;
         echo '[{"Estatus": "Fallo"}]';
@@ -950,7 +989,7 @@ function EditarNota()
             $stmt = $db->prepare($sql);
             $stmt->execute();
             
-            echo '[{"Estatus": "Exitoso"},  {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}]';
+            echo '[{"Estatus": "Exitoso"},  {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}, {"FechaModificacion":"'.$nota->FechaModificacion.'"}]';
             $db->commit();
             $db = null;
 
@@ -968,7 +1007,7 @@ function EditarNota()
     {
         $db->commit();
         $db = null;
-        echo '[{"Estatus": "Exitoso"},  {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}]';
+        echo '[{"Estatus": "Exitoso"},  {"Etiqueta":'.json_encode($nota->Etiqueta).'}, {"Tema":'.json_encode($nota->Tema).'}, {"FechaModificacion":"'.$nota->FechaModificacion.'"}]';
     }
 }
 

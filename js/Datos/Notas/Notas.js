@@ -242,6 +242,7 @@ function EditarNota($http, CONFIG, $q, nota)
         {
             if(data[0].Estatus == "Exitoso")
             {
+                console.log(data);
                 q.resolve(data);
             }
             else

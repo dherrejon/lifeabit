@@ -1,5 +1,4 @@
 <?php
-
     require 'Slim/Slim.php';
     require 'configuration.php';
 
@@ -192,7 +191,7 @@
     $app->put('/SetAplicacion', $seguridad, 'SetAplicacion');
 
     /*----------------------Usuario ----------------------*/
-    $app->get('/GetUsuarios', $seguridad, $ChecarSesion, 'GetUsuarios');
+    $app->get('/GetUsuarios', 'GetUsuarios');
     $app->post('/AgregarUsuario', $seguridad, $ChecarSesion, 'AgregarUsuario');
     $app->put('/EditarUsuario', $seguridad, $ChecarSesion, 'EditarUsuario');
     $app->post('/ActivarDesactivarUsuario', $seguridad, $ChecarSesion, 'ActivarDesactivarUsuario');
@@ -261,7 +260,7 @@
     $app->delete('/BorrarDivisa', $seguridad, $ChecarSesion, 'BorrarDivisa');
 
     /*-----------------------  Actividad ------------------------------------------*/
-    $app->post('/GetActividad', $seguridad, $ChecarSesion, 'GetActividad');
+    $app->post('/GetActividad', 'GetActividad');
     $app->post('/AgregarActividad', $seguridad, $ChecarSesion, 'AgregarActividad');
     $app->put('/EditarActividad', $seguridad, $ChecarSesion, 'EditarActividad');
     $app->delete('/BorrarActividad', $seguridad, $ChecarSesion, 'BorrarActividad');
