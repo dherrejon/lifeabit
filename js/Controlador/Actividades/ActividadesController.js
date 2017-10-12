@@ -41,7 +41,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.filtroFecha = {Fecha:"", FechaFormato:"", Seleccion:""};
     $scope.campoBuscar = "Conceptos";
     $scope.buscarActividad = "";
-    $scope.buscarConcepto = "";
+    //$scope.buscarConcepto = "";
     
     $scope.hoy = GetDate();
     $scope.filtro.fecha.Fecha = $scope.hoy;
@@ -68,6 +68,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.buscarPais = "";
     $scope.buscarEstado = "";
     $scope.buscarCiudad = "";
+    
+    $scope.modulo = "";
 
     /*------------------ Catálogos -----------------------------*/
     $scope.GetActividad = function()              
@@ -327,7 +329,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         
         GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
         {
-            //console.log(data);
             for(var k=0; k<data.length; k++)
             {   
                 //Notas
@@ -350,6 +351,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.eventoActividad = data[0].Evento;
                 //console.log($scope.eventoActividad);
             }
+            
+            //console.log($scope.eventoActividad);
            
         }).catch(function(error)
         {
@@ -1193,6 +1196,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.AbrirActividad = function(operacion, actividad)
     {
         $scope.operacion = operacion;
+        $scope.modulo = "Actividad";
         
         if(operacion == "Agregar")
         {
@@ -1226,9 +1230,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
         $('#modalApp').modal('toggle');
         
-        $rootScope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaActividad);
+        $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaActividad, 'Actividad');
     };
-    
     
     $scope.ActivarDesactivarTema = function(tema)
     {
@@ -1519,23 +1522,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         else
         {
-            $scope.QuitarEtiquetaNoVisible();
-            $scope.AgregarEtiquetaOcultar();
-            
-            $scope.nuevaActividad.Hora = $scope.SetNullHora($scope.nuevaActividad.Hora);
-            $scope.nuevaActividad.UsuarioId = $rootScope.UsuarioId;
-            if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
-            {
-                var d = new Date();
-                $scope.nuevaActividad.FechaCreacion = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-                
-                
-                $scope.AgregarActividad();
-            }
-            else if($scope.operacion == "Editar")
-            {
-                $scope.EditarActividad();
-            }
+            $scope.AgregarEtiquetaOcultar('Actividad');
         }
     };
     
@@ -1551,13 +1538,74 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
     };
     
-    $scope.AgregarEtiquetaOcultar = function()
+    $scope.AgregarEtiquetaOcultar = function(modulo)
     {
-        for(var k=0; k<$scope.nuevaActividad.Tema.length; k++)
+        $scope.modulo = modulo;
+        if(modulo == 'Actividad')
         {
-            $rootScope.$broadcast('SepararEtiqueta', $scope.nuevaActividad.Tema[k].Tema);
+            for(var k=0; k<$scope.nuevaActividad.Etiqueta.length; k++)
+            {
+                if(!$scope.nuevaActividad.Etiqueta[k].Visible)
+                {
+                    $scope.nuevaActividad.Etiqueta.splice(k, 1);
+                    k--;
+                }
+            }
+            
+
+            $scope.$broadcast('SepararEtiqueta', $scope.nuevaActividad.Tema, 'Actividad');
+    
+        }
+        else if(modulo == 'Evento')
+        {
+            var promesas = [];
+            for(var k=0; k<$scope.nuevoEvento.Etiqueta.length; k++)
+            {
+                if(!$scope.nuevoEvento.Etiqueta[k].Visible)
+                {
+                    $scope.nuevoEvento.Etiqueta.splice(k, 1);
+                    k--;
+                }
+            }
+            
+            $scope.$broadcast('SepararEtiqueta', $scope.nuevoEvento.Tema, 'Evento');
         }
     };
+    
+    $scope.$on('TerminarEtiquetaOculta',function()
+    {           
+        if($scope.modulo == "Actividad")
+        {
+            $scope.nuevaActividad.Hora = $scope.SetNullHora($scope.nuevaActividad.Hora);
+            $scope.nuevaActividad.UsuarioId = $rootScope.UsuarioId;
+            if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
+            {
+                var d = new Date();
+                $scope.nuevaActividad.FechaCreacion = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+                
+                
+                $scope.AgregarActividad();
+            }
+            else if($scope.operacion == "Editar")
+            {
+                $scope.EditarActividad();
+            }
+        }
+        else if($scope.modulo == "Evento")
+        {   
+            $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
+            $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
+            if($scope.operacion == "Agregar")
+            {
+                $scope.AgregarEventoActividad();
+            }
+            else if($scope.operacion == "Editar")
+            {
+                $scope.EditarEventoActividad();
+            }
+        }
+    });
+    
     
     $scope.AgregarActividad = function()    
     {
@@ -1602,7 +1650,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     };
     
     $scope.EditarActividad = function()    
-    {
+    {   
         EditarActividad($http, CONFIG, $q, $scope.nuevaActividad).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
@@ -1700,9 +1748,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.mensajeError[$scope.mensajeError.length] = "*Escribe una actividad válida.";
         }
         
-        if($scope.nuevaActividad.Etiqueta.length === 0)
+        if(($scope.nuevaActividad.Etiqueta.length + $scope.nuevaActividad.Tema.length) === 0)
         {
-            $scope.mensajeError[$scope.mensajeError.length] = "*Selecciona al menos una etiqueta.";
+            $scope.mensajeError[$scope.mensajeError.length] = "*Selecciona al menos una etiqueta o tema.";
         }
         
         if($scope.nuevaActividad.Frecuencia.FrecuenciaId.length === 0)
@@ -2130,17 +2178,20 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.RegistrarEvento = function(operacion, actividad, evento)
     {
         $scope.operacion = operacion;
+        $scope.modulo = "Evento";
         
         if($scope.operacion == "Agregar")
         {
             $scope.nuevoEvento = new EventoActividad();
             
-           
             document.getElementById("horaEvento").value = "";
             $('#horaEvento').data("DateTimePicker").clear();
             
             $scope.SetValoresDefecto(actividad);
             $scope.IniciarEvento(actividad);
+            
+            $scope.ActivarDesactivarTema([]);
+            $scope.ActivarDesactivarEtiqueta([]);
         }
         else if($scope.operacion == "Editar")
         {
@@ -2165,9 +2216,14 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             {
                 $scope.buscarCiudad = "";
             }
+            
+            $scope.ActivarDesactivarTema(evento.Tema);
+            $scope.ActivarDesactivarEtiqueta(evento.Etiqueta);
         }
         
         $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
+        
+        $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoEvento, 'Evento');
         
         $('#modalEvento').modal('toggle');
     };
@@ -2352,6 +2408,68 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.mostrarCiudad = false;
     };*/
     
+    //----- Vista -----
+    $scope.GetClaseEvento = function(evento)
+    {
+        if(evento.Hecho == "1")
+        {
+            if(evento.Fecha == $scope.hoy)
+            {
+                evento.EstatusTexto = "Hoy";
+            }
+            else
+            {
+                evento.EstatusTexto = "Hecho";
+            }
+            
+            return "done";
+        }
+        else if(evento.Fecha < $scope.hoy)
+        {
+            evento.EstatusTexto = "Pendiente";
+            return "pendiente";
+        }
+        else if(evento.Fecha > $scope.hoy)
+        {
+            evento.EstatusTexto = "En espera";
+            return "enEspera";
+        }
+        else if(evento.Fecha == $scope.hoy)
+        {
+            evento.EstatusTexto = "Hoy";
+            return "hoyPendiente";
+        }
+    };
+
+    $scope.AccionEvento = function(evento)
+    {   
+        $scope.eventoOpt = evento;
+        
+        $('#OperacionEvento').modal('toggle');
+    };
+    
+    $scope.HechoEvento = function()
+    {
+        HechoEvento($http, CONFIG, $q, $scope.eventoOpt.EventoActividadId).then(function(data)
+        {
+            if(data[0].Estatus == "Exitoso")
+            {
+                $scope.eventoOpt.Hecho = "1";
+                //$scope.eventoOpt.FechaHecho = data[1].Fecha;
+            }
+            else
+            {
+                 $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde.";
+                 $('#mensajeError').modal('toggle');
+            }
+            
+        }).catch(function(error)
+        {
+            $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde. Error: " + error;
+            $('#mensajeError').modal('toggle');
+        });
+    };
+    
     //-------- Agregar Ciudad ----------
     $scope.AbrirAgregarCiudad = function()
     {
@@ -2438,16 +2556,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         else
         {*/
-            $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
-            $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
-            if($scope.operacion == "Agregar")
-            {
-                $scope.AgregarEventoActividad();
-            }
-            else if($scope.operacion == "Editar")
-            {
-                $scope.EditarEventoActividad();
-            }
+            $scope.AgregarEtiquetaOcultar('Evento');
         //}
     };
     
@@ -2479,7 +2588,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.mensaje = "Evento agregado.";
                 $scope.EnviarAlerta('Vista');
                 
-                $scope.nuevoEvento.EventoActividadId = data[1].Id;                
+                $scope.nuevoEvento.EventoActividadId = data[1].Id;
+                $scope.nuevoEvento.Etiqueta = data[2].Etiqueta;  
+                $scope.nuevoEvento.Tema = data[3].Tema;  
                 
                 $scope.SetNuevoEvento($scope.nuevoEvento);
         
@@ -2506,6 +2617,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             if(data[0].Estatus == "Exitoso")
             {   
                 $scope.mensaje = "Evento editado.";
+                
+                $scope.nuevoEvento.Etiqueta = data[1].Etiqueta;  
+                $scope.nuevoEvento.Tema = data[2].Tema;  
+                
                 $scope.SetNuevoEvento($scope.nuevoEvento);
                 $scope.EnviarAlerta('Vista');
                 
@@ -2527,6 +2642,37 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.SetNuevoEvento = function(evento)
     {
+        var sqlBase = "SELECT COUNT(*) as num FROM ? WHERE TemaActividadId= '";
+        //tema
+        for(var k=0; k<evento.Tema.length; k++)
+        {
+            sql = sqlBase + evento.Tema[k].TemaActividadId + "'";
+
+            count = alasql(sql, [$scope.tema]);
+            
+            if(count[0].num === 0)
+            {
+                evento.Tema[k].filtro = true;
+               $scope.tema.push(evento.Tema[k]);
+            }
+        }
+        
+        //etiqueta
+        sqlBase = "SELECT COUNT(*) as num FROM ? WHERE EtiquetaId= '";
+        for(var k=0; k<evento.Etiqueta.length; k++)
+        {
+            sql = sqlBase + evento.Etiqueta[k].EtiquetaId + "'";
+            
+            //etiqueta Dropdownlist
+            count = alasql(sql, [$scope.etiqueta]);
+            
+            if(count[0].num === 0)
+            {
+               evento.Etiqueta[k].filtro = true;
+               $scope.etiqueta.push(evento.Etiqueta[k]);
+            }
+        }
+        
         if($scope.operacion == "Agregar")
         {
             var nuevoEvento = $scope.SetEvento(evento);
@@ -2578,6 +2724,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         evento.Actividad = data.Actividad;
         evento.Costo = data.Costo;
         evento.Cantidad = data.Cantidad;
+        
+        evento.Hecho = data.Hecho;
+        evento.FechaHecho = data.FechaHecho;
 
         if(data.Notas !== null && data.Notas !== undefined)
         {
@@ -2617,6 +2766,31 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             evento.Divisa.DivisaId = data.Divisa.DivisaId;
             evento.Divisa.Divisa = data.Divisa.Divisa;
+        }
+        
+        evento.EtiquetaVisible = [];
+        for(var k=0; k<data.Etiqueta.length; k++)
+        {
+            var etiqueta = new Etiqueta();
+            etiqueta.EtiquetaId = data.Etiqueta[k].EtiquetaId;
+            etiqueta.Nombre = data.Etiqueta[k].Nombre;
+            etiqueta.Visible = data.Etiqueta[k].Visible;
+            
+            evento.Etiqueta.push(etiqueta);
+            
+            if(data.Etiqueta[k].Visible)
+            {
+                evento.EtiquetaVisible.push(etiqueta);
+            }
+        }
+        
+        for(var k=0; k<data.Tema.length; k++)
+        {
+            var tema = new Etiqueta();
+            tema.TemaActividadId = data.Tema[k].TemaActividadId;
+            tema.Tema = data.Tema[k].Tema;
+            
+            evento.Tema.push(tema);
         }
             
         return evento;    

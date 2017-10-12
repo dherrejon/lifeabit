@@ -5,13 +5,21 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.tema = [];
     $scope.modal = "";
     
-    $rootScope.$on('IniciarEtiquetaControl', function (evento, etiqueta, tema, elemento) 
+    $scope.$on('IniciarEtiquetaControl', function (evento, etiqueta, tema, elemento, modal) 
     {
-        $scope.buscarConcepto = "";
-        $scope.etiqueta = etiqueta;
-        $scope.tema = tema;
-        $scope.elemento = elemento;
+        if($scope.modal == modal)
+        {
+            $scope.buscarConcepto = "";
+            $scope.etiqueta = etiqueta;
+            $scope.tema = tema;
+            $scope.elemento = elemento;
+        }
     });
+    
+    $scope.IniciarModal = function(modal)
+    {
+        $scope.modal = modal;
+    };
     
     //-------- Typeahead ------------------
     $scope.FiltroConcepto = function(concepto)
@@ -82,7 +90,9 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.AgregarEtiqueta = function(etiqueta, ver)
     {
         etiqueta.Visible = ver;
+
         etiqueta.show = false;
+
         $scope.buscarConcepto = "";
         
         $scope.elemento.Etiqueta.push(etiqueta);
@@ -107,7 +117,8 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.PressKeyConcepto = function(e)
     {
-        switch(e.which) {
+        switch(e.which) 
+        {
             case 13:
                 $scope.IdentificarEtiqueta();
               break;
@@ -136,7 +147,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         else
         {
             $rootScope.mensajeError = [];
-            $rootScope.mensajeError[$rootScope.mensajeError.length] = "*Escribe una etiqueta válida.";
+            $rootScope.mensajeError[$rootScope.mensajeError.length] = "*Escribe una etiqueta válida. " +$scope.modal ;
             $('#mensajeError').modal('toggle');
             
             return;
@@ -153,7 +164,17 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             }
             else
             {
-                $scope.EsNuevaEtiqueta(etiqueta);
+                var q = $q.defer();
+                var promesas = [];
+                
+                promesas[0] = $scope.EsNuevaEtiqueta(etiqueta);
+                
+                $q.all(promesas).then(function()
+                {
+                    q.resolve();
+                });
+                
+                return q.promise;
             }
         }
     };
@@ -169,6 +190,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                     if($scope.etiqueta[k].show)
                     {
                         $scope.AgregarEtiqueta($scope.etiqueta[k], $scope.verEtiqueta);
+                        
                         return false;
                     }
                     else
@@ -221,7 +243,9 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         etiqueta.Nombre = nueva.charAt(0).toUpperCase() + nueva.substr(1).toLowerCase();
         etiqueta.UsuarioId =  $scope.usuarioLogeado.UsuarioId;
         
-        AgregarEtiqueta($http, CONFIG, $q, etiqueta).then(function(data)
+        var q = $q.defer();
+        var promesas = [];
+        promesas[0] = AgregarEtiqueta($http, CONFIG, $q, etiqueta).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
             {
@@ -233,7 +257,11 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 $scope.elemento.Etiqueta.push(data[2].Etiqueta);
 
                 $scope.etiqueta.push(data[2].Etiqueta);
-                $scope.etiqueta[$scope.etiqueta.length-1].show = false;
+                
+                if($scope.verEtiqueta)
+                {
+                    $scope.etiqueta[$scope.etiqueta.length-1].show = false;
+                }
                 
                 
                 $rootScope.mensaje = "Etiqueta Agregada.";
@@ -250,6 +278,13 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             $rootScope.mensajeError[$rootScope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeError').modal('toggle');
         });
+        
+        $q.all(promesas).then(function()
+        {
+            q.resolve();
+        });
+        
+        return q.promise;
     };
     
     $scope.QuitarEtiqueta = function(etiqueta)
@@ -401,21 +436,48 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         }
     };
     
-    $rootScope.$on('SepararEtiqueta', function (evento, tema) 
+    $scope.$on('SepararEtiqueta', function (evento, tema, modal) 
     {
-        $scope.SepararEtiqueta(tema);
+        if($scope.modal == modal)
+        {
+            var promesas = [];
+            
+            for(var k=0; k<tema.length; k++)
+            {
+                var promesa = $scope.SepararEtiqueta(tema[k].Tema);
+                
+                promesas.push(promesa);
+            }
+            
+            $q.all(promesas).then(function()
+            {
+                ETIQUETA.TerminarEtiquetaOculta();
+            });
+        }
     });
     
     $scope.SepararEtiqueta = function(etiqueta)
-    {        
+    {    
+        var q = $q.defer();
+        
+        var promesas = [];
+        
         $scope.verEtiqueta = false;
         
         etiqueta = etiqueta.split(" ");
         
         for(var k=0; k<etiqueta.length; k++)
         {
-            $scope.AgregarNuevaEtiqueta(etiqueta[k], false);
+            var promesa = $scope.AgregarNuevaEtiqueta(etiqueta[k], false);
+            promesas.push(promesa);
         }
+        
+        $q.all(promesas).then(function()
+        {
+            q.resolve();
+        });
+        
+        return q.promise;
     };
     
     //---------------- Editar etiqueta exterior---------------------------

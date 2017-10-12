@@ -1,6 +1,4 @@
-
-<div ng-controller="ControlEtiquetaController">
-    
+<div >
     <!-- Etiqueta typeahead -->
     <br>
     <div class="row">
@@ -8,24 +6,24 @@
 
             <label>Etiqueta</label>
             <br>
-                <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
+                <!--<span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
                      <div class="btn-group" role="group" style="margin-bottom:8px">
 
 
                       <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
 
                       <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
-                            <!-- Editar -->
+                            <!-- Editar --
                             <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
                                  <span class="fa fa-pencil"> </span> Editar
                             </a></li>
 
-                            <!-- Equivalencias -->
+                            <!-- Equivalencias --
                              <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
                                  <span class="fa fa-clone"> </span> Equivalencias
                             </a></li>
 
-                            <!-- Borrar -->
+                            <!-- Borrar --
                             <li><a class=" dropdownOpcion2" ng-click="BorraEtiqueta(etiqueta)">
                                  <span class="fa fa-trash"> </span> Borrar
                             </a></li>
@@ -43,11 +41,11 @@
                           <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
                         </div>
                      </span>  
-                 </span> 
+                 </span> -->
                  
                  <div id="concepto">
                      <div class="input-group">
-                        <input  type="text"  class="form-control entrada" ng-model="buscarConcepto" uib-typeahead="e as (e.Nombre + e.Tema) for e in FiltroConcepto($viewValue)  | limitTo:7" typeahead-on-select="SeleccionarEtiqueta()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-editable="true" typeahead-no-results="noResultados" ng-keypress="PressKeyConcepto($event)" id="nuevoConcepto" autocomplete="off"> 
+                        <input  type="text"  class="form-control entrada" ng-model="$parent.buscarConcepto" uib-typeahead="e as (e.Nombre + e.Tema) for e in FiltroConcepto($viewValue)  | limitTo:7" typeahead-on-select="SeleccionarEtiqueta()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-editable="true" typeahead-no-results="noResultados" ng-keypress="PressKeyConcepto($event)" id="nuevoConcepto" autocomplete="off"> 
                         <span class="input-group-addon entrada" ng-click="QuitarEtiquetaBuscar()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
                     </div>
 
@@ -97,12 +95,12 @@
 
         </div>
     </div>-->
-    <!--<br>
+    <!--<br> -->
     
     <div class="row" >
          <div class="col-xs-12">
 
-              <!--lista de etiquetas Seleccionados --
+              <!--lista de etiquetas Seleccionados -->
               <div ng-if="elemento.Etiqueta.length > 0" >
                 <b>Etiquetas</b><br>
                  <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
@@ -112,17 +110,17 @@
                       <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="font-size:10pt"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
 
                       <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
-                            <!-- Editar --
+                            <!-- Editar -->
                             <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
                                  <span class="fa fa-pencil"> </span> Editar
                             </a></li>
 
-                            <!-- Equivalencias --
+                            <!-- Equivalencias -->
                              <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
                                  <span class="fa fa-clone"> </span> Equivalencias
                             </a></li>
 
-                            <!-- Borrar --
+                            <!-- Borrar -->
                             <li><a class=" dropdownOpcion2" ng-click="BorraEtiqueta(etiqueta)">
                                  <span class="fa fa-trash"> </span> Borrar
                             </a></li>
@@ -135,7 +133,7 @@
                  <br><br>
              </div>
 
-             <!--lista de etiquetas Seleccionados --
+             <!--lista de etiquetas Seleccionados -->
             <div ng-if="elemento.Tema.length > 0">
                  <b>Temas</b><br>                            
                  <span ng-repeat="tema in elemento.Tema | orderBy:'Tema' track by $index">
@@ -147,6 +145,6 @@
              </div>                     
          </div>
 
-    </div>-->
+    </div>
     
 </div>

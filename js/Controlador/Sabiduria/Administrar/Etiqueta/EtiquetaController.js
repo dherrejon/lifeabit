@@ -537,6 +537,11 @@ app.factory('ETIQUETA',function($rootScope)
       $rootScope.$broadcast('EtiquetaBorrada'); 
   };
     
+  service.TerminarEtiquetaOculta = function()
+  {
+      $rootScope.$broadcast('TerminarEtiquetaOculta'); 
+  };
+    
 
   return service;
 });

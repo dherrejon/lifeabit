@@ -15,8 +15,8 @@ function GetEventoActividad($id)
         $stmt = $db->query($sql);
         $response = $stmt->fetchAll(PDO::FETCH_OBJ);
         
-        echo '[ { "Estatus": "Exito"}, {"Evento":'.json_encode($response).'} ]'; 
-        $db = null;
+        //echo '[ { "Estatus": "Exito"}, {"Evento":'.json_encode($response).'} ]'; 
+        //$db = null;
  
     } 
     catch(PDOException $e) 
@@ -26,6 +26,63 @@ function GetEventoActividad($id)
         $app->status(409);
         $app->stop();
     }
+    
+    $countEvento = count($response);
+    
+    if($countEvento > 0)
+    {
+        for($k=0; $k<$countEvento; $k++)
+        {
+            $sql = "SELECT EventoActividadId, EtiquetaId, Nombre, Visible FROM EtiquetaEventoVista WHERE EventoActividadId = ".$response[$k]->EventoActividadId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $response[$k]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            $sql = "SELECT EventoActividadId, TemaActividadId, Tema FROM TemaEventoVista WHERE EventoActividadId = ".$response[$k]->EventoActividadId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $response[$k]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            /*$sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $response[$k]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }*/
+        }
+    }
+    
+    echo '[ { "Estatus": "Exito"}, {"Evento":'.json_encode($response).'} ]'; 
+    $db = null;$app->stop();
+    
 }
 
 function AgregarEventoActividad()
@@ -149,6 +206,132 @@ function AgregarEventoActividad()
         }
     }
     
+    $countTema = count($evento->Tema);
+    
+    if($countTema>0)  
+    {
+        //temas Nuevos
+        for($k=0; $k<$countTema; $k++)
+        {
+            if($evento->Tema[$k]->TemaActividadId == "-1")
+            {
+                $sql = "INSERT INTO TemaActividad (UsuarioId, Tema) VALUES (:UsuarioId, :Tema)";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    
+                    $stmt->bindParam("UsuarioId", $evento->UsuarioId);
+                    $stmt->bindParam("Tema", $evento->Tema[$k]->Tema);
+                    
+                    $stmt->execute();
+                    
+                    $evento->Tema[$k]->TemaActividadId = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    //echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+        }
+        
+        $sql = "INSERT INTO TemaPorEvento (EventoActividadId, TemaActividadId) VALUES";
+        
+        
+        /*Artista de cancion*/
+        for($k=0; $k<$countTema; $k++)
+        {
+            $sql .= " (".$eventoId.", ".$evento->Tema[$k]->TemaActividadId."),";
+        }
+
+        $sql = rtrim($sql,",");
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+            
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[{"Estatus": "Fallo"}]';
+            //echo $e;
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    $countEtiqueta = count($evento->Etiqueta);
+    
+    if($countEtiqueta>0)  
+    {
+        //etiquetas Nuevos
+        for($k=0; $k<$countEtiqueta; $k++)
+        {
+            if($evento->Etiqueta[$k]->EtiquetaId == "-1")
+            {
+                $sql = "INSERT INTO Etiqueta (UsuarioId, Nombre, Activo) VALUES (:UsuarioId, :Nombre, 1)";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    
+                    $stmt->bindParam("UsuarioId", $evento->UsuarioId);
+                    $stmt->bindParam("Nombre", $evento->Etiqueta[$k]->Nombre);
+                    
+                    $stmt->execute();
+                    
+                    $evento->Etiqueta[$k]->EtiquetaId  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    //echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+        }
+        
+        $sql = "INSERT INTO EtiquetaPorEvento (EventoActividadId, EtiquetaId, Visible) VALUES";
+        
+        
+        /*Etiqueta de la actividad*/
+        for($k=0; $k<$countEtiqueta; $k++)
+        {
+            if($evento->Etiqueta[$k]->Visible)
+            {
+                $sql .= " (".$eventoId.", ".$evento->Etiqueta[$k]->EtiquetaId.", true),";
+            }
+            else
+            {
+                $sql .= " (".$eventoId.", ".$evento->Etiqueta[$k]->EtiquetaId.", false),";
+            }
+        }
+
+        $sql = rtrim($sql,",");
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[{"Estatus": "Fallo"}]';
+            //echo $e;
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
     if(strlen($evento->Divisa->DivisaId) > 0) 
     {
         $sql = "INSERT INTO DivisaEventoActividad (EventoActividadId, DivisaId) VALUES(:EventoActividadId, :DivisaId)";
@@ -210,7 +393,7 @@ function AgregarEventoActividad()
         }
     }
     
-    echo '[{"Estatus": "Exitoso"}, {"Id":"'.$eventoId.'"}]';
+    echo '[{"Estatus": "Exitoso"}, {"Id":"'.$eventoId.'"}, {"Etiqueta":'.json_encode($evento->Etiqueta).'}, {"Tema":'.json_encode($evento->Tema).'}]';
     $db->commit();
     $db = null;
 
@@ -334,6 +517,38 @@ function EditarEventoActividad()
         $app->stop();
     }
     
+    $sql = "DELETE FROM TemaPorEvento WHERE EventoActividadId=".$evento->EventoActividadId;
+    try 
+    {
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+        
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        //echo $e;
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "DELETE FROM EtiquetaPorEvento WHERE EventoActividadId=".$evento->EventoActividadId;
+    try 
+    {
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+        
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        //echo $e;
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
     if(strlen($evento->Lugar->LugarId) > 0) 
     {
         $sql = "INSERT INTO LugarEventoActividad (EventoActividadId, LugarId) VALUES(:EventoActividadId, :LugarId)";
@@ -403,6 +618,132 @@ function EditarEventoActividad()
         }
     }
     
+    $countTema = count($evento->Tema);
+    
+    if($countTema>0)  
+    {
+        //temas Nuevos
+        for($k=0; $k<$countTema; $k++)
+        {
+            if($evento->Tema[$k]->TemaActividadId == "-1")
+            {
+                $sql = "INSERT INTO TemaActividad (UsuarioId, Tema) VALUES (:UsuarioId, :Tema)";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    
+                    $stmt->bindParam("UsuarioId", $evento->UsuarioId);
+                    $stmt->bindParam("Tema", $evento->Tema[$k]->Tema);
+                    
+                    $stmt->execute();
+                    
+                    $evento->Tema[$k]->TemaActividadId = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+        }
+        
+        $sql = "INSERT INTO TemaPorEvento (EventoActividadId, TemaActividadId) VALUES";
+        
+        
+        /*Artista de cancion*/
+        for($k=0; $k<$countTema; $k++)
+        {
+            $sql .= " (".$evento->EventoActividadId.", ".$evento->Tema[$k]->TemaActividadId."),";
+        }
+
+        $sql = rtrim($sql,",");
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+            
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[{"Estatus": "Fallo"}]';
+            echo $sql;
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    $countEtiqueta = count($evento->Etiqueta);
+    
+    if($countEtiqueta>0)  
+    {
+        //etiquetas Nuevos
+        for($k=0; $k<$countEtiqueta; $k++)
+        {
+            if($evento->Etiqueta[$k]->EtiquetaId == "-1")
+            {
+                $sql = "INSERT INTO Etiqueta (UsuarioId, Nombre, Activo) VALUES (:UsuarioId, :Nombre, 1)";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    
+                    $stmt->bindParam("UsuarioId", $evento->UsuarioId);
+                    $stmt->bindParam("Nombre", $evento->Etiqueta[$k]->Nombre);
+                    
+                    $stmt->execute();
+                    
+                    $evento->Etiqueta[$k]->EtiquetaId  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    //$db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+        }
+        
+        $sql = "INSERT INTO EtiquetaPorEvento (EventoActividadId, EtiquetaId, Visible) VALUES";
+        
+        
+        /*Etiqueta de la actividad*/
+        for($k=0; $k<$countEtiqueta; $k++)
+        {
+            if($evento->Etiqueta[$k]->Visible)
+            {
+                $sql .= " (".$evento->EventoActividadId.", ".$evento->Etiqueta[$k]->EtiquetaId.", true),";
+            }
+            else
+            {
+                $sql .= " (".$evento->EventoActividadId.", ".$evento->Etiqueta[$k]->EtiquetaId.", false),";
+            }
+        }
+
+        $sql = rtrim($sql,",");
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[{"Estatus": "Fallo"}]';
+            echo $e;
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
     if(strlen($evento->Divisa->DivisaId) > 0) 
     {
         $sql = "INSERT INTO DivisaEventoActividad (EventoActividadId, DivisaId) VALUES(:EventoActividadId, :DivisaId)";
@@ -464,7 +805,7 @@ function EditarEventoActividad()
         }
     }
     
-    echo '[{"Estatus": "Exitoso"}]';
+    echo '[{"Estatus": "Exitoso"}, {"Etiqueta":'.json_encode($evento->Etiqueta).'}, {"Tema":'.json_encode($evento->Tema).'}]';
     $db->commit();
     $db = null;
 }
@@ -491,6 +832,34 @@ function BorrarEventoActividad()
     {
         echo '[ { "Estatus": "Fallo" } ]';
         //echo $e;
+        $app->status(409);
+        $app->stop();
+    }
+
+}
+
+function HechoEvento()
+{
+    global $app;
+    $request = \Slim\Slim::getInstance()->request();
+    $eventoId = json_decode($request->getBody());
+   
+    
+    $sql = "UPDATE EventoActividad SET Hecho = '1', FechaHecho = NOW() WHERE EventoActividadId=".$eventoId;
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+        
+        $db = null;
+        echo '[ { "Estatus": "Exitoso" } ]';
+        
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        echo $e;
         $app->status(409);
         $app->stop();
     }

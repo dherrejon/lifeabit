@@ -16,6 +16,12 @@ class EventoActividad
         this.Lugar = new Lugar();
         this.Unidad = new Unidad();
         this.Divisa = new Divisa();
+        
+        this.hecho = false;
+        this.FechaHecho = "";
+        
+        this.Tema = [];
+        this.Etiqueta = [];
     }
 }
 
@@ -62,6 +68,9 @@ function SetEventoActividad(data)
     evento.Cantidad = data.Cantidad;
     evento.FechaFormato = TransformarFecha(data.Fecha);
     
+    evento.Hecho = data.Hecho;
+    evento.FechaHecho = data.FechaHecho;
+    
     if(data.Hora !== null)
     {
         evento.HoraFormato = convertTo24Hour(data.Hora);
@@ -107,6 +116,35 @@ function SetEventoActividad(data)
     {
         evento.Divisa.DivisaId = data.DivisaId;
         evento.Divisa.Divisa = data.Divisa;
+    }
+    
+    
+    evento.EtiquetaVisible = [];
+    
+    if(data.Etiqueta !== null && data.Etiqueta !== undefined )
+    {
+        for(var k=0; k<data.Etiqueta.length; k++)
+        {
+            evento.Etiqueta[k] = data.Etiqueta[k];
+            
+            if(data.Etiqueta[k].Visible == "1")
+            {
+                evento.Etiqueta[k].Visible = true;
+                evento.EtiquetaVisible.push(evento.Etiqueta[k]);
+            }
+            else
+            {
+                evento.Etiqueta[k].Visible = false;
+            }
+        }
+    }
+    
+    if(data.Tema !== null && data.Tema !== undefined )
+    {
+        for(var k=0; k<data.Tema.length; k++)
+        {
+            evento.Tema[k] = data.Tema[k];
+        }
     }
     
     return evento;
@@ -205,6 +243,25 @@ function BorrarEventoActividad($http, CONFIG, $q, id)
     $http({      
           method: 'DELETE',
           url: CONFIG.APIURL + '/BorrarEventoActividad',
+          data: id
+
+      }).success(function(data)
+        {
+            q.resolve(data);    
+        }).error(function(data, status){
+            q.resolve([{Estatus:status}]);
+
+     }); 
+    return q.promise;
+}
+
+function HechoEvento($http, CONFIG, $q, id)
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'PUT',
+          url: CONFIG.APIURL + '/HechoEvento',
           data: id
 
       }).success(function(data)

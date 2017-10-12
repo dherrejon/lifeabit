@@ -435,6 +435,59 @@ function GetActividadPorId()
                 $app->status(409);
                 $app->stop();
             }
+            
+            $countEvento = count($actividad[$k]->Evento);
+    
+            if($countEvento > 0)
+            {
+                for($j=0; $j<$countEvento; $j++)
+                {
+                    $sql = "SELECT EventoActividadId, EtiquetaId, Nombre, Visible FROM EtiquetaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $actividad[$k]->Evento[$j]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        //echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $sql = "SELECT EventoActividadId, TemaActividadId, Tema FROM TemaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $actividad[$k]->Evento[$j]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        //echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    /*$sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $response[$k]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        //echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }*/
+                }
+            }
         }
     }
     
