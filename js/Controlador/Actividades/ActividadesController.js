@@ -1,4 +1,4 @@
-app.controller("ActividadesController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, FRECUENCIA, LUGAR, CIUDAD, UNIDAD, DIVISA)
+app.controller("ActividadesController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, FRECUENCIA, LUGAR, CIUDAD, UNIDAD, DIVISA, IMAGEN, ETIQUETA)
 {   
     $scope.titulo = "Actividades";
     
@@ -11,6 +11,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.frecuencia = [];
     $scope.etiqueta = [];
     $scope.lugar = [];
+    $scope.fototeca = [];
     
     $scope.temaF = [];
     $scope.frecuenciaF = [];
@@ -259,6 +260,56 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         });
     };
     
+    $scope.GetImagenEtiqueta = function(imagen, val)
+    {
+        GetImagenEtiqueta($http, $q, CONFIG, imagen.ImagenId).then(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                imagen.Etiqueta = data[1].Etiqueta;
+                imagen.Tema = data[2].Tema;
+                //imagen.EtiquetaVisible = $scope.GetEtiquetaVisible(data[1].Etiqueta);
+            }
+            else
+            {
+                imagen.Etiqueta = [];
+                imagen.Tema = [];
+            }
+            
+            if(val !== false)
+            {
+                $scope.SetTemaImagenEvento(imagen, $scope.nuevoEvento.Tema);
+                $scope.SetEtiquetaImagenEvento(imagen, $scope.nuevoEvento.Etiqueta);
+            }
+            //console.log(imagen);
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+        
+    };
+    
+    $scope.GetGaleriaFotos = function()
+    {
+        var datos = [];
+        datos[0] = $rootScope.UsuarioId;
+
+        GetFototeca($http, $q, CONFIG, datos).then(function(data)
+        {
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].Seleccionada = false;
+            }
+
+            $scope.fototeca = data;
+
+
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+        
+    };
     
     /*------- Otros catálogos ---------------*/
     $scope.GetTemaActividad = function()              
@@ -423,17 +474,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.detalle = new Actividad();
     };
     
-    $scope.GetClaseEvento = function(evento)
-    {
-        if($scope.hoy > evento.Fecha)
-        {
-            return "Pasada";
-        }
-        else
-        {
-            return "";
-        }
-    };
     
     //------------------------------- Filtrar -------------------------
     $scope.FitroActividad = function(info)
@@ -2179,13 +2219,11 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         $scope.operacion = operacion;
         $scope.modulo = "Evento";
+        $scope.tabModal = "Evento";
         
         if($scope.operacion == "Agregar")
         {
             $scope.nuevoEvento = new EventoActividad();
-            
-            document.getElementById("horaEvento").value = "";
-            $('#horaEvento').data("DateTimePicker").clear();
             
             $scope.SetValoresDefecto(actividad);
             $scope.IniciarEvento(actividad);
@@ -2219,6 +2257,11 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             
             $scope.ActivarDesactivarTema(evento.Tema);
             $scope.ActivarDesactivarEtiqueta(evento.Etiqueta);
+            
+            for(var k=0; k<evento.Imagen.length; k++)
+            {
+                $scope.GetImagenEtiqueta(evento.Imagen[k], false);
+            }
         }
         
         $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
@@ -2250,7 +2293,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         
         $scope.nuevoEvento.Hora = actividad.Hora;
-        document.getElementById("horaEvento").value = $scope.nuevoEvento.Hora;
+        document.getElementById("horaEvento").value = actividad.Hora;
     };
     
     $scope.IniciarEvento = function(actividad)
@@ -2264,7 +2307,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.nuevoEvento.Lugar = SetLugar($scope.detalle.Lugar);
 
         document.getElementById("fechaEvento").value = $scope.nuevoEvento.Fecha;
-        $('#horaEvento').data("DateTimePicker").clear();
     };
     
     $scope.CerrarRegistrarEvento = function()
@@ -2590,7 +2632,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 
                 $scope.nuevoEvento.EventoActividadId = data[1].Id;
                 $scope.nuevoEvento.Etiqueta = data[2].Etiqueta;  
-                $scope.nuevoEvento.Tema = data[3].Tema;  
+                $scope.nuevoEvento.Tema = data[3].Tema;
+                $scope.nuevoEvento.Imagen = data[4].Imagen;  
                 
                 $scope.SetNuevoEvento($scope.nuevoEvento);
         
@@ -2601,8 +2644,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde.";
                 $('#mensajeError').modal('toggle');
             }
-            
-            
         }).catch(function(error)
         {
             $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
@@ -2619,7 +2660,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.mensaje = "Evento editado.";
                 
                 $scope.nuevoEvento.Etiqueta = data[1].Etiqueta;  
-                $scope.nuevoEvento.Tema = data[2].Tema;  
+                $scope.nuevoEvento.Tema = data[2].Tema;
+                $scope.nuevoEvento.Imagen = data[3].Imagen;  
                 
                 $scope.SetNuevoEvento($scope.nuevoEvento);
                 $scope.EnviarAlerta('Vista');
@@ -2670,6 +2712,24 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             {
                evento.Etiqueta[k].filtro = true;
                $scope.etiqueta.push(evento.Etiqueta[k]);
+            }
+        }
+        
+        //imagen
+        if($scope.fototeca.length > 0)
+        {
+            sqlBase = "SELECT COUNT(*) as num FROM ? WHERE ImagenId= '";
+            for(var k=0; k<evento.Imagen.length; k++)
+            {
+                sql = sqlBase + evento.Imagen[k].ImagenId + "'";
+
+                //etiqueta Dropdownlist
+                count = alasql(sql, [$scope.fototeca]);
+
+                if(count[0].num === 0)
+                {
+                   $scope.fototeca.push(evento.Imagen[k]);
+                }
             }
         }
         
@@ -2724,6 +2784,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         evento.Actividad = data.Actividad;
         evento.Costo = data.Costo;
         evento.Cantidad = data.Cantidad;
+        evento.Imagen = data.Imagen;
         
         evento.Hecho = data.Hecho;
         evento.FechaHecho = data.FechaHecho;
@@ -2860,6 +2921,494 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $('#mensajeError').modal('toggle');
         });
     };
+    
+    //---------------------- Fototeca ----------------------------
+    $scope.AbrirFototeca = function()
+    {
+        $scope.imgFototeca = [];
+        
+        if($scope.fototeca.length === 0)
+        {
+            $scope.GetGaleriaFotos();
+        }
+        else
+        {
+            for(var k=0; k<$scope.fototeca.length; k++)
+            {
+                $scope.fototeca[k].Seleccionada = false;
+            }
+        }
+        
+        $('#fototeca').modal('toggle');
+    };
+    
+    $scope.AgregarQuitarImagenFototeca = function(imagen)
+    {
+        imagen.Seleccionada = !imagen.Seleccionada;
+    };
+    
+    $scope.AgregarImagenes = function()
+    {
+        var agregada = false;
+        var count = 0;
+        for(var k=0; k< $scope.fototeca.length; k++)
+        {
+            if($scope.fototeca[k].Seleccionada)
+            {
+                agregada = false;
+                for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+                {
+                    if($scope.nuevoEvento.Imagen[i].ImagenId == $scope.fototeca[k].ImagenId)
+                    {
+                        agregada = true;
+                        break;
+                    }
+                }
+                if(!agregada)
+                {
+                    if(count === 0)
+                    {
+                        count ++;
+                        $scope.todasImg = "opt";
+                        $scope.GetImagenEtiqueta($scope.fototeca[k]);
+                        $scope.lastIndex = $scope.nuevoEvento.Imagen.length + 1;
+                    }
+                    
+                    $scope.nuevoEvento.Imagen.push($scope.fototeca[k]);
+                }
+            }
+        }
+        
+        $('#fototeca').modal('toggle');
+    };
+    
+    $scope.SetEtiquetaImagenEvento = function(imagen, etiqueta)
+    {
+        for(var j=0; j<etiqueta.length; j++)
+        {
+            if(etiqueta[j].Visible)
+            {
+                var label = false;
+                for(var i=0; i<imagen.Etiqueta.length; i++)
+                {
+                    if(etiqueta[j].EtiquetaId == imagen.Etiqueta[i].EtiquetaId)
+                    {
+                        label = true;
+                        imagen.Etiqueta[i].Visible = "1"; 
+                        break;
+                    }
+                }
+
+                if(!label)
+                {
+                    var e = new Object();
+
+                    e.EtiquetaId = etiqueta[j].EtiquetaId;
+                    e.Nombre = etiqueta[j].Nombre;
+                    e.Visible = "1";
+
+                    imagen.Etiqueta.push(e);
+                }
+            }
+        }
+    };
+    
+    $scope.SetTemaImagenEvento = function(imagen, tema)
+    {
+        var agregado = false;
+        for(var j=0; j<tema.length; j++)
+        {
+            var label = false;
+            for(var i=0; i<imagen.Tema.length; i++)
+            {
+                if(tema[j].TemaActividadId == imagen.Tema[i].TemaActividadId)
+                {
+                    label = true;
+                    break;
+                }
+            }
+            
+            if(!label)
+            {
+                var t = new Object();
+                
+                t.TemaActividadId = tema[j].TemaActividadId;
+                t.Tema = tema[j].Tema;
+                
+                imagen.Tema.push(t);
+                
+                agregado = true;
+            }
+        }
+        
+        if(agregado)
+        {
+            IMAGEN.CambiarEtiquetasOcultas(imagen, $scope.etiqueta, $scope.tema);
+        }
+        else if($scope.todasImg == "opt" || $scope.todasImg == "tema" || $scope.todasImg == "src")
+        {
+            $scope.TerminarAgregarTemaImagen();
+        }
+    };
+    
+     //-------- ver Imagenes ----------
+    $scope.VerImganes = function(Agregadas, Seleccionadas, Eliminadas, ImagenA, ImagenS, index, indexOrigen)
+    {
+        $scope.detalleImagenEliminadas = false;
+        $scope.iLmt = 0;
+        $scope.detalleImagen = [];
+        
+        if(Agregadas)
+        {
+            for(var k=0; k<ImagenA.length; k++)
+            {
+                if(ImagenA[k].Eliminada !== true)
+                {
+                    $scope.detalleImagen.push(ImagenA[k]);
+                    
+                    if(k==index)
+                    {
+                       $scope.iImg = $scope.detalleImagen.length-1;
+                    }
+                }
+                
+            }
+            
+            $scope.iLmt = $scope.detalleImagen.length-1;
+        }
+        
+        if(Seleccionadas)
+        {
+            if(indexOrigen === 0)
+            {
+                  $scope.iImg = index + $scope.iLmt+1;  
+            }
+            
+            for(var k=0; k<ImagenS.length; k++)
+            {
+                $scope.detalleImagen.push(ImagenS[k]);
+            }
+        }
+        
+        if(Eliminadas)
+        {
+            $scope.detalleImagenEliminadas = true;
+            
+            for(var k=0; k<ImagenA.length; k++)
+            {
+                if(ImagenA[k].Eliminada == true)
+                {
+                    $scope.detalleImagen.push(ImagenA[k]);
+                    
+                    if(k==index)
+                    {
+                       $scope.iImg = $scope.detalleImagen.length-1;
+                    }
+                }
+                
+            }
+            
+            $scope.iLmt = $scope.detalleImagen.length-1;
+        }
+        
+        $('#verImagen').modal('toggle');
+    };
+    
+    $('#verImagen').keydown(function(e)
+    {
+        switch(e.which) {
+            case 37:
+              $scope.changeImageViewed(-1);
+              $scope.$apply();
+              break;
+            /*
+            case 38: console.log('up');
+            break;
+            */
+            case 39:
+              $scope.changeImageViewed(1);
+              $scope.$apply();
+              break;
+            /*
+            case 40: console.log('down');
+            break;
+            */
+            default: return;
+        }
+        e.preventDefault(); // prevent the default action (scroll / move caret)
+    });
+    
+    $scope.changeImageViewed = function(val)
+    {
+        $scope.iImg += val; 
+        if($scope.iImg < 0)
+        {
+            $scope.iImg = $scope.detalleImagen.length -1;
+        }
+        else if($scope.iImg >= $scope.detalleImagen.length)
+        {
+            $scope.iImg = 0;
+        }
+    };
+    
+    //--------------- Etiquetas de Imagenes -----------------------------
+    $scope.EtiquetarImagen = function(imagen, tipo)
+    {
+        $scope.etiquetaImagen = imagen;
+        IMAGEN.EtiquetaImagen(imagen, $scope.etiqueta, $scope.tema, tipo);
+    };
+    
+    $scope.$on('TerminarEtiquetaImagen',function()
+    {   
+        $scope.mensaje = "Imagen Etiquetada";
+        $scope.EnviarAlerta('Modal');
+        
+        $scope.SetEtiquetaImagen(IMAGEN.GetImagen());
+    });
+    
+    $scope.$on('TerminarEtiquetaImagenOcultas',function()
+    {   
+        if($scope.todasImg == "opt" || $scope.todasImg == "tema" || $scope.todasImg == "src")
+        {
+            $scope.TerminarAgregarTemaImagen();
+        }
+    });
+    
+    $scope.TerminarAgregarTemaImagen = function()
+    {
+        var opt = $scope.todasImg;
+        $scope.todasImg = "";
+        if(opt === "tema")
+        {   
+            var index = 0;
+            
+            if($scope.nuevoEvento.Imagen.length === 0)
+            {
+                index = 1;
+            }
+            
+            for(var k=1; k<$scope.nuevoEvento.Imagen.length; k++)
+            {
+                $scope.SetTemaImagenEvento($scope.nuevoEvento.Imagen[k], $scope.temaAgregar);
+            }
+            
+            for(var i=index; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+            {
+                $scope.SetTemaImagenEvento($scope.nuevoEvento.ImagenSrc[i], $scope.temaAgregar);
+            }
+        }
+        else if(opt == "opt")
+        {
+            for(var k=$scope.lastIndex; k<$scope.nuevoEvento.Imagen.length; k++)
+            {
+                $scope.GetImagenEtiqueta($scope.nuevoEvento.Imagen[k]);
+            }
+        }
+        else if(opt == "src")
+        {
+            for(var k=$scope.lastIndex; k<$scope.nuevoEvento.ImagenSrc.length; k++)
+            {
+                $scope.SetTemaImagenEvento($scope.nuevoEvento.ImagenSrc[k], $scope.nuevoEvento.Tema);
+            }
+        }
+    };
+
+    $scope.SetEtiquetaImagen = function(imagen)
+    {
+        $scope.etiquetaImagen.Etiqueta  = [];
+        $scope.etiquetaImagen.Tema = []; 
+        
+        
+        for(var k=0; k<imagen.Etiqueta.length; k++)
+        {
+            var etiqueta = new Object();
+            etiqueta.Nombre = imagen.Etiqueta[k].Nombre;
+            etiqueta.EtiquetaId = imagen.Etiqueta[k].EtiquetaId;
+            etiqueta.Visible = imagen.Etiqueta[k].Visible;
+            
+            $scope.etiquetaImagen.Etiqueta.push(etiqueta);
+        }
+        
+        for(var k=0; k<imagen.Tema.length; k++)
+        {
+            var tema = new Object();
+        
+            tema.TemaActividadId = imagen.Tema[k].TemaActividadId;
+            tema.Tema = imagen.Tema[k].Tema;
+            
+            $scope.etiquetaImagen.Tema.push(tema);
+        }
+    };
+    
+    $scope.ContarEtiquetasVisibles = function(etiqueta)
+    {
+        if(etiqueta != undefined)
+        {
+            var con = 0;
+        
+            for(var k=0; k<etiqueta.length; k++)
+            {
+                if(etiqueta[k].Visible == "1")
+                {
+                    con++;
+                }
+            }
+
+            return con;
+        }
+    };
+    
+    //destecta cuando se agrego una etiqueta
+    $scope.$on('EtiquetaSet',function(etiqueta)
+    {
+        $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+    });
+    
+    $scope.SetEtiquetaTodasImagenes = function(etiqueta)
+    {
+        var e = [];
+        e[0] = etiqueta;
+
+        for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+        {
+            $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.Imagen[i], e);
+        }
+        
+        for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+        {
+            $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.ImagenSrc[i], e);
+        }
+    };
+    
+    $scope.$on('TemaSet',function(etiqueta)
+    {
+        $scope.todasImg = "tema";
+        $scope.SetTemaTodasImagenes(ETIQUETA.GetEtiqueta());
+    });
+    
+    $scope.SetTemaTodasImagenes = function(tema)
+    {
+        var e = [];
+        e[0] = tema;
+        
+        $scope.temaAgregar = e;
+        
+        if($scope.nuevoEvento.Imagen.length > 0)
+        {
+            $scope.SetTemaImagenEvento($scope.nuevoEvento.Imagen[0], e);
+        }
+        else if($scope.nuevoEvento.ImagenSrc.length > 0)
+        {
+            $scope.SetTemaImagenEvento($scope.nuevoEvento.ImagenSrc[0], e);
+        }
+    };
+    
+    $scope.$on('QuitarEtiqueta',function(evento, etiqueta)
+    {
+        for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoEvento.Imagen[i].Etiqueta.length; j++)
+            {
+                if($scope.nuevoEvento.Imagen[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.nuevoEvento.Imagen[i].Etiqueta.splice(j,1);
+                    break;
+                }
+            }
+        }
+        
+        for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoEvento.ImagenSrc[i].Etiqueta.length; j++)
+            {
+                if($scope.nuevoEvento.ImagenSrc[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.nuevoEvento.ImagenSrc[i].Etiqueta.splice(j,1);
+                    break;
+                }
+            }
+        }
+    });
+    
+    $scope.$on('QuitarTema',function(evento, tema)
+    {
+        for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoEvento.Imagen[i].Tema.length; j++)
+            {
+                if($scope.nuevoEvento.Imagen[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.nuevoEvento.Imagen[i].Tema.splice(j,1);
+                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevoEvento.Imagen[i], $scope.etiqueta, $scope.tema);
+                    break;
+                }
+            }
+        }
+        
+        for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoEvento.ImagenSrc[i].Tema.length; j++)
+            {
+                if($scope.nuevoEvento.ImagenSrc[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.nuevoEvento.ImagenSrc[i].Tema.splice(j,1);
+                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevoEvento.ImagenSrc[i], $scope.etiqueta, $scope.tema);
+                    break;
+                }
+            }
+        }
+    });
+    
+    
+    //Imagenes de archivo
+    function ImagenSeleccionada(evt) 
+    {
+        var files = evt.target.files;
+        
+        $scope.index = $scope.nuevoEvento.ImagenSrc.length;
+        $scope.lastIndex = $scope.nuevoEvento.ImagenSrc.length + 1;
+        $scope.srcSize = $scope.nuevoEvento.ImagenSrc.length + files.length;
+        
+        
+        for (var i = 0, f; f = files[i]; i++) 
+        {
+            if (!f.type.match('image.*')) 
+            {
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = (function(theFile) 
+            {
+                return function(e) 
+                {
+                    $scope.nuevoEvento.ImagenSrc.push(theFile);
+                    $scope.nuevoEvento.ImagenSrc[$scope.nuevoEvento.ImagenSrc.length-1].Src= (e.target.result);
+                    $scope.nuevoEvento.ImagenSrc[$scope.nuevoEvento.ImagenSrc.length-1].Etiqueta = [];
+                    $scope.nuevoEvento.ImagenSrc[$scope.nuevoEvento.ImagenSrc.length-1].Tema = [];
+
+                    if( $scope.srcSize === $scope.nuevoEvento.ImagenSrc.length)
+                    {
+                        $scope.todasImg = "src";
+                        $scope.SetTemaImagenEvento($scope.nuevoEvento.ImagenSrc[$scope.index], $scope.nuevoEvento.Tema);
+                    }
+                    
+                    $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.ImagenSrc[$scope.nuevoEvento.ImagenSrc.length-1], $scope.nuevoEvento.Etiqueta);
+                    
+                    $scope.$apply();
+                };
+                
+                debugger;
+            })(f);
+            
+            
+            reader.readAsDataURL(f);
+        }
+         document.getElementById('cargarImagen').value = "";
+    }
+ 
+    document.getElementById('cargarImagen').addEventListener('change', ImagenSeleccionada, false);
     
     autosize($('textarea'));
     

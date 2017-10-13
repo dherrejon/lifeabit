@@ -700,6 +700,19 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
         }
     };
     
+    $scope.EtiquetaEquivalenteLista = function(etiqueta)              
+    {
+        $scope.ee = [];
+        GetEtiquetaEquivalente($http, $q, CONFIG, etiqueta.EtiquetaId).then(function(data)
+        {
+            $scope.ee = data;
+        
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
 });
 
 app.factory('IMAGEN',function($rootScope)

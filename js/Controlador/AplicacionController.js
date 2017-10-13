@@ -25,6 +25,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.diario = [];
     $scope.actividad = [];
     $scope.imagen = [];
+    $scope.evento = [];
     $scope.detalle = [];
     $scope.tipoDetalle = "";
     $scope.verDetalle = false;
@@ -36,9 +37,9 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.buscarConcepto = "";
     $scope.campoBuscar = "Conceptos";
     
-    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Imagenes", "Notas"];
+    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Eventos", "Imagenes", "Notas"];
     $scope.appFiltro = "Todo";
-    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true};
+    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true};
     
     //------------------- Catálogos (coneptos) -----------------------------------
     $scope.GetTemaActividad = function()              
@@ -85,14 +86,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             if(data[0].Estatus == "Exito")
             {
                 for(var k=0; k<data[2].Diario.length; k++)
-                {
-                    /*if($scope.campoBuscar == "Conceptos")
-                    {
-                       data[2].Diario[k].FechaFormato = TransformarFecha( data[2].Diario[k].Fecha); 
-                    }
-                    else if($scope.campoBuscar == "Fecha")
-                    {*/
-                    
+                {                    
                     data[2].Diario[k].FechaFormato = TransformarFecha( data[2].Diario[k].Fecha);
                     
                     if(data[2].Diario[k].Notas !== null && data[2].Diario[k].Notas !== undefined)
@@ -104,13 +98,18 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                     {
                          data[2].Diario[k].NotasHTML = "";
                     }
-                    //}
+                }
+                
+                for(var k=0; k<data[5].Evento.length; k++)
+                {                    
+                    data[5].Evento[k].FechaFormato = TransformarFecha( data[5].Evento[k].Fecha);
                 }
                 
                 $scope.nota = data[1].Notas;
                 $scope.diario = data[2].Diario;
                 $scope.actividad = data[3].Actividad;
                 $scope.imagen = data[4].Imagen;
+                $scope.evento = data[5].Evento;
             }
             else
             {
@@ -192,6 +191,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             }
              
             $scope.detalle = data;
+            $scope.eventoData = data[0].Evento;
         
         }).catch(function(error)
         {
@@ -199,27 +199,22 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         });
     };
     
-    $scope.GetActividadPorId = function(id)
+    $scope.GetEventoActividadPorId = function(id)
     {
-        var datos = {Id:id};
-        $scope.tipoDetalle = "Actividad";
+        $scope.tipoDetalle = "Evento";
         
-        GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
+        GetEventoActividadPorId($http, $q, CONFIG, id).then(function(data)
         {
-            
             for(var k=0; k<data.length; k++)
             {
                 data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
                 
-                for(var i=0; i<data[k].Evento.length; i++)
-                {
-                    data[k].Evento[i].NotasHTML = $sce.trustAsHtml( data[k].Evento[i].NotasHTML);
-                }
                 
                 data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
             }
              
             $scope.detalle = data;
+            $scope.eventoData = data;
         
         }).catch(function(error)
         {
@@ -276,13 +271,33 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     
     $scope.GetClaseEvento = function(evento)
     {
-        if($scope.hoy > evento.Fecha)
+        if(evento.Hecho == "1")
         {
-            return "Pasada";
+            if(evento.Fecha == $scope.hoy)
+            {
+                evento.EstatusTexto = "Hoy";
+            }
+            else
+            {
+                evento.EstatusTexto = "Hecho";
+            }
+            
+            return "done";
         }
-        else
+        else if(evento.Fecha < $scope.hoy)
         {
-            return "";
+            evento.EstatusTexto = "Pendiente";
+            return "pendiente";
+        }
+        else if(evento.Fecha > $scope.hoy)
+        {
+            evento.EstatusTexto = "En espera";
+            return "enEspera";
+        }
+        else if(evento.Fecha == $scope.hoy)
+        {
+            evento.EstatusTexto = "Hoy";
+            return "hoyPendiente";
         }
     };
     
@@ -306,6 +321,51 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         }
         
         return visible;
+    };
+    
+    $scope.VerImganes = function(imagen)
+    {
+        console.log($rootScope.UsuarioId);
+        $scope.img = imagen;
+        $scope.iImg = 0;
+        $('#verImagen').modal('toggle');
+    };
+    
+    $('#verImagen').keydown(function(e)
+    {
+        switch(e.which) {
+            case 37:
+              $scope.changeImageViewed(-1);
+              $scope.$apply();
+              break;
+            /*
+            case 38: console.log('up');
+            break;
+            */
+            case 39:
+              $scope.changeImageViewed(1);
+              $scope.$apply();
+              break;
+            /*
+            case 40: console.log('down');
+            break;
+            */
+            default: return;
+        }
+        e.preventDefault(); // prevent the default action (scroll / move caret)
+    });
+    
+    $scope.changeImageViewed = function(val)
+    {
+        $scope.iImg += val; 
+        if($scope.iImg < 0)
+        {
+            $scope.iImg = $scope.img.length -1;
+        }
+        else if($scope.iImg >= $scope.img.length)
+        {
+            $scope.iImg = 0;
+        }
     };
     
     //----------------- buscar concepto ----------------
@@ -579,6 +639,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
          $scope.diario = [];
          $scope.actividad = [];
          $scope.imagen = [];
+         $scope.evento = [];
      };
     
     $scope.CambiarAppFiltro = function(app)

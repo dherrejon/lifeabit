@@ -272,12 +272,12 @@
     /*-----------------------  Evento Actividad ------------------------------------------*/
     $app->get('/GetEventoActividad/:id', $seguridad, $ChecarSesion, 'GetEventoActividad');
     $app->post('/AgregarEventoActividad', $seguridad, $ChecarSesion, 'AgregarEventoActividad');
-    $app->put('/EditarEventoActividad', $seguridad, $ChecarSesion, 'EditarEventoActividad');
+    $app->post('/EditarEventoActividad', $seguridad, $ChecarSesion, 'EditarEventoActividad');
     $app->delete('/BorrarEventoActividad', $seguridad, $ChecarSesion, 'BorrarEventoActividad');
     $app->put('/HechoEvento', $seguridad, $ChecarSesion, 'HechoEvento');
 
     $app->get('/GetPersonaEventoActividad/:id', $seguridad, $ChecarSesion, 'GetPersonaEventoActividad');
-
+    $app->get('/GetEventoActividadPorId/:id', $seguridad, $ChecarSesion, 'GetEventoActividadPorId');
     
 
     //---------------------------------------------------------------------------------------------------------------Diario

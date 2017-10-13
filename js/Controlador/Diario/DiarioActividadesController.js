@@ -1992,8 +1992,6 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
                 
                 $scope.SetNuevoDiario($scope.nuevoDiario);
                 $scope.GetFechaDiario($scope.filtro);
-                
-                console.log($scope.etiqueta);
             }
             else
             {
@@ -3073,6 +3071,19 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         }
         
         return ciudad;
+    };
+    
+    $scope.EtiquetaEquivalenteLista = function(etiqueta)              
+    {
+        $scope.ee = [];
+        GetEtiquetaEquivalente($http, $q, CONFIG, etiqueta.EtiquetaId).then(function(data)
+        {
+            $scope.ee = data;
+        
+        }).catch(function(error)
+        {
+            alert(error);
+        });
     };
     
     autosize($('textarea'));

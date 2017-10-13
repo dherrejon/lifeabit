@@ -189,7 +189,7 @@
                 </div>
 
                 <div class="row" ng-if="(verApp.actividad && appFiltro == 'Todo') || appFiltro == 'Actividades'"> <!-- ng-if="agrupar == 'Titulo'" -->
-                    <a ng-repeat="actividad in actividad | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(diario.FechaFormato)}}" ng-click="GetActividadPorId(actividad.ActividadId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                    <a ng-repeat="actividad in actividad | orderBy:'Nombre' "  class="btn appElemento " ng-click="GetActividadPorId(actividad.ActividadId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                         <!-- indicador -->
                         <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
                             {{actividad.Nombre}}
@@ -207,7 +207,7 @@
                 </div>
 
                 <div class="row" ng-if="(verApp.diario && appFiltro == 'Todo') || appFiltro == 'Diario'"> <!-- ng-if="agrupar == 'Titulo'" -->
-                    <a ng-repeat="diario in diario | orderBy:'-Fecha' "  class="btn appElemento {{GetClaseDiario(diario.FechaFormato)}}" ng-click="GetDiarioPorId(diario.DiarioId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                    <a ng-repeat="diario in diario | orderBy:'-Fecha' "  class="btn appElemento " ng-click="GetDiarioPorId(diario.DiarioId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                         <!-- indicador -->
                         <b class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;" ng-if="campoBuscar == 'Conceptos'">
                             {{diario.FechaFormato}}
@@ -217,6 +217,24 @@
                             <p class="textoDetalleBarra" data-ng-bind-html="diario.NotasHTML" ></p>
                         </div>
                         
+                    </a>
+                </div>
+                
+                <!-- Eventos -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.evento = !verApp.evento">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Eventos ({{evento.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.evento "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.evento "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.evento && appFiltro == 'Todo') || appFiltro == 'Eventos'"> <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="evento in evento | orderBy:['Actividad', '-Fecha'] "  class="btn appElemento" ng-click="GetEventoActividadPorId(evento.EventoActividadId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden; font-size: 12pt">
+                            <b>{{evento.Actividad}}:</b> {{evento.FechaFormato}}
+                        </span>
                     </a>
                 </div>
                 
@@ -291,7 +309,7 @@
         <br>
         
         <div ng-repeat="detalle in detalle">
-            <div class="row" >
+            <div class="row" ng-show="tipoDetalle != 'Evento'">
                 <div class="col-xs-12">
                     <div >
                         
@@ -392,7 +410,7 @@
              </div>
              
              <!-- Divisor -->
-            <div class="row">
+            <div class="row" ng-show="tipoDetalle != 'Evento'">
                <div class="col-sm-12"> 
                    <div class="divisorAzul"></div>                      
                </div>
@@ -408,112 +426,185 @@
             </div>
             
             <!-- Eventos Actividades -->
-            <div class="row" ng-if="tipoDetalle == 'Actividad'">
-               <div class="col-xs-12">
-                  <div ng-repeat="evento in detalle.Evento | orderBy:'-Fecha' | filter: {Fecha:filtro.fecha}" >
+            <div class="row" ng-if="tipoDetalle == 'Actividad' || tipoDetalle == 'Evento'">
 
-                     <div class="eventoVista {{GetClaseEvento(evento)}}">
+                   <div class="col-xs-12">
+                        
+                      <div  class="eventoVista" style="position: relative" ng-repeat="evento in eventoData | orderBy:['-Fecha', '-HoraFormato'] "> <!-- | filter: {Fecha:filtroFecha.Fecha} -->
+                        
+                         <div class="actividad {{GetClaseEvento(evento)}}" style="margin-top: -1px">
+                         
+                             <button class="btn btnEvento" ng-click="AccionEvento(evento)" ng-disabled="true">
+                                <span ng-if="('1' == evento.Hecho)" class="fa fa-check"></span> 
+                             </button>
+                            
+                             <div class="text-center tituloEstatusActividad {{evento.EstatusTexto}}" >{{evento.EstatusTexto}}</div>
+                            
+                         </div> 
+                          
+                        
+                           
+                           
+                        <div class="" style="position: relative; margin-left: 90px; padding: 10px; overflow-y: scroll; max-height: 80px;">
+                         
+                            
+                            <!-- Opciones ocultas -->
+                            <div class="btn-group pull-right" >
+                              
+                                 <a class=" operacionEvento" style="color: transparent" disabled>
+                                     <span class="fa fa-picture-o"></span>
+                                 </a>
+                               
+                                <a class=" operacionEvento" style="color: transparent" disabled>
+                                     <span class="fa fa-comment-o"></span>
+                                </a>
+                                 
+                                <a class=" operacionEvento" style="color: transparent" disabled>
+                                     <span class="fa fa-ellipsis-v"></span>
+                                </a>
+                                 
+                            </div>
+                            
+                            <!-- Actividad --> 
+                            <span ng-if="tipoDetalle == 'Evento'">  
+                                <b style="color: black">  {{detalle.Actividad}}</b>
+                                <br>
+                            </span> 
+                            
+                            <!-- Fecha -->    
+                            <b style="color: black"> <span class="fa fa-calendar"> </span> {{evento.FechaFormato}}</b>
+                            <br>
+                            
+                            <!-- Hora -->  
+                            <span ng-if="evento.Hora.length > 0">
+                                 <b class="fa fa-clock-o"> </b>
+                                <span class="">{{evento.Hora}}</span>
+                                <br>
+                             </span>  
+                             
+                             <!-- Lugar y cuydad -->
+                             <span ng-if="evento.Lugar.LugarId.length > 0 || evento.Ciudad.CiudadId.length > 0 ">
+                                 <b class="fa fa-map-marker"></b>
+                                 <span ng-if="evento.Lugar.LugarId.length > 0 ">
+                                     <span ng-if="evento.Ciudad.CiudadId.length > 0 ">{{evento.Lugar.Nombre}},</span>
+                                     <span ng-if="evento.Ciudad.CiudadId.length == 0 ">{{evento.Lugar.Nombre}}</span>
+                                 </span>
+                                 
+                                 <span ng-if="evento.Ciudad.CiudadId.length > 0 ">
+                                     {{evento.Ciudad.Ciudad}} ({{evento.Ciudad.AbreviacionPais}}).
+                                 </span>
+                                 <br>
+                             </span>
+                             
+                             <!-- cantidad -->
+                             <span ng-if="evento.Cantidad.length > 0">
+                                 <b class="">#</b>
+                                 <span class="">{{evento.Cantidad}} {{evento.Unidad.Unidad}}</span>
+                                 <br>
+                             </span>
+                             
+                             <!-- Costo -->
+                             <span ng-if="evento.Costo.length > 0">
+                                 <b class="fa fa-usd"></b>
+                                 <span class="">{{evento.Costo}} {{evento.Divisa.Divisa}}</span>
+                                 <br>
+                             </span>
+                             
+                         </div>
+                         
+                         <!-- Opciones -->
+                        <div class="btn-group pull-right" style="position: absolute; right: 0; top: 0; padding: 10px">
+                           <!-- Imagenes -->
+                           <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.Imagen.length) > 0" ng-click="VerImganes(evento.Imagen)">
+                                 <span class="fa fa-picture-o"></span>
+                             </a>
+                                 
+                            <!-- Concepto -->
+                            <span class="dropdown">
+                
+                               
+                                <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.EtiquetaVisible.length + evento.Tema.length) > 0">
+                                     <span class="fa fa-comment-o"></span>
+                                 </a>
 
-                         <!-- Fecha y Ciudad -->
-                         <div class="row">
-                            <!-- Cantidad -->
-                             <div class="col-xs-12 ">
+                                <ul class="dropdown-menu  dropdown-menu-right dropdownRight" style="margin-top: 10px">
+
+                                    <div  class="row " ng-show="evento.EtiquetaVisible.length > 0">
+                                        <div class="col-xs-12"> 
+                                            <li  class="dropdown-header tituloFitro"><b>Etiquetas</b></li>
+                                        </div>
+                                    </div>
+
+                                    <li style="width: auto">
+                                        <form role="infoEtoiqueta">
+                                            <div  style="margin-top: 10px"></div>
+
+                                            <div class="panel  panelFiltro" style="border-radius: 0px; padding: 2px important;">
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <ul>
+                                                            <li ng-repeat="etiqueta in evento.EtiquetaVisible | orderBy:'Nombre'" >
+                                                                <span>{{etiqueta.Nombre}}</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </form>
+                                    </li>
 
 
-                               <!-- Fecha -->
-                               <span ng-if="(hoy == evento.Fecha)" >
-                                   <span class="fechaIndicador">
-                                       <span  style="margin-left: 5px;"> Hoy </span>
-                                   </span>
+                                    <div  class="row " ng-show="evento.Tema.length > 0">
+                                        <div class="col-xs-12"> 
+                                            <li  class="dropdown-header tituloFitro"><b>Temas</b></li>
+                                        </div>
+                                    </div>
 
-                                    <span style="margin-left: 5px;"></span>
+                                    <li style="width: auto">
+                                        <form role="infoEtoiqueta">
+                                            <div  style="margin-top: 10px"></div>
+
+                                            <div class="panel  panelFiltro" style="border-radius: 0px; padding: 2px important;">
+                                                <div class="row">
+                                                    <div class="col-xs-12">
+                                                        <ul>
+                                                            <li ng-repeat="tema in evento.Tema | orderBy:'Tema'">
+                                                                <span>{{tema.Tema}}</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </span>
+
+                             <!-- Opciones de evento evento -->
+                             <span class="dropdown" style="position: relative">
+                                 <a class=" operacionEvento" data-toggle="dropdown" data-target="optEvento">
+                                     <span class="fa fa-ellipsis-v"></span>
+                                 </a>
+
+                                <ul class="dropdown-menu dropdown-menu-right dropdownRight" id="optEvento" style="margin-top: 10px;">
+
+                                      <!-- Detalles -->
+                                      <li>
+                                        <a class=" dropdownOpcion2" ng-click="VerDetallesEvento(evento)">
+                                            <span class="fa fa-eye"></span> Detalles
+                                        </a>
+                                        </li>
+
+                                    </ul>
                                 </span>
+                        </div>
+                          
+                          
+                      </div>
+                   </div>
 
-                                 <b style="color: black"> {{evento.FechaFormato}}</b>
-
-                                <!--<span class="" ng-if="evento.Ciudad.CiudadId.length > 0">
-                                     <b class=" datoEvento fa fa-map-marker"> </b>
-                                     <span class="datoEvento"> {{evento.Ciudad.Ciudad}}, {{evento.Ciudad.Estado}}. {{evento.Ciudad.Pais}}.</span><br>
-                                 </span>-->
-
-
-                                 <div class="pull-right btn-group">
-
-                                    <!-- Detalles -->
-                                     <a class=" operacionEvento" ng-click="VerDetallesEvento(evento)">
-                                         <span class="fa fa-eye"></span>
-                                     </a>
-
-                                 </div>
-
-                             </div>
-                         </div>
-
-                         <!-- Divisor -->
-                         <div class="divisorGris1" ng-if="(evento.Cantidad.length + evento.Costo.length + evento.Lugar.LugarId.length) >0">
-                         </div>
-
-                         <!-- Cantidad, costo y lugar -->
-                         <div class="row hidden-xs">
-                            <!-- Cantidad -->
-                             <div class="col-sm-4  text-center">
-                                <span ng-if="evento.Cantidad.length > 0">
-                                     <b class="">Cantidad</b><br>
-                                     <span class="">{{evento.Cantidad}} {{evento.Unidad.Unidad}}</span><br>
-                                 </span>
-                             </div>
-
-                             <!-- Costo -->
-                             <div class="col-sm-4 text-center">
-                                <span ng-if="evento.Costo.length > 0">
-                                     <b class="">Costo</b><br>
-                                     <span class="">{{evento.Costo}} {{evento.Divisa.Divisa}}</span><br>
-                                 </span>
-                             </div>
-
-                             <!-- Lugar -->
-                             <div class="col-sm-4 text-center">
-                                <span ng-if="evento.Lugar.LugarId.length > 0">
-                                     <b class="">Lugar</b><br>
-                                     <span class="">{{evento.Lugar.Nombre}}</span><br>
-                                 </span>
-                             </div>
-                         </div>
-
-
-                         <!-- Cantidad, costo y lugar -->
-                         <div class="row hidden-sm hidden-md hidden-lg">
-                            <!-- Cantidad -->
-                             <div class="col-xs-12 ">
-                                <span ng-if="evento.Cantidad.length > 0">
-                                     <b class="">Cantidad: </b>
-                                     <span class="">{{evento.Cantidad}} {{evento.Unidad.Unidad}}</span>
-                                 </span>
-                             </div>
-
-                             <!-- Costo -->
-                             <div class="col-xs-12">
-                                <span ng-if="evento.Costo.length > 0">
-                                     <b class="">Costo: </b>
-                                     <span class="">{{evento.Costo}} {{evento.Divisa.Divisa}}</span>
-                                 </span>
-                             </div>
-
-                             <!-- Lugar -->
-                             <div class="col-xs-12">
-                                <span ng-if="evento.Lugar.LugarId.length > 0">
-                                     <b class="">Lugar: </b>
-                                    <span class="">{{evento.Lugar.Nombre}}</span>
-                                 </span>
-                             </div>
-                         </div>
-
-                     </div>
-                      <br>
-
-
-                  </div>
-               </div>
             </div>
             
             <div class="row" ng-if="tipoDetalle == 'Imagen'">
@@ -612,6 +703,43 @@
             
         </div>
     </div>
+    
+    <!---------- VerImagen ---------------->
+    <div class="modal fade sombraDivModal" id="verImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-md modalPrincipal">
+          
+          <div class="row">
+                <div class="col-xs-12">
+                    <a class="pull-right" data-dismiss="modal" aria-label="Close"> <span class="fa fa-times changeImage">    </span></a>
+                </div>
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="myCarousel2" class="carousel  slide">
+  
+                      <!-- Items -->
+                      <div class="carousel-inner">
+                        <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in img">
+                            <img   class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                        </div>
+                      </div>
+                      <!-- Navigation -->
+                       <a class="left carousel-control"  ng-click="changeImageViewed(-1);" ng-if="img.length > 1">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control"  ng-click="changeImageViewed(1);" ng-if="img.length > 1">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
     
 </div>
 

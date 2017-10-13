@@ -542,6 +542,28 @@ app.factory('ETIQUETA',function($rootScope)
       $rootScope.$broadcast('TerminarEtiquetaOculta'); 
   };
     
+  service.EtiquetaSet = function(etiqueta)
+  {
+      this.etiqueta = etiqueta;
+      $rootScope.$broadcast('EtiquetaSet'); 
+  };
+    
+  service.TemaSet = function(etiqueta)
+  {
+      this.etiqueta = etiqueta;
+      $rootScope.$broadcast('TemaSet'); 
+  };
+    
+  service.QuitarEtiqueta = function(etiqueta)
+  {
+      $rootScope.$broadcast('QuitarEtiqueta',etiqueta); 
+  };
+    
+  service.QuitarTema = function(tema)
+  {
+      $rootScope.$broadcast('QuitarTema', tema); 
+  };
+    
 
   return service;
 });

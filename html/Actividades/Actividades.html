@@ -416,7 +416,11 @@
                             <!-- Opciones ocultas -->
                             <div class="btn-group pull-right" >
                                
-                               <a class=" operacionEvento" style="color: transparent" disabled>
+                               <a class=" operacionEvento" style="color: transparent" disabled ng-if="evento.Imagen.length > 0">
+                                     <span class="fa fa-picture-o"></span>
+                                 </a>
+                                 
+                               <a class=" operacionEvento" style="color: transparent" disabled ng-if="(evento.EtiquetaVisible.length + evento.Tema.length) > 0">
                                      <span class="fa fa-comment-o"></span>
                                  </a>
                                  
@@ -469,8 +473,14 @@
                          
                          <!-- Opciones -->
                         <div class="btn-group pull-right" style="position: absolute; right: 0; top: 0; padding: 10px">
+                           
+                           <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.Imagen.length) > 0" ng-click="VerImganes(true, false, false, evento.Imagen, null, 0)">
+                                 <span class="fa fa-picture-o"></span>
+                             </a>
+                             
                             <!-- Concepto -->
                             <span class="dropdown">
+                               
                                 <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.EtiquetaVisible.length + evento.Tema.length) > 0">
                                      <span class="fa fa-comment-o"></span>
                                  </a>
@@ -957,34 +967,6 @@
         </div>
     </div>
     
-    <!---------- VerImagen ---------------->
-    <div class="modal fade modalCancionero" id="verImagen">
-        <div class=" modalImagenCancionero ">
-           <div class="row">
-                <div class="col-xs-12 tituloCancion" style="font-size:14pt !important">
-                    <b>{{detalle.Titulo}}</b>
-                    <button class="btn close cerrarModal" style="font-size:14pt !important" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">Salir</span></button>
-                </div>
-            </div>
-            
-            <div class="row" ng-if="!verImagen.origen">
-                <div class="col-xs-12">
-                    <img  class="img-responsive center-block visualizarImagenCompleta" ng-src="data:image/PNG;base64,{{verImagen.imagen}}"/>
-                </div>
-            </div>
-            
-            <div class="row" ng-show="verImagen.origen">
-                <div class="col-xs-12">
-                    <span id="PrevisualizarImagenDetalles"></span>
-                </div>
-            </div>
-            
-            
-            <br>
-            
-        </div>
-    </div>
-    
     <!-- Borrar -->
     <div class="modal fade sombraDivModal" id="borrarActividad">
         <br>    <br>   <br>
@@ -1316,376 +1298,377 @@
             <br>
             
             <form name="eventoForma">
-                
-                <!-- Fecha -->
-                <div class="row">
-                      
-                    <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                        <label class="">Fecha</label><br>
-                        <div class="row" >
-                           <div class="col-xs-12" >
-                            <span class="botonFecha">{{nuevoEvento.FechaFormato}}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="row" >
-                            <div class="col-xs-12" >
-                                <input type="text"  id="fechaEvento" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFecha(this)"/>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <br>
-                <!-- Hora -->
-                <div class="row">
-                      
-                    <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                        <label class="">Hora</label><br>
-                        
-                        <div class="row" >
-                            <div class="col-xs-12" >
-                                <input type="text"  id="horaEvento" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraEvento(this)"/>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                
-                <!-- Notas -->
-                <div class="row">
-                    <div class="col-sm-12">
-                         <div class="">
-                            <label class="etiquetaNormal">Notas</label>
-                            <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="nota" ng-model="nuevoEvento.Notas" maxlength="20000"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <br>
-                 
-                 <div class="row">
-                    <div class="col-sm-12">
-                        <div class="divisorGris2"></div>
-                    </div>
-                </div>
-                
-                 <br><br>
-                 
-                 
-                <!-- lugar -->
-                <div class="row">
-                    
-                    <!-- Lugar -->
-                     <div class="col-sm-6 etiquetaDropdownList" id="lugarEventoPanel">
-                        <label>Lugar</label>
-                        <a class="btn btn-block dropdownListModal" ng-click="MostrarLugar()">{{nuevoEvento.Lugar.Nombre}} <span class="caret"></span></a>
-                        
-                        <div ng-show="mostrarLugar" class="dropdown-menu modalAgregarDropdown">
-                           <div class="col-xs-12" style="margin-top: 10px"></div>
-                           
-                            <div class="col-xs-10">
-                                <div class="input-group">
-                                    <input type="text"  placeholder="Buscar Lugar" class="entrada form-control" name="buscarLugarOperacion" ng-model="buscarLugarOperacion">
-                                    <span class="input-group-btn">
-                                        <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(9)"><span aria-hidden="true">&times;</span></a>
-                                    </span>
-                                </div>
-                               
-                            </div>
-                            
-                            <div class="col-xs-2">
-                               <a class="btn  botonAgregar pull-right" ng-click="AbrirAgregarLugar('Evento')"><span class="fa fa-plus"></span> </a>
-                           </div>
-
-                            
-                            <div class="col-xs-12" style="margin-top: 10px"></div>
-                            <div class="panel  panelFiltro" style="border-radius: 0px;">
-                                <div class="row " >
-                                    <div class="col-xs-12">
-
-                                        <table  class="table table-responsive">
-                                            
-                                            <tbody  style="cursor: pointer">
-                                                
-                                                <tr>
-                                                    <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarLugar('Ninguno', 'Evento')"><b>Ninguno</b></td>
-                                                </tr>
-                                                
-                                                <tr  ng-repeat="lugar in lugar | filter:buscarLugarOperacion | orderBy:'Nombre'">
-                                                  <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarLugar(lugar, 'Evento')">{{lugar.Nombre}}</td>
-                                                </tr>
-                                            </tbody>
-                                            
-                                        </table>
-
-                                    </div>
-                                </div>
-                            </div>
+               
+               <div class="row">
+                     <div class="col-xs-12">
+                         
+                         <div class="text-center">
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Evento'" ng-class="{active: tabModal == 'Evento'}"><div class="fa fa-calendar-o tabModal"></div><br>Evento</a>
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Imagenes'" ng-class="{active: tabModal == 'Imagenes'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
                          </div>
-                    </div> 
-                    
-                    <br class="hidden-sm hidden-md hidden-lg">
-                    
-                    <!-- Ciudad-->
-                     <div class="col-sm-6 etiquetaDropdownList">
-
-                         <label>Ciudad</label>
-                        <div class="input-group">
-                            <input type="text"  class="form-control entrada" ng-model="buscarCiudad" uib-typeahead="c as (c.Ciudad + ' (' + c.AbreviacionPais + ')') for c in FiltrarBuscarCiudad($viewValue) | limitTo:5" typeahead-on-select="CambiarCiudad()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-no-results="noResultados"> 
-                            <span class="input-group-addon entrada" ng-click="QuitaCiudad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
-                            <span class="input-group-addon entrada" ng-click="AbrirAgregarCiudad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
-                        </div>
-
-                        <div ng-if="noResultados">
-                            Sin Resultado
-                        </div>
-
-                    </div>
-                </div>
-            
-                 
-                <!--<div class="row">
-                   <!-- pais
-                    <div class="col-sm-6 etiquetaDropdownList" id="paisEventoPanel">
-                        <label>Pais</label>
-                        <a class="btn btn-block dropdownListModal" ng-click="MostrarPais()">{{nuevoEvento.Ciudad.Pais}} <span class="caret"></span></a>
-                        
-                        <div ng-show="mostrarPais" class="dropdown-menu modalAgregarDropdown">
-                           <div class="col-xs-12" style="margin-top: 10px"></div>
-                           
-                            <div class="col-xs-10">
-                                <div class="input-group">
-                                    <input type="text"  placeholder="Buscar Pais" class="entrada form-control" name="buscarPais" ng-model="buscarPais">
-                                    <span class="input-group-btn">
-                                        <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(10)"><span aria-hidden="true">&times;</span></a>
-                                    </span>
-                                </div>
-                               
-                            </div>
-                            
-                            <div class="col-xs-2">
-                               <a class="btn  botonAgregar pull-right" ng-click="AbrirAgregarCiudad('Pais')"><span class="fa fa-plus"></span> </a>
-                           </div>
-
-                            
-                            <div class="col-xs-12" style="margin-top: 10px"></div>
-                            <div class="panel  panelFiltro" style="border-radius: 0px;">
-                                <div class="row " >
-                                    <div class="col-xs-12">
-
-                                        <table  class="table table-responsive">
-                                            
-                                            <tbody  style="cursor: pointer">
-                                                
-                                                <tr>
-                                                    <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarPais('')"><b>Ninguno</b></td>
-                                                </tr>
-                                                
-                                                <tr  ng-repeat="pais in pais | filter:buscarPais | orderBy:'Pais'">
-                                                  <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarPais(pais.Pais)">{{pais.Pais}}</td>
-                                                </tr>
-                                            </tbody>
-                                            
-                                        </table>
-
-                                    </div>
-                                </div>
-                            </div>
-                         </div>
-                    </div> 
-                        
-                    <br class="hidden-md hidden-lg hidden-sm">
-                    <!-- Estado
-                    <div class="col-sm-6 etiquetaDropdownList" id="estadoEventoPanel">
-                        <label>Estado</label>
-                        <a class="btn btn-block dropdownListModal" ng-click="MostrarEstado()" ng-class="{disabled:(nuevoEvento.Ciudad.Pais.length == 0)}">
-                            {{nuevoEvento.Ciudad.Estado}} <span class="caret"></span>
-                        </a>
-                        
-                        <div ng-show="mostrarEstado" class="dropdown-menu modalAgregarDropdown">
-                           <div class="col-xs-12" style="margin-top: 10px"></div>
-                           
-                            <div class="col-xs-10">
-                                <div class="input-group">
-                                    <input type="text"  placeholder="Buscar Estado" class="entrada form-control" name="buscarEstado" ng-model="buscarEstado">
-                                    <span class="input-group-btn">
-                                        <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(11)"><span aria-hidden="true">&times;</span></a>
-                                    </span>
-                                </div>
-                               
-                            </div>
-                            
-                            <div class="col-xs-2">
-                               <a class="btn  botonAgregar pull-right" ng-click="AbrirAgregarCiudad('Estado')"><span class="fa fa-plus"></span> </a>
-                           </div>
-
-                            
-                            <div class="col-xs-12" style="margin-top: 10px"></div>
-                            <div class="panel  panelFiltro" style="border-radius: 0px;">
-                                <div class="row " >
-                                    <div class="col-xs-12">
-
-                                        <table  class="table table-responsive">
-                                            
-                                            <tbody  style="cursor: pointer">
-                                                
-                                                <tr  ng-repeat="estado in estado | filter:buscarEstado | orderBy:'Estado' | filter:{Pais:nuevoEvento.Ciudad.Pais}:true">
-                                                  <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarEstado(estado.Estado)">{{estado.Estado}}</td>
-                                                </tr>
-                                            </tbody>
-                                            
-                                        </table>
-
-                                    </div>
-                                </div>
-                            </div>
-                         </div>
-                    </div>          
-                </div>-->
-                
-                <!-- Ciudad -->
-                <!--<div class="row">
-                    <div class="col-sm-12 etiquetaDropdownList" id="ciudadEventoPanel">
-                    
-                        <label>Ciudad</label>
-                        <a class="btn btn-block dropdownListModal" ng-click="MostrarCiudad()" ng-class="{disabled:(nuevoEvento.Ciudad.Estado.length == 0)}">
-                            {{nuevoEvento.Ciudad.Ciudad}} <span class="caret"></span>
-                        </a>
-                        
-                        <div ng-show="mostrarCiudad" class="dropdown-menu modalAgregarDropdown">
-                           <div class="col-xs-12" style="margin-top: 10px"></div>
-                           
-                            <div class="col-xs-10">
-                                <div class="input-group">
-                                    <input type="text"  placeholder="Buscar Ciudad" class="entrada form-control" name="buscarCiudad" ng-model="buscarCiudad">
-                                    <span class="input-group-btn">
-                                        <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(12)"><span aria-hidden="true">&times;</span></a>
-                                    </span>
-                                </div>
-                               
-                            </div>
-                            
-                            <div class="col-xs-2">
-                               <a class="btn  botonAgregar pull-right" ng-click="AbrirAgregarCiudad('Ciudad')"><span class="fa fa-plus"></span> </a>
-                           </div>
-                            
-                            <div class="col-xs-12" style="margin-top: 10px"></div>
-                            <div class="panel  panelFiltro" style="border-radius: 0px;">
-                                <div class="row " >
-                                    <div class="col-xs-12">
-
-                                        <table  class="table table-responsive">
-                                            
-                                            <tbody  style="cursor: pointer">
-                                                
-                                                <tr  ng-repeat="ciudad in ciudad | filter:buscarCiudad | orderBy:'Ciudad' | filter:{Pais:nuevoEvento.Ciudad.Pais}:true |  filter:{Estado:nuevoEvento.Ciudad.Estado}:true">
-                                                  <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarCiudad(ciudad)">{{ciudad.Ciudad}}</td>
-                                                </tr>
-                                            </tbody>
-                                            
-                                        </table>
-
-                                    </div>
-                                </div>
-                            </div>
-                         </div>
-
-                   </div>             
-                </div>-->
-                <br>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="divisorGris2"></div>
-                    </div>
-                </div>
-                 <br>
-                 <!-- Cantidad -->
-                 <div class="row">
-                    <div class="col-xs-12">
-                        <div class="input-group">
-                            <div class="entrada2">
-                                <input type="text" required class="entrada form-control text-right" name="cantidad" ng-model="nuevoEvento.Cantidad" />
-                                <label style="z-index:10">Cantidad</label>
-                            </div>
-                            <span class="input-group-btn">
-                                <div class="dropdown">
-                                   <a type="button" class="btn botonInputDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span ng-if="nuevoEvento.Unidad.Unidad.length > 0">{{nuevoEvento.Unidad.Unidad}} </span>
-                                        <span ng-if="nuevoEvento.Unidad.Unidad.length == 0">Unidades </span>
-                                        <span class="fa fa-chevron-down"></span>
-                                    </a>
-
-                                    <ul class="dropdown-menu dropdown-menu-right elemetosDropdownListModal">
-
-                                       <li> 
-                                           <a href="" class="dropdownOpcionModal text-center" ng-click="AbrirAgregarUnidad()"> 
-                                            <span>Agregar</span>
-                                            </a>
-                                        </li>
-                                        
-                                        <div role="separator" class="dropdown-divider"></div>
-
-                                        <li ng-repeat="unidad in unidad  | orderBy:'Unidad'">
-                                            <a  href="" class="dropdownOpcionModal"  ng-click="CambiarUnidad(unidad)">
-                                                <span>{{unidad.Unidad}}</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </span>
-                        </div>
-                    </div>
-                 </div>
-                 
-                 <br><br>
-                 <!-- Costo -->
-                 <div class="row">
-                    <div class="col-xs-12">
-                        <div class="input-group">
-                            <div class="entrada2">
-                                <input type="text" required class="entrada form-control text-right" name="costo" ng-model="nuevoEvento.Costo" />
-                                <label style="z-index:10">Costo</label>
-                            </div>
-                            <span class="input-group-btn">
-                                <div class="dropdown">
-                                   <a type="button" class="btn botonInputDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span ng-if="nuevoEvento.Divisa.Divisa.length > 0">{{nuevoEvento.Divisa.Divisa}} </span>
-                                        <span ng-if="nuevoEvento.Divisa.Divisa.length == 0">Divisa </span>
-                                        <span class="fa fa-chevron-down"></span>
-                                    </a>
-
-                                    <ul class="dropdown-menu dropdown-menu-right elemetosDropdownListModal">
-
-                                       <li> 
-                                           <a href="" class="dropdownOpcionModal text-center" ng-click="AbrirAgregarDivisa()"> 
-                                            <span>Agregar</span>
-                                            </a>
-                                        </li>
-                                        
-                                        <div role="separator" class="dropdown-divider"></div>
-
-                                        <li ng-repeat="divisa in divisa  | orderBy:'Unidad'">
-                                            <a  href="" class="dropdownOpcionModal"  ng-click="CambiarDivisa(divisa)">
-                                                <span>{{divisa.Divisa}}</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </span>
-                        </div>
-                    </div>
+                                          
+                     </div>
                  </div>
                  <br>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="divisorGris2"></div>
+                
+                <div ng-show="tabModal == 'Evento'">
+                    <!-- Fecha -->
+                    <div class="row">
+
+                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                            <label class="">Fecha</label><br>
+                            <div class="row" >
+                               <div class="col-xs-12" >
+                                <span class="botonFecha">{{nuevoEvento.FechaFormato}}</span>
+                                </div>
+                            </div>
+
+                            <div class="row" >
+                                <div class="col-xs-12" >
+                                    <input type="text"  id="fechaEvento" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFecha(this)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <br>
+                    <!-- Hora -->
+                    <div class="row">
+
+                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                            <label class="">Hora</label><br>
+
+                            <div class="row" >
+                                <div class="col-xs-12" >
+                                    <input type="text"  id="horaEvento" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraEvento(this)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Notas -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                             <div class="">
+                                <label class="etiquetaNormal">Notas</label>
+                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="nota" ng-model="nuevoEvento.Notas" maxlength="20000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+
+                     <div class="row">
+                        <div class="col-sm-12">
+                            <div class="divisorGris2"></div>
+                        </div>
+                    </div>
+
+                     <br><br>
+
+
+                    <!-- lugar -->
+                    <div class="row">
+
+                        <!-- Lugar -->
+                         <div class="col-sm-6 etiquetaDropdownList" id="lugarEventoPanel">
+                            <label>Lugar</label>
+                            <a class="btn btn-block dropdownListModal" ng-click="MostrarLugar()">{{nuevoEvento.Lugar.Nombre}} <span class="caret"></span></a>
+
+                            <div ng-show="mostrarLugar" class="dropdown-menu modalAgregarDropdown">
+                               <div class="col-xs-12" style="margin-top: 10px"></div>
+
+                                <div class="col-xs-10">
+                                    <div class="input-group">
+                                        <input type="text"  placeholder="Buscar Lugar" class="entrada form-control" name="buscarLugarOperacion" ng-model="buscarLugarOperacion">
+                                        <span class="input-group-btn">
+                                            <a class="btn close cerrarModal"  ng-click="LimpiarBuscar(9)"><span aria-hidden="true">&times;</span></a>
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-xs-2">
+                                   <a class="btn  botonAgregar pull-right" ng-click="AbrirAgregarLugar('Evento')"><span class="fa fa-plus"></span> </a>
+                               </div>
+
+
+                                <div class="col-xs-12" style="margin-top: 10px"></div>
+                                <div class="panel  panelFiltro" style="border-radius: 0px;">
+                                    <div class="row " >
+                                        <div class="col-xs-12">
+
+                                            <table  class="table table-responsive">
+
+                                                <tbody  style="cursor: pointer">
+
+                                                    <tr>
+                                                        <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarLugar('Ninguno', 'Evento')"><b>Ninguno</b></td>
+                                                    </tr>
+
+                                                    <tr  ng-repeat="lugar in lugar | filter:buscarLugarOperacion | orderBy:'Nombre'">
+                                                      <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="CambiarLugar(lugar, 'Evento')">{{lugar.Nombre}}</td>
+                                                    </tr>
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                        </div> 
+
+                        <br class="hidden-sm hidden-md hidden-lg">
+
+                        <!-- Ciudad-->
+                         <div class="col-sm-6 etiquetaDropdownList">
+
+                             <label>Ciudad</label>
+                            <div class="input-group">
+                                <input type="text"  class="form-control entrada" ng-model="buscarCiudad" uib-typeahead="c as (c.Ciudad + ' (' + c.AbreviacionPais + ')') for c in FiltrarBuscarCiudad($viewValue) | limitTo:5" typeahead-on-select="CambiarCiudad()" typeahead-select-on-blur="false" typeahead-focus-first="false" typeahead-no-results="noResultados"> 
+                                <span class="input-group-addon entrada" ng-click="QuitaCiudad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="AbrirAgregarCiudad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                            </div>
+
+                            <div ng-if="noResultados">
+                                Sin Resultado
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                   
+                    <br>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="divisorGris2"></div>
+                        </div>
+                    </div>
+                     <br>
+                     <!-- Cantidad -->
+                     <div class="row">
+                        <div class="col-xs-12">
+                            <div class="input-group">
+                                <div class="entrada2">
+                                    <input type="text" required class="entrada form-control text-right" name="cantidad" ng-model="nuevoEvento.Cantidad" />
+                                    <label style="z-index:10">Cantidad</label>
+                                </div>
+                                <span class="input-group-btn">
+                                    <div class="dropdown">
+                                       <a type="button" class="btn botonInputDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span ng-if="nuevoEvento.Unidad.Unidad.length > 0">{{nuevoEvento.Unidad.Unidad}} </span>
+                                            <span ng-if="nuevoEvento.Unidad.Unidad.length == 0">Unidades </span>
+                                            <span class="fa fa-chevron-down"></span>
+                                        </a>
+
+                                        <ul class="dropdown-menu dropdown-menu-right elemetosDropdownListModal">
+
+                                           <li> 
+                                               <a href="" class="dropdownOpcionModal text-center" ng-click="AbrirAgregarUnidad()"> 
+                                                <span>Agregar</span>
+                                                </a>
+                                            </li>
+
+                                            <div role="separator" class="dropdown-divider"></div>
+
+                                            <li ng-repeat="unidad in unidad  | orderBy:'Unidad'">
+                                                <a  href="" class="dropdownOpcionModal"  ng-click="CambiarUnidad(unidad)">
+                                                    <span>{{unidad.Unidad}}</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                     </div>
+
+                     <br><br>
+                     <!-- Costo -->
+                     <div class="row">
+                        <div class="col-xs-12">
+                            <div class="input-group">
+                                <div class="entrada2">
+                                    <input type="text" required class="entrada form-control text-right" name="costo" ng-model="nuevoEvento.Costo" />
+                                    <label style="z-index:10">Costo</label>
+                                </div>
+                                <span class="input-group-btn">
+                                    <div class="dropdown">
+                                       <a type="button" class="btn botonInputDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span ng-if="nuevoEvento.Divisa.Divisa.length > 0">{{nuevoEvento.Divisa.Divisa}} </span>
+                                            <span ng-if="nuevoEvento.Divisa.Divisa.length == 0">Divisa </span>
+                                            <span class="fa fa-chevron-down"></span>
+                                        </a>
+
+                                        <ul class="dropdown-menu dropdown-menu-right elemetosDropdownListModal">
+
+                                           <li> 
+                                               <a href="" class="dropdownOpcionModal text-center" ng-click="AbrirAgregarDivisa()"> 
+                                                <span>Agregar</span>
+                                                </a>
+                                            </li>
+
+                                            <div role="separator" class="dropdown-divider"></div>
+
+                                            <li ng-repeat="divisa in divisa  | orderBy:'Unidad'">
+                                                <a  href="" class="dropdownOpcionModal"  ng-click="CambiarDivisa(divisa)">
+                                                    <span>{{divisa.Divisa}}</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                     </div>
+                     <br>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="divisorGris2"></div>
+                        </div>
+                    </div>
+                     <br>
+
+                    <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Evento')" ng-controller="ControlEtiquetaController as ac"></div>
+
+                </div>
+                   
+                <div ng-show="tabModal == 'Imagenes'">
+                    <!-- Imagenes -->
+                    <div class="row" >
+
+                        <div class="col-xs-12">
+                            <a ng-click="AbrirFototeca()" class="pull-right btn operacionEvento"> 
+                                <span class="fa fa-picture-o"></span> Fototeca
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+
+                        <div class="col-sm-12">
+
+                           <div  method="post" enctype="multipart/form-data">
+
+                                <div class="form-group files">
+                                    <input id="cargarImagen" type="file" class="form-control" multiple accept="image/*" name="imagen" > <!-- onchange="angular.element(this).scope().CargarArchivo(this)" -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                
+                    <br>
+                
+
+                   <div class="row" >
+                       <div class="col-xs-12">
+                           <table  class="table table-responsive">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <tr   ng-repeat="img in nuevoEvento.ImagenSrc" ng-if="nuevoEvento.ImagenSrc.length > 0">
+                                      
+                                      <td class="text-center">
+                                          <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarImagen(img, 'prev')">
+                                            <span >
+                                             <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                             <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                            </span>
+                                         </a>
+                                      </td>
+                                     
+                                      <td style="width: 100px; max-width: 100px">
+                                          <div class="imgContainer" style="height:50px">
+                                              <a style="overflow: hidden !important; max-height: 50px">
+                                                <img class="img-responsive" style="width: 100%" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevoEvento.Imagen, nuevoEvento.ImagenSrc, $index, 0)"/>
+                                              </a>
+                                          </div>
+                                        </td>
+
+                                      <td class="hidden-xs"> <span class="infoCenterCell">{{img.name}}</span> </td>
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{(img.size/1000000).toFixed(2)}} MB</span> </td>
+                                      <td class="text-center">
+                                          <a class="btn btnQuitarImg" ng-click="nuevoEvento.ImagenSrc.splice($index,1)">
+                                             <span class="fa fa-times-circle"></span>
+                                         </a>
+                                      </td>
+                                      
+                                                   
+                                    </tr>
+
+                                    <tr ng-repeat="img in nuevoEvento.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
+                                     <td class="text-center">
+                                          <a class="btn operacionEvento infoCenterCell" ng-click="EtiquetarImagen(img, 'img')" style="font-size: 13pt;">
+                                            <span >
+                                             <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                             <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                            </span>
+                                         </a>
+                                      </td>
+                                      
+                                      <td style="width: 100px">
+                                        <div class="imgContainer" style="height:50px">
+                                             <a style="overflow: hidden !important; max-height: 50px">
+                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoEvento.Imagen, nuevoEvento.ImagenSrc, $index, 1)"/>
+                                             </a>
+                                        </div>
+                                      </td>
+                                      
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{img.Nombre}}</span> </td>
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{(img.Size/1000000).toFixed(2)}} MB </span></td>
+                                      <td class="text-center">  
+                                          <a class="btn btnQuitarImg" ng-click="img.Eliminada = true">
+                                             <span class="fa fa-times-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                       </div>
+                    </div>
+                                             
+                     <div class="row"  ng-if="(fotoEliminada = (nuevoEvento.Imagen | filter:{Eliminada:'true'}  ).length) > 0">
+                       <div class="col-xs-12">
+
+                           <a class="btn botonDetallesActividad" ng-click="showEliminada = !showEliminada">
+                               <span>Fotos Eliminadas ({{fotoEliminada}})</span>
+                               <span ng-show="showEliminada" class="fa fa-angle-double-up"></span>
+                               <span ng-show="!showEliminada" class="fa fa-angle-double-right"></span>
+                           </a>
+                           <table  class="table table-responsive" ng-show="showEliminada">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <tr ng-repeat="img in nuevoEvento.Imagen"  ng-if="img.Eliminada == true">
+                                      <td style="width: 100px">
+                                          <div class="imgContainer" style="height:50px">
+                                              <a style="overflow: hidden !important; max-height: 50px">
+                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoEvento.Imagen, null, $index)"/>
+                                              </a>
+                                          </div>
+                                      </td>
+                                    
+                                      <td class="hidden-xs " > <span class="infoCenterCell">{{img.Nombre}}</span> </td>
+                                        <td class="hidden-xs"> <span class="infoCenterCell"> {{(img.Size/1000000).toFixed(2)}} MB </span></td>
+                                      <td class="text-center">  
+                                          <a class="btn btnAgregarImg" ng-click="img.Eliminada = false">
+                                             <span class="fa fa-check-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                       </div>
                     </div>
                 </div>
-                 <br>
-                 
-                <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Evento')" ng-controller="ControlEtiquetaController as ac"></div>
-
-                
+                   
                 <br><br>
                 <!---- botones de operación -->
                 <div class="row">
@@ -1697,7 +1680,8 @@
                         <a focus class="btn botonFinModal btn-block" ng-click="TerminarEventoActividad()">TERMINAR</a>
                     </div>
                 </div>
-            <br>
+                <br>
+                
             </form> 
             
         </div>
@@ -1726,7 +1710,7 @@
         </div>
     </div>
     
-    <!-- Borrar -->
+    <!-- Opciones de evento -->
     <div class="modal fade sombraDivModal" id="OperacionEvento">
         <br>    <br>   <br>
         <div class="modal-dialog modalPrincipal">
@@ -1765,6 +1749,93 @@
         </div>
     </div>
     
+     <!---------- VerImagen ---------------->
+    <div class="modal fade sombraDivModal" id="verImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-md modalPrincipal">
+          
+          <div class="row">
+                <div class="col-xs-12">
+                    <a class="pull-right" data-dismiss="modal" aria-label="Close"> <span class="fa fa-times changeImage">    </span></a>
+                </div>
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="myCarousel2" class="carousel  slide">
+  
+                      <!-- Items -->
+                      <div class="carousel-inner">
+                        <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
+                        </div>
+                      </div>
+                      <!-- Navigation -->
+                       <a class="left carousel-control"  ng-click="changeImageViewed(-1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control"  ng-click="changeImageViewed(1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!---------- fototeca ---------------->
+    <div class="modal fade sombraDivModal" id="fototeca" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-lg modalPrincipal">
+         
+            <div class="row">
+                
+                <div class="col-xs-12">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" ng-click="AgregarImagenes()" ><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+            </div>
+            <br>
+          
+            <div class="row">
+                 <div ng-repeat="img in fototeca">
+                    <!-- Imagenes -->
+                    <div style="padding-left: 12px;  padding-right: 12px">
+                         <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px;  padding-right: 3px">
+                           <div class="imgContainer" >
+                                <div class="crop center-block">
+
+                                    <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
+                                        <span class="fa fa-check-circle" ></span>
+                                    </a>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                 </div>
+                            </div>
+                            <div style="height: 15px"></div>
+                         </div>
+                     </div>
+                </div>     
+            </div>            
+            <br>
+            <!---- botones de operacion -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="AgregarImagenes()" >TERMINAR</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
     <!-- Hecho Evento -->
     <!--<div class="modal fade sombraDivModal" id="EventoHecho">
         <br>    <br>   <br>
@@ -1800,6 +1871,7 @@
 <div ng-if="CargarExterior" ng-include=" 'html/Actividades/Administrar/Unidades/AgregarUnidades.html' "> </div>
 <div ng-if="CargarExterior" ng-include=" 'html/Actividades/Administrar/Unidades/AgregarDivisas.html' "> </div>
 
+<div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
 

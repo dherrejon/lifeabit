@@ -22,6 +22,9 @@ class EventoActividad
         
         this.Tema = [];
         this.Etiqueta = [];
+        
+        this.Imagen = [];
+        this.ImagenSrc = [];
     }
 }
 
@@ -67,6 +70,7 @@ function SetEventoActividad(data)
     evento.Costo = data.Costo;
     evento.Cantidad = data.Cantidad;
     evento.FechaFormato = TransformarFecha(data.Fecha);
+    evento.Imagen = data.Imagen;
     
     evento.Hecho = data.Hecho;
     evento.FechaHecho = data.FechaHecho;
@@ -154,40 +158,48 @@ function AgregarEventoActividad($http, CONFIG, $q, evento)
 {
     var q = $q.defer();
     
-    if(evento.Costo !== undefined && evento.Costo !== null)
+    var fd = new FormData();
+    
+    for(var k=0; k<evento.ImagenSrc.length; k++)
     {
-        if(evento.Costo.length === 0)
-        {
-            evento.Costo = null;
-        }
-    }
-    else
-    {
-        evento.Costo = null;
+        fd.append('file[]', evento.ImagenSrc[k]);
     }
     
-    if(evento.Cantidad !== undefined && evento.Cantidad !== null)
+    if(evento.Imagen.length > 0)
     {
-        if(evento.Cantidad.length === 0)
+        for(var k=0; k<evento.Imagen.length; k++)
         {
-            evento.Cantidad = null;
+            if(evento.Imagen[k].Eliminada === undefined)
+            {
+                evento.Imagen[k].Eliminada = false;
+            }
         }
     }
-    else
-    {
-        evento.Cantidad = null;
-    }
+
+    var Evento = jQuery.extend({}, evento);
+    Evento.Cantidad = SetValNull(Evento.Cantidad);
+    Evento.Costo = SetValNull(Evento.Costo);
+    
+    Evento.AgregarImagen = Evento.ImagenSrc.length;
+    
+    fd.append('evento', JSON.stringify(Evento));
     
     $http({      
           method: 'POST',
           url: CONFIG.APIURL + '/AgregarEventoActividad',
-          data: evento
+          data: fd,
+          headers: 
+          {
+            "Content-type": undefined 
+          }
 
       }).success(function(data)
         {
+
             q.resolve(data);
+            
         }).error(function(data, status){
-            q.resolve([{Estatus:status}]);
+            q.resolve([{Estatus: status}]);
 
      }); 
     return q.promise;
@@ -197,40 +209,49 @@ function EditarEventoActividad($http, CONFIG, $q, evento)
 {
     var q = $q.defer();
     
-    if(evento.Costo !== undefined && evento.Costo !== null)
+    var fd = new FormData();
+    
+    for(var k=0; k<evento.ImagenSrc.length; k++)
     {
-        if(evento.Costo.length === 0)
-        {
-            evento.Costo = null;
-        }
-    }
-    else
-    {
-        evento.Costo = null;
+        fd.append('file[]', evento.ImagenSrc[k]);
     }
     
-    if(evento.Cantidad !== undefined && evento.Cantidad !== null)
+    if(evento.Imagen.length > 0)
     {
-        if(evento.Cantidad.length === 0)
+        for(var k=0; k<evento.Imagen.length; k++)
         {
-            evento.Cantidad = null;
+            if(evento.Imagen[k].Eliminada === undefined)
+            {
+                evento.Imagen[k].Eliminada = false;
+            }
         }
     }
-    else
-    {
-        evento.Cantidad = null;
-    }
 
+    var Evento = jQuery.extend({}, evento);
+    Evento.Cantidad = SetValNull(Evento.Cantidad);
+    Evento.Costo = SetValNull(Evento.Costo);
+    
+    Evento.AgregarImagen = Evento.ImagenSrc.length;
+    
+    //console.log(evento);
+    fd.append('evento', JSON.stringify(Evento));
+    
     $http({      
-          method: 'PUT',
+          method: 'POST',
           url: CONFIG.APIURL + '/EditarEventoActividad',
-          data: evento
+          data: fd,
+          headers: 
+          {
+            "Content-type": undefined 
+          }
 
       }).success(function(data)
         {
-            q.resolve(data);    
+
+            q.resolve(data);
+            
         }).error(function(data, status){
-            q.resolve([{Estatus:status}]);
+            q.resolve([{Estatus: status}]);
 
      }); 
     return q.promise;
@@ -287,6 +308,36 @@ function GetPersonaEventoActividad($http, $q, CONFIG, id)
       }).success(function(data)
         {
             q.resolve(data);
+             
+        }).error(function(data, status){
+            q.resolve([{Estatus: status}]);
+     }); 
+    return q.promise;
+}
+
+function GetEventoActividadPorId($http, $q, CONFIG, id)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetEventoActividadPorId/' + id,
+
+      }).success(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                var evento = []; 
+                for(var k=0; k<data[1].Evento.length; k++)
+                {
+                    evento[k] = SetEventoActividad(data[1].Evento[k]);
+                }
+                q.resolve(evento); 
+            }
+            else
+            {
+                q.resolve([]);
+            }
              
         }).error(function(data, status){
             q.resolve([{Estatus: status}]);
@@ -371,6 +422,23 @@ function convertTo24Hour(time)
     }
     
     return time;
+}
+
+function SetValNull(val)
+{
+    if(val !== undefined && val !== null)
+    {
+        if(val.length === 0)
+        {
+            return null;
+        }
+    }
+    else
+    {
+        return null;
+    }
+    
+    return val;
 }
 
 var dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];

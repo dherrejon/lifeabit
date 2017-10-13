@@ -2339,6 +2339,19 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         }
     }*/
     
+    $scope.EtiquetaEquivalenteLista = function(etiqueta)              
+    {
+        $scope.ee = [];
+        GetEtiquetaEquivalente($http, $q, CONFIG, etiqueta.EtiquetaId).then(function(data)
+        {
+            $scope.ee = data;
+        
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
 });
 
 

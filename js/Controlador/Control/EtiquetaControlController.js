@@ -4,6 +4,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.buscarConcepto = "";
     $scope.tema = [];
     $scope.modal = "";
+    $scope.ee = []; //Etiqueta equivalente
     
     $scope.$on('IniciarEtiquetaControl', function (evento, etiqueta, tema, elemento, modal) 
     {
@@ -96,6 +97,11 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         $scope.buscarConcepto = "";
         
         $scope.elemento.Etiqueta.push(etiqueta);
+        
+        if(ver)
+        {
+            ETIQUETA.EtiquetaSet(etiqueta);
+        }
     };
     
     /*$('#nuevoConcepto').keydown(function(e)
@@ -266,6 +272,11 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 
                 $rootScope.mensaje = "Etiqueta Agregada.";
                 $scope.EnviarAlerta('Modal');
+                
+                if($scope.verEtiqueta)
+                {   
+                    $scope.SetEtiquetaTodasImagenes(data[2].Etiqueta);
+                }
             }
             else
             {
@@ -288,7 +299,8 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     };
     
     $scope.QuitarEtiqueta = function(etiqueta)
-    {
+    {  
+        ETIQUETA.QuitarEtiqueta(etiqueta);
         
         for(var k=0; k<$scope.elemento.Etiqueta.length; k++)
         {
@@ -320,6 +332,8 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         
         tema.show = false;
         $scope.buscarConcepto = "";
+        
+        ETIQUETA.TemaSet(tema);
     };
     
     $scope.AgregarNuevoTema = function(nuevo)
@@ -332,14 +346,55 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             }
             else
             {
-                var tema = new TemaActividad();
+                $scope.EsNuevoTema(nuevo);
+                /*var tema = new TemaActividad();
                 tema.Tema = nuevo;
                 tema.TemaActividadId = "-1";
                 $scope.buscarTema = "";
                 
-                $scope.elemento.Tema.push(tema);
+                $scope.elemento.Tema.push(tema);*/
             }
         }
+    };
+    
+    $scope.EsNuevoTema = function(nueva)
+    {
+        var tema = new TemaActividad();
+        tema.Tema = nueva;
+        tema.UsuarioId =  $rootScope.UsuarioId;
+        
+        AgregarTemaActividad($http, CONFIG, $q, tema).then(function(data)
+        {
+            if(data[0].Estatus == "Exitoso")
+            {
+                $scope.buscarConcepto = "";
+                data[2].Tema.filtro = true;
+                
+                $scope.elemento.Tema.push(data[2].Tema);
+
+                $scope.tema.push(data[2].Tema);
+                $scope.tema[$scope.tema.length-1].show = false;
+                
+                
+                $scope.mensaje = "Tema Agregado.";
+
+                $scope.EnviarAlerta('Modal');
+                
+                ETIQUETA.TemaSet(data[2].Tema);
+
+                //$scope.$apply();
+            }
+            else
+            {
+                 $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde.";
+                $('#mensajeDiario').modal('toggle');
+            }
+            
+        }).catch(function(error)
+        {
+            $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde. Error: " + error;
+            $('#mensajeDiario').modal('toggle');
+        });
     };
     
     $scope.ValidarTemaAgregado = function(nuevo)
@@ -394,7 +449,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.QuitarTema = function(tema)
     {
-        
+        ETIQUETA.QuitarTema(tema);
         for(var k=0; k<$scope.elemento.Tema.length; k++)
         {
             if(tema == $scope.elemento.Tema[k])
@@ -648,5 +703,18 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         return BuscarTema(tema, $scope.buscarConcepto);
     };
     
+    
+    $scope.EtiquetaEquivalenteLista = function(etiqueta)              
+    {
+        $scope.ee = [];
+        GetEtiquetaEquivalente($http, $q, CONFIG, etiqueta.EtiquetaId).then(function(data)
+        {
+            $scope.ee = data;
+        
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
 
 });
