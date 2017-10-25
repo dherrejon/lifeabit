@@ -257,7 +257,6 @@ app.controller("EtiquetaEquivalenteController", function($scope, $window, $http,
             if(data[0].Estatus == "Exitoso")
             {
                 $scope.SetNuevasEtiquetas($scope.equivalente.Etiqueta, data[1].Etiqueta);
-                
                 $('#modalEtiquetaEquivalente').modal('toggle');
             }
             else
@@ -278,6 +277,7 @@ app.controller("EtiquetaEquivalenteController", function($scope, $window, $http,
     
     $scope.SetNuevasEtiquetas = function(nueva, etiqueta)
     {
+        var count  = nueva.length;
         var sql = "SELECT * FROM ? WHERE EtiquetaId = '-1'";
         nueva = alasql(sql, [nueva]);
         
@@ -296,7 +296,7 @@ app.controller("EtiquetaEquivalenteController", function($scope, $window, $http,
             }
         }
         
-        EEQUIVALENTE.SentNuevaEtiqueta(nueva);
+        EEQUIVALENTE.SentNuevaEtiqueta(nueva, count);
     };
     
     //-------------------- Cerrar modal -----------------
@@ -380,13 +380,13 @@ app.factory('EEQUIVALENTE',function($rootScope)
   {
       this.etiqueta = etiqueta;
       this.equivalente = equivalente;
+      
       $rootScope.$broadcast('SetEtiquetaEquivalente'); 
   };
     
-  service.SentNuevaEtiqueta = function(nueva)
+  service.SentNuevaEtiqueta = function(nueva, count)
   {
-      this.nueva = nueva;
-      $rootScope.$broadcast('SentNuevaEtiqueta'); 
+      $rootScope.$broadcast('SentNuevaEtiqueta', nueva, count); 
   };
     
   service.GetEquivalente = function()

@@ -170,8 +170,8 @@ function GetActividad()
         $stmt = $db->query($sql);
         $response = $stmt->fetchAll(PDO::FETCH_OBJ);
         
-        echo '[ { "Estatus": "Exito"}, {"Actividad":'.json_encode($response).'} ]'; 
-        $db = null;
+        //echo '[ { "Estatus": "Exito"}, {"Actividad":'.json_encode($response).'} ]'; 
+        //$db = null;
  
     } 
     catch(PDOException $e) 
@@ -181,6 +181,30 @@ function GetActividad()
         $app->status(409);
         $app->stop();
     }
+    
+    $numAct = count($response);
+    
+    for($k=0; $k<$numAct; $k++)
+    {
+        $sql = "SELECT Hecho, Fecha, EventoActividadId FROM EventoActividad WHERE ActividadId = ".$response[$k]->ActividadId;
+        
+        try 
+        {
+            $db = getConnection();
+            $stmt = $db->query($sql);
+            $response[$k]->EventoAux = $stmt->fetchAll(PDO::FETCH_OBJ);
+        } 
+        catch(PDOException $e) 
+        {
+            echo($sql);
+            echo '[ { "Estatus": "Fallo" } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    echo '[ { "Estatus": "Exito"}, {"Actividad":'.json_encode($response).'} ]'; 
+    $db = null;
 }
 
 

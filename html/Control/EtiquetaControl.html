@@ -105,9 +105,9 @@
                 <b>Etiquetas</b><br>
                  <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
                     
-                     <div class="btn-group campoAgregado contornoAzul" role="group" style="border-width: 2px; margin-top: 8px">
+                     <div class="btn-group campoAgregado contornoAzul" role="group" style="border-width: 2px; margin-bottom: 8px">
                       
-                      <span class="btn-group">
+                      <span ng-class="{'btn-group' : etiqueta.count > 0}" ng-show="etiqueta.count > 0">
                           <a style="border-width: 0px; font-size:10pt;" class="btn campoAgregadoQuitar contornoAzul" data-toggle="dropdown" ng-click="EtiquetaEquivalenteLista(etiqueta)"><span class="fa fa-clone"></span></a>
                           <ul class="dropdown-menu  dropdown-menu-left dropdownOpt" style="margin-top: 5px">
 

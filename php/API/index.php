@@ -305,6 +305,8 @@
     $app->get('/GetEtiquetaPorNota/:id', $seguridad, $ChecarSesion, 'GetEtiquetaPorNota');
     $app->get('/GetTemaPorNota/:id', $seguridad, $ChecarSesion, 'GetTemaPorNota');
     $app->post('/GetNotasFiltro', $seguridad, $ChecarSesion, 'GetNotasFiltro');
+    $app->get('/GetNotaOrdenUsuario/:id', $seguridad, $ChecarSesion, 'GetNotaOrdenUsuario');
+    $app->post('/EditarNotaOrdenUsuario', $seguridad, $ChecarSesion, 'EditarNotaOrdenUsuario');
 
     //---------------------------------------------------------------------------------------------------------------Buscador
 

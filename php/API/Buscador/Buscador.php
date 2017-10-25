@@ -441,7 +441,7 @@ function GetActividadPorId()
     {
         for($k=0; $k<$numActividad; $k++)
         {
-            $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
+            $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
             
             try 
             {
@@ -493,7 +493,7 @@ function GetActividadPorId()
             {
                 for($j=0; $j<$countEvento; $j++)
                 {
-                    $sql = "SELECT EventoActividadId, EtiquetaId, Nombre, Visible FROM EtiquetaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+                    $sql = "SELECT EventoActividadId, EtiquetaId, Nombre, Visible, count FROM EtiquetaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
 
                     try 
                     {

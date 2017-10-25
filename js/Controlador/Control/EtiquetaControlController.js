@@ -5,6 +5,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.tema = [];
     $scope.modal = "";
     $scope.ee = []; //Etiqueta equivalente
+    $rootScope.mensajeError = [];
     
     $scope.$on('IniciarEtiquetaControl', function (evento, etiqueta, tema, elemento, modal) 
     {
@@ -21,6 +22,20 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     {
         $scope.modal = modal;
     };
+    
+    $scope.$on('AgregarEtiquetaSugerida', function (evento, etiqueta, tema, elemento, modal, sugerida) 
+    {
+        if($scope.modal == modal)
+        {
+            $scope.buscarConcepto = "";
+            $scope.etiqueta = etiqueta;
+            $scope.tema = tema;
+            $scope.elemento = elemento;
+            
+            $scope.verEtiqueta  = true;
+            $scope.AgregarNuevaEtiqueta(sugerida);
+        }
+    });
     
     //-------- Typeahead ------------------
     $scope.FiltroConcepto = function(concepto)
@@ -257,6 +272,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             {
                 data[2].Etiqueta.Visible = $scope.verEtiqueta;
                 data[2].Etiqueta.filtro = true;
+                data[2].Etiqueta.count = 0;
 
                 $scope.buscarConcepto = "";
 
@@ -280,12 +296,14 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             }
             else
             {
+                 $rootScope.mensajeError = [];
                  $rootScope.mensajeError[$rootScope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde.";
                  $('#mensajeError').modal('toggle');
             }
             
         }).catch(function(error)
         {
+            $rootScope.mensajeError = [];
             $rootScope.mensajeError[$rootScope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeError').modal('toggle');
         });
@@ -574,13 +592,17 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     //-------------- Etiquetas equivalentes -----------------------------
     $scope.EtiquetaEquivalente = function(etiqueta)
     {
+        $scope.etiquetaActualizar = etiqueta;
         EEQUIVALENTE.SetEtiquetaEquivalente(etiqueta, $scope.etiqueta);
     };
     
-    $scope.$on('SentNuevaEtiqueta',function()
+    $scope.$on('SentNuevaEtiqueta',function(evento, nueva, count)
     {   
-        var nueva = EEQUIVALENTE.GetNueva();
-        $scope.PushNuevaEtiqueta(nueva);
+        if($scope.etiquetaActualizar != undefined)
+        {
+            $scope.etiquetaActualizar.count = count;
+            $scope.PushNuevaEtiqueta(nueva);
+        }
     });
     
     $scope.PushNuevaEtiqueta = function(etiqueta)

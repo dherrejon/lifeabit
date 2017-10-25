@@ -7,7 +7,7 @@ function GetEtiqueta($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT EtiquetaId, Nombre, Activo FROM Etiqueta WHERE UsuarioId  = ".$id;
+    $sql = "SELECT EtiquetaId, Nombre, Activo, count FROM EtiquetaVista WHERE UsuarioId  = ".$id;
 
     try 
     {

@@ -276,14 +276,14 @@ function BorrarEventoActividad($http, CONFIG, $q, id)
     return q.promise;
 }
 
-function HechoEvento($http, CONFIG, $q, id)
+function HechoEvento($http, CONFIG, $q, evento)
 {
     var q = $q.defer();
 
     $http({      
           method: 'PUT',
           url: CONFIG.APIURL + '/HechoEvento',
-          data: id
+          data: evento
 
       }).success(function(data)
         {

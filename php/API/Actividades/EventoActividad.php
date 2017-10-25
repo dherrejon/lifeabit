@@ -716,8 +716,15 @@ function EditarEventoActividad()
     {
          $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
     }*/
-
-    $sql = "UPDATE EventoActividad SET Fecha = :Fecha, Notas = :Notas,  Costo = :Costo,  Cantidad = :Cantidad, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ) WHERE EventoActividadId = ".$evento->EventoActividadId;
+    
+    if($evento->Hecho == "1")
+    {
+        $sql = "UPDATE EventoActividad SET Fecha = :Fecha, Notas = :Notas,  Costo = :Costo,  Cantidad = :Cantidad, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ), Hecho = '1' WHERE EventoActividadId = ".$evento->EventoActividadId;
+    }
+    else
+    {
+        $sql = "UPDATE EventoActividad SET Fecha = :Fecha, Notas = :Notas,  Costo = :Costo,  Cantidad = :Cantidad, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ), Hecho = '0', FechaHecho = null WHERE EventoActividadId = ".$evento->EventoActividadId;
+    }
     
     try 
     {
@@ -1452,10 +1459,18 @@ function HechoEvento()
 {
     global $app;
     $request = \Slim\Slim::getInstance()->request();
-    $eventoId = json_decode($request->getBody());
+    $evento = json_decode($request->getBody());
    
+    if($evento->hecho == "1")
+    {
+        $sql = "UPDATE EventoActividad SET Hecho = '1', FechaHecho = NOW() WHERE EventoActividadId=".$evento->id;
+    }
+    else
+    {
+        $sql = "UPDATE EventoActividad SET Hecho = '0', FechaHecho = null WHERE EventoActividadId=".$evento->id;
+    }
     
-    $sql = "UPDATE EventoActividad SET Hecho = '1', FechaHecho = NOW() WHERE EventoActividadId=".$eventoId;
+   
     try 
     {
         $db = getConnection();
@@ -1469,7 +1484,7 @@ function HechoEvento()
     catch(PDOException $e) 
     {
         echo '[ { "Estatus": "Fallo" } ]';
-        echo $e;
+        echo $sql;
         $app->status(409);
         $app->stop();
     }

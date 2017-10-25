@@ -169,7 +169,7 @@ function GetDiario()
     {
         for($k=0; $k<$countDiario; $k++)
         {
-            $sql = "SELECT DiarioId, EtiquetaId, Nombre, Visible FROM EtiquetaDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
+            $sql = "SELECT DiarioId, EtiquetaId, Nombre, Visible, count FROM EtiquetaDiarioVista WHERE DiarioId = ".$response[$k]->DiarioId;
 
             try 
             {

@@ -89,6 +89,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
             etiqueta.EtiquetaId = data.Etiqueta[k].EtiquetaId;
             etiqueta.Nombre = data.Etiqueta[k].Nombre;
             etiqueta.Visible = data.Etiqueta[k].Visible;
+            etiqueta.count = data.Etiqueta[k].count;
             imagen.Etiqueta.push(etiqueta);
         }
         
@@ -122,7 +123,6 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
     $scope.AgregarEtiqueta = function(etiqueta, ver)
     {
         etiqueta.Visible = ver;
-        
         $scope.imagen.Etiqueta.push($scope.SetGetEtiquetaEtiqueta(etiqueta));
         
         etiqueta.ShowImg = false;
@@ -137,6 +137,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
         etiqueta.EtiquetaId = data.EtiquetaId;
         etiqueta.Nombre = data.Nombre;
         etiqueta.Visible = data.Visible;
+        etiqueta.count = data.count;
         
         return etiqueta;
     };
@@ -228,6 +229,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
             {
                 data[2].Etiqueta.Visible = $scope.verEtiqueta;
                 data[2].Etiqueta.filtro = true;
+                data[2].Etiqueta.count = 0;
 
                 $scope.buscarConceptoImg = "";
 
@@ -658,16 +660,20 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
     //-------------- Etiquetas equivalentes -----------------------------
     $scope.EtiquetaEquivalente = function(etiqueta)
     {
+        $scope.etiquetaActualizar = etiqueta;
         EEQUIVALENTE.SetEtiquetaEquivalente(etiqueta, $scope.etiqueta);
     };
     
-    /*$scope.$on('SentNuevaEtiqueta',function()
+    $scope.$on('SentNuevaEtiqueta',function(evento, nueva, count)
     {   
-        var nueva = EEQUIVALENTE.GetNueva();
-        $scope.PushNuevaEtiqueta(nueva);
+        if($scope.etiquetaActualizar != undefined)
+        {
+            $scope.etiquetaActualizar.count = count;
+        }
     });
     
-    $scope.PushNuevaEtiqueta = function(etiqueta)
+    
+    /*$scope.PushNuevaEtiqueta = function(etiqueta)
     {
         for(var k=0; k<etiqueta.length; k++)
         {

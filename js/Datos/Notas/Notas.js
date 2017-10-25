@@ -35,7 +35,6 @@ function GetNotas($http, $q, CONFIG, usuarioId)
                     nota[k] = SetNota(data[1].Notas[k]);
                 }
             }
-
             q.resolve(nota);
              
         }).error(function(data, status){
@@ -149,6 +148,7 @@ function AgregarNota($http, CONFIG, $q, nota)
 {
     var q = $q.defer();
     
+    
     var fd = new FormData();
     
     for(var k=0; k<nota.ImagenSrc.length; k++)
@@ -167,7 +167,7 @@ function AgregarNota($http, CONFIG, $q, nota)
         }
     }
 
-    var Nota = SetNota(nota);
+    var Nota = jQuery.extend({}, nota);
     Nota.UsuarioId = nota.UsuarioId;
     Nota.AgregarImagen = nota.ImagenSrc.length;
     
@@ -223,7 +223,7 @@ function EditarNota($http, CONFIG, $q, nota)
         }
     }
 
-    var Nota = SetNota(nota);
+    var Nota = jQuery.extend({}, nota);
     Nota.UsuarioId = nota.UsuarioId;
     Nota.AgregarImagen = nota.ImagenSrc.length;
     
@@ -242,7 +242,6 @@ function EditarNota($http, CONFIG, $q, nota)
         {
             if(data[0].Estatus == "Exitoso")
             {
-                console.log(data);
                 q.resolve(data);
             }
             else
@@ -376,6 +375,61 @@ function GetFototeca($http, $q, CONFIG, datos)
              
         }).error(function(data, status){
             q.resolve([]);
+     }); 
+    return q.promise;
+}
+
+//---------------- Nota filtro --------------------------------
+function GetNotaOrden()
+{
+    var filtro = [];
+    
+    filtro[0] = {Id:"1", Nombre:"Título", Orden:"Titulo"};
+    filtro[1] = {Id:"2", Nombre:"Fecha Modificación", Orden:"-FechaModificacion"};
+    filtro[2] = {Id:"3", Nombre:"Fecha Creación", Orden:"Fecha"};
+    
+    return filtro;
+}
+
+function GetNotaOrdenUsuario($http, $q, CONFIG, id)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetNotaOrdenUsuario/' + id
+
+      }).success(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                q.resolve(data[1].Id);
+            }
+
+            q.resolve("");
+             
+        }).error(function(data, status){
+            q.resolve("");
+     }); 
+    return q.promise;
+}
+
+function EditarNotaOrdenUsuario($http, $q, CONFIG, UsuarioId, NotaOrdenId)     
+{
+    var q = $q.defer();
+    
+    var datos = {UsuarioId: UsuarioId, NotaOrdenId:NotaOrdenId};
+    
+    $http({      
+          method: 'POST',
+          url: CONFIG.APIURL + '/EditarNotaOrdenUsuario',
+          data: datos
+      }).success(function(data)
+        {
+            q.resolve(data[0].Estatus );
+             
+        }).error(function(data, status){
+            q.resolve([{Estatus: status}]);
      }); 
     return q.promise;
 }

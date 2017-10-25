@@ -1,4 +1,4 @@
-app.controller("NotasController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, ETIQUETA, EEQUIVALENTE)
+app.controller("NotasController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, ETIQUETA, IMAGEN)
 {   
     $scope.titulo = "Notas";
     
@@ -50,6 +50,10 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     EditarConcepto = false;
     
+    //Orden
+    $scope.notaOrden = GetNotaOrden();
+    $scope.ordenNota = $scope.notaOrden[0];
+    
     
     /*------------------ Catálogos -----------------------------*/
     $scope.GetNotas = function()              
@@ -59,6 +63,25 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             $scope.nota = data;
             
             //$scope.GetEtiquetaPorNota();
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
+    $scope.GetNotaOrdenUsuario = function()              
+    {
+        GetNotaOrdenUsuario($http, $q, CONFIG, $rootScope.UsuarioId).then(function(data)
+        {    
+            for(var k=0; k<$scope.notaOrden.length; k++)
+            {
+                if(data.Id == $scope.notaOrden[k].Id)
+                {
+                    $scope.ordenNota = $scope.notaOrden[k];
+                    break;
+                }
+            }
+            
         }).catch(function(error)
         {
             alert(error);
@@ -181,6 +204,55 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             alert(error);
         });
     };
+    
+    $scope.GetImagenEtiqueta = function(imagen, val)
+    {
+        GetImagenEtiqueta($http, $q, CONFIG, imagen.ImagenId).then(function(data)
+        {
+            if(data[0].Estatus == "Exito")
+            {
+                imagen.Etiqueta = data[1].Etiqueta;
+                imagen.Tema = data[2].Tema;
+            }
+            else
+            {
+                imagen.Etiqueta = [];
+                imagen.Tema = [];
+            }
+            
+            if(val !== false)
+            {
+                $scope.SetTemaImagenNota(imagen, $scope.nuevaNota.Tema);
+                $scope.SetEtiquetaImagenNota(imagen, $scope.nuevaNota.Etiqueta);
+            }
+
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+        
+    };
+    
+    //---- Oredenar -------
+    $scope.CambiarOrden = function(orden)
+    {
+        if(orden.Id != $scope.ordenNota)
+        {
+            $scope.ordenNota = orden;
+            $scope.EditarNotaOrdenUsuario($rootScope.UsuarioId, orden.Id);
+        }
+    };
+    
+    $scope.EditarNotaOrdenUsuario = function(usuarioId, notaOrdenId)              
+    {
+        EditarNotaOrdenUsuario($http, $q, CONFIG, usuarioId, notaOrdenId).then(function(data)
+        {      
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+    
     
     //-------- Notas de detalles --------
     $scope.GetNotasPorId = function(id, tipo)
@@ -502,24 +574,105 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     $scope.AgregarImagenes = function()
     {
         var agregada = false;
-        for(var k=0; k< $scope.imgFototeca.length; k++)
+        var count = 0;
+        for(var k=0; k< $scope.fototeca.length; k++)
         {
-            agregada = false;
-            for(var i=0; i<$scope.nuevaNota.Imagen.length; i++)
+            if($scope.fototeca[k].Seleccionada)
             {
-                if($scope.nuevaNota.Imagen[i].ImagenId == $scope.imgFototeca[k].ImagenId)
+                agregada = false;
+                for(var i=0; i<$scope.nuevaNota.Imagen.length; i++)
                 {
-                    agregada = true;
-                    break;
+                    if($scope.nuevaNota.Imagen[i].ImagenId == $scope.fototeca[k].ImagenId)
+                    {
+                        agregada = true;
+                        break;
+                    }
                 }
-            }
-            if(!agregada)
-            {
-                $scope.nuevaNota.Imagen.push($scope.imgFototeca[k]);
+                if(!agregada)
+                {
+                    if(count === 0)
+                    {
+                        count ++;
+                        $scope.todasImg = "opt";
+                        $scope.GetImagenEtiqueta($scope.fototeca[k]);
+                        $scope.lastIndex = $scope.nuevaNota.Imagen.length + 1;
+                    }
+                    
+                    $scope.nuevaNota.Imagen.push($scope.fototeca[k]);
+                }
             }
         }
         
         $('#fototeca').modal('toggle');
+    };
+    
+    $scope.SetEtiquetaImagenNota = function(imagen, etiqueta)
+    {
+        for(var j=0; j<etiqueta.length; j++)
+        {
+            if(etiqueta[j].Visible)
+            {
+                var label = false;
+                for(var i=0; i<imagen.Etiqueta.length; i++)
+                {
+                    if(etiqueta[j].EtiquetaId == imagen.Etiqueta[i].EtiquetaId)
+                    {
+                        label = true;
+                        imagen.Etiqueta[i].Visible = "1"; 
+                        break;
+                    }
+                }
+
+                if(!label)
+                {
+                    var e = new Object();
+
+                    e.EtiquetaId = etiqueta[j].EtiquetaId;
+                    e.Nombre = etiqueta[j].Nombre;
+                    e.Visible = "1";
+
+                    imagen.Etiqueta.push(e);
+                }
+            }
+        }
+    };
+    
+    $scope.SetTemaImagenNota = function(imagen, tema)
+    {
+        var agregado = false;
+        for(var j=0; j<tema.length; j++)
+        {
+            var label = false;
+            for(var i=0; i<imagen.Tema.length; i++)
+            {
+                if(tema[j].TemaActividadId == imagen.Tema[i].TemaActividadId)
+                {
+                    label = true;
+                    break;
+                }
+            }
+            
+            if(!label)
+            {
+                var t = new Object();
+                
+                t.TemaActividadId = tema[j].TemaActividadId;
+                t.Tema = tema[j].Tema;
+                
+                imagen.Tema.push(t);
+                
+                agregado = true;
+            }
+        }
+        
+        if(agregado)
+        {
+            IMAGEN.CambiarEtiquetasOcultas(imagen, $scope.etiqueta, $scope.tema);
+        }
+        else if($scope.todasImg == "opt" || $scope.todasImg == "tema" || $scope.todasImg == "src")
+        {
+            $scope.TerminarAgregarTemaImagen();
+        }
     };
     
     //----------------------- Buscar Barra --------------------------
@@ -1058,15 +1211,22 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         else if(operacion == "Editar")
         {
             $scope.nuevaNota = SetNota(objeto);   
-            $scope.notaInicial = SetNota(objeto);   
             
             $scope.ActivarDesactivarTema($scope.nuevaNota.Tema);
             $scope.ActivarDesactivarEtiqueta($scope.nuevaNota.Etiqueta);
             
+            for(var k=0; k<$scope.nuevaNota.Imagen.length; k++)
+            {
+                $scope.GetImagenEtiqueta($scope.nuevaNota.Imagen[k], false);
+            }
+            
+            $scope.notaInicial = SetNota($scope.nuevaNota);   
             document.getElementById("fechaNota").value = $scope.nuevaNota.Fecha;
         }
         
-        $('#modalNota').modal('toggle');
+        $('#modalApp').modal('toggle');
+        
+        $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaNota, 'Nota');
     };
     
     $scope.IniciarNota = function(fecha)
@@ -1184,7 +1344,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     {
         if(JSON.stringify($scope.notaInicial) === JSON.stringify($scope.nuevaNota))
         {
-            $('#modalNota').modal('toggle');
+            $('#modalApp').modal('toggle');
         }
         else
         {
@@ -1194,7 +1354,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     $scope.ConfirmarCerrarNota = function()
     {
-        $('#modalNota').modal('toggle');
+        $('#modalApp').modal('toggle');
         $scope.mensajeError = [];
         $scope.LimpiarInterfaz();
     };
@@ -1204,448 +1364,6 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         $scope.buscarConcepto = "";
         $scope.etiquetaSugerida = [];
         //$scope.buscarTema = "";
-    };
-    
-    //----Tema-----
-    /*$('#nuevoTema').keydown(function(e)
-    {
-        switch(e.which) {
-            case 13:
-                $scope.AgregarNuevoTema();
-              break;
-
-            default:
-                return;
-        }
-        e.preventDefault(); // prevent the default action (scroll / move caret)
-    });*/
-    
-    $scope.AgregarTema = function(tema)
-    {
-        $scope.nuevaNota.Tema.push(tema);
-        
-        //$scope.SepararEtiqueta(tema.Tema);
-        
-        tema.show = false;
-        $scope.buscarConcepto = "";
-    };
-    
-    $scope.AgregarNuevoTema = function(nuevo)
-    {
-        if(nuevo.length > 0)
-        {
-            if(!$scope.ValidarTemaAgregado(nuevo))
-            {
-                return;    
-            }
-            else
-            {
-                var tema = new TemaActividad();
-                tema.Tema = nuevo;
-                tema.TemaActividadId = "-1";
-                $scope.buscarConcepto = "";
-                
-                //$scope.SepararEtiqueta(nuevo);
-                
-                $scope.nuevaNota.Tema.push(tema);
-            }
-        }
-    };
-    
-    /*$scope.AgregarTemaBlur = function()
-    {
-        if($scope.buscarConcepto !== undefined)
-        {
-            if($scope.buscarConcepto.length > 0)
-            {
-                $scope.AgregarNuevoTema();
-            }
-        }
-    };*/
-    
-    $scope.ValidarTemaAgregado = function(tema)
-    {
-        if($rootScope.erTema.test(tema))
-        {
-            for(var k=0; k<$scope.tema.length; k++)
-            {
-                if($scope.tema[k].Tema.toLowerCase() == tema.toLowerCase())
-                {
-                    if($scope.tema[k].show)
-                    {
-                        $scope.AgregarTema($scope.tema[k]);
-                        return false;
-                    }
-                    else
-                    {
-                        $scope.mensajeError = [];
-                        //$scope.mensajeError[$scope.mensajeError.length] = "*Este tema ya fue agregado.";
-                        $scope.buscarConcepto = "";
-                        //$('#mensajeNota').modal('toggle');
-                        return false;
-                    }
-                }
-            }
-
-            for(var k=0; k<$scope.nuevaNota.Tema.length; k++)
-            {
-                if($scope.nuevaNota.Tema[k].Tema.toLowerCase() == tema.toLowerCase())
-                {
-                    $scope.mensajeError = [];
-                    //$scope.mensajeError[$scope.mensajeError.length] = "*Este tema ya fue agregado.";
-                    $scope.buscarConcepto = "";
-                    //$('#mensajeNota').modal('toggle');
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            $scope.mensajeError = [];
-            $scope.mensajeError[$scope.mensajeError.length] = "*Escribe un tema válido.";
-            $scope.buscarConcepto = "";
-            $('#mensajeNota').modal('toggle');
-            
-            return false;
-        }
-        
-        
-        return true;
-    };
-    
-    $scope.QuitarTema = function(tema)
-    {
-        
-        for(var k=0; k<$scope.nuevaNota.Tema.length; k++)
-        {
-            if(tema == $scope.nuevaNota.Tema[k])
-            {
-                $scope.nuevaNota.Tema.splice(k,1);
-                break;
-            }
-        }
-        
-        if(tema != "-1")
-        {
-            for(var k=0; k<$scope.tema.length; k++)
-            {
-                if($scope.tema[k].TemaActividadId == tema.TemaActividadId)
-                {
-                    $scope.tema[k].show = true;
-                    return;
-                }
-            }
-        }
-    };
-    
-    $scope.EditarTema = function(tema)
-    {
-        EditarConcepto = true;
-        if(tema.TemaActividadId == "-1")
-        {
-            $scope.buscarConcepto = tema.Tema;
-            
-            for(var k=0; k<$scope.nuevaNota.Tema.length; k++)
-            {
-                if($scope.nuevaNota.Tema[k].Tema == tema.Tema)
-                {
-                    $scope.nuevaNota.Tema.splice(k,1);
-                    break;
-                }
-            }
-            
-            $("#nuevoConcepto").focus();
-        }
-    };
-    
-    $scope.BuscarTema = function(tema)
-    {
-        return $scope.FiltrarBuscarTema(tema, $scope.buscarConcepto);
-    };
-    
-    //etiqueta
-    $('#nuevoConcepto').keydown(function(e)
-    {
-        switch(e.which) {
-            case 13:
-                $scope.IdentificarEtiqueta();
-                $scope.$apply();
-              break;
-
-            default:
-                return;
-        }
-        e.preventDefault(); // prevent the default action (scroll / move caret)
-    });
-    
-    $scope.AgregarEtiqueta = function(etiqueta, ver)
-    {
-        etiqueta.Visible = ver;
-        $scope.nuevaNota.Etiqueta.push(etiqueta);
-        
-        etiqueta.show = false;
-        $scope.buscarConcepto = "";
-    };
-    
-    $scope.IdentificarEtiqueta = function()
-    {
-        if($rootScope.erEtiqueta.test($scope.buscarConcepto))
-        {
-            $scope.verEtiqueta  = true;
-            $scope.AgregarNuevaEtiqueta($scope.buscarConcepto);
-            $scope.buscarConcepto = "";
-        }
-        else if($rootScope.erTema.test($scope.buscarConcepto))
-        {
-            $scope.verEtiqueta  = false;
-            var tema = $scope.buscarConcepto;
-            $scope.AgregarNuevoTema(tema);
-            $scope.buscarConcepto = "";
-        }
-        else
-        {
-            $scope.mensajeError = [];
-            $scope.mensajeError[$scope.mensajeError.length] = "*Escribe una etiqueta válida.";
-            //$scope.buscarConcepto = "";
-            $('#mensajeNota').modal('toggle');
-            return;
-        }
-    };
-    
-    $scope.SepararEtiqueta = function(etiqueta)
-    {        
-        $scope.verEtiqueta = false;
-        
-        etiqueta = etiqueta.split(" ");
-        
-        for(var k=0; k<etiqueta.length; k++)
-        {
-            $scope.AgregarNuevaEtiqueta(etiqueta[k], false);
-        }
-    };
-    
-    $scope.AgregarNuevaEtiqueta = function(etiqueta, insertEtiqueta)
-    {
-        if(etiqueta.length > 0)
-        {
-            if(!$scope.ValidarEtiquetaAgregado(etiqueta))
-            {
-                return;    
-            }
-            else
-            {
-                if(insertEtiqueta !== false)
-                {
-                     $scope.EsNuevaEtiqueta(etiqueta);
-                }
-                else
-                {
-                    $scope.EsEtiquetaSinInsert(etiqueta);
-                }
-            }
-        }
-    };
-    
-    
-    $scope.EsNuevaEtiqueta = function(nueva)
-    {
-        var etiqueta = new Etiqueta();
-        etiqueta.Nombre = nueva.charAt(0).toUpperCase() + nueva.substr(1).toLowerCase();
-        etiqueta.UsuarioId =  $scope.usuarioLogeado.UsuarioId;
-        
-        AgregarEtiqueta($http, CONFIG, $q, etiqueta).then(function(data)
-        {
-            if(data[0].Estatus == "Exitoso")
-            {
-                data[2].Etiqueta.Visible = $scope.verEtiqueta;
-
-                $scope.buscarConcepto = "";
-
-                $scope.nuevaNota.Etiqueta.push(data[2].Etiqueta);
-                
-                data[2].Etiqueta.filtro = true;
-                $scope.etiqueta.push(data[2].Etiqueta);
-                $scope.etiqueta[$scope.etiqueta.length-1].show = false;
-                
-                
-                $scope.mensaje = "Etiqueta Agregada.";
-                $scope.EnviarAlerta('Modal');
-                //$scope.$apply();
-            }
-            else
-            {
-                 $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde.";
-                $('#mensajeEtiqueta').modal('toggle');
-            }
-            
-        }).catch(function(error)
-        {
-            $scope.mensajeError[$scope.mensajeError.length]  = "Ha ocurrido un error. Intente más tarde. Error: " + error;
-            $('#mensajeEtiqueta').modal('toggle');
-        });
-    };
-    
-    $scope.EsEtiquetaSinInsert = function(nueva)
-    {
-        var etiqueta = new Etiqueta();
-        etiqueta.Nombre = nueva.charAt(0).toUpperCase() + nueva.substr(1).toLowerCase();
-        etiqueta.EtiquetaId = "-1";
-        etiqueta.Visible = $scope.verEtiqueta;
-
-        $scope.nuevaNota.Etiqueta.push(etiqueta);
-    };
-    
-    /*document.getElementById('modalNota').onclick = function(e) 
-    {
-        if(!EditarConcepto)
-        {
-            if(!($(e.target).parents("#AgregarConcepto").size()))
-            { 
-                if($scope.buscarConcepto !== undefined)
-                {
-                    if($scope.buscarConcepto.length > 0)
-                    {
-                        $scope.EsTemaEtiqueta($scope.buscarConcepto);
-                        //$scope.$apply();
-                    }
-                }
-            }
-        }
-        else
-        {
-            EditarConcepto = false;
-        }
-        
-    };*/
-    
-    
-    /*$scope.EsTemaEtiqueta = function(texto)
-    {
-        if($rootScope.erEtiqueta.test(texto))
-        {
-            $scope.AgregarNuevaEtiqueta();
-        }
-        else if($rootScope.erTema.test(texto))
-        {
-           $scope.CrearConcepto();
-        }
-        else
-        {
-            $scope.mensajeError = [];
-            $scope.mensajeError[$scope.mensajeError.length] = "*Escribe una etiqueta o un tema válido.";
-            $('#mensajeNota').modal('toggle');
-            $scope.$apply();
-        }
-    };*/
-    
-    $scope.ValidarEtiquetaAgregado = function(concepto)
-    {
-        if($rootScope.erEtiqueta.test(concepto))
-        {
-            for(var k=0; k<$scope.nuevaNota.Etiqueta.length; k++)
-            {
-                if($scope.nuevaNota.Etiqueta[k].Nombre.toLowerCase() == concepto.toLowerCase())
-                {
-                    if($scope.verEtiqueta)
-                    {
-                        $scope.nuevaNota.Etiqueta[k].Visible = true;
-                    }
-                    
-                    $scope.mensajeError = [];
-                    //$scope.mensajeError[$scope.mensajeError.length] = "*Esta etiqueta ya fue agregada.";
-                    $scope.buscarConcepto = "";
-                    //$('#mensajeNota').modal('toggle');
-                    return false;
-                }
-            }
-            
-            for(var k=0; k<$scope.etiqueta.length; k++)
-            {
-                if($scope.etiqueta[k].Nombre.toLowerCase() == concepto.toLowerCase())
-                {
-                    if($scope.etiqueta[k].show)
-                    {
-                        $scope.AgregarEtiqueta($scope.etiqueta[k], $scope.verEtiqueta);
-                        return false;
-                    }
-                    else
-                    {
-                        if($scope.verEtiqueta)
-                        {
-                            $scope.etiqueta[k].Visible = true;
-                        }
-                        
-                        $scope.mensajeError = [];
-                        //$scope.mensajeError[$scope.mensajeError.length] = "*Esta etiqueta ya fue agregada.";
-                        $scope.buscarConcepto = "";
-                        //$('#mensajeNota').modal('toggle');
-                        return false;
-                    }
-                }
-            }
-            
-        }
-        else
-        {
-            $scope.mensajeError = [];
-            $scope.mensajeError[$scope.mensajeError.length] = "*Escribe una etiqueta válida.";
-            $scope.buscarConcepto = "";
-            $('#mensajeNota').modal('toggle');
-            
-            return false;
-        }
-    
-        return true;
-    };
-    
-    $scope.QuitarEtiqueta = function(etiqueta)
-    {
-        
-        for(var k=0; k<$scope.nuevaNota.Etiqueta.length; k++)
-        {
-            if(etiqueta == $scope.nuevaNota.Etiqueta[k])
-            {
-                $scope.nuevaNota.Etiqueta.splice(k,1);
-                break;
-            }
-        }
-        
-        if(etiqueta.EtiquetaId != "-1")
-        {
-            for(var k=0; k<$scope.etiqueta.length; k++)
-            {
-                if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
-                {
-                    $scope.etiqueta[k].show = true;
-                    return;
-                }
-            }
-        }
-    };
-    
-    $scope.EditarEtiqueta = function(etiqueta)
-    {
-        EditarConcepto = true;
-        if(etiqueta.EtiquetaId == "-1")
-        {
-            $scope.buscarConcepto = etiqueta.Nombre;
-            
-            for(var k=0; k<$scope.nuevaNota.Etiqueta.length; k++)
-            {
-                if($scope.nuevaNota.Etiqueta[k].Nombre == etiqueta.Nombre)
-                {
-                    $scope.nuevaNota.Etiqueta.splice(k,1);
-                    break;
-                }
-            }
-            
-            $("#nuevoConcepto").focus();
-        }
-    };
-    
-    $scope.BuscarEtiqueta = function(etiqueta)
-    {
-        return $scope.FiltrarBuscarEtiqueta(etiqueta, $scope.buscarConcepto);
     };
     
     $scope.CrearEtiquetaSugerida = function()
@@ -1687,16 +1405,18 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     {
         if($rootScope.erEtiqueta.test(etiqueta))
         {
-            $scope.verEtiqueta = true;
-            $scope.AgregarNuevaEtiqueta(etiqueta);
+            $scope.$broadcast('AgregarEtiquetaSugerida', $scope.etiqueta, $scope.tema, $scope.nuevaNota, 'Nota', etiqueta);
         }
         else
         {
             $scope.mensajeError = [];
-            $scope.mensajeError[0] = "*Etiqueta no válida.";
+            $scope.mensajeError[0] = "*Etiqueta no válida. " + etiqueta;
         }
         
-        $scope.etiquetaSugerida.splice(k,1);
+        if( k != -1)
+        {
+            $scope.etiquetaSugerida.splice(k,1);
+        }
     };
     
     $scope.AgregarTodaEtiquetaSugerida = function()
@@ -1705,10 +1425,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         
         for(var k=0; k<$scope.etiquetaSugerida.length; k++)
         {
-            if($rootScope.erEtiqueta.test($scope.etiquetaSugerida[k]))
-            {
-                $scope.AgregarNuevaEtiqueta($scope.etiquetaSugerida[k]);
-            }
+            $scope.AgregarEtiquetaSugerida($scope.etiquetaSugerida[k], -1);
         }
         
         $scope.etiquetaSugerida = [];
@@ -1734,16 +1451,6 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         {
             $scope.QuitarEtiquetaNoVisible();
             $scope.AgregarEtiquetaOcultar();
-            
-            $scope.nuevaNota.UsuarioId = $scope.usuarioLogeado.UsuarioId;
-            if($scope.operacion == "Agregar")
-            {
-                $scope.AgregarNota();
-            }
-            if($scope.operacion == "Editar")
-            {
-                $scope.EditarNota();
-            }
         }
         
         if($scope.nuevaNota.ImagenSrc.length > 0)
@@ -1766,11 +1473,21 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     $scope.AgregarEtiquetaOcultar = function()
     {
-        for(var k=0; k<$scope.nuevaNota.Tema.length; k++)
-        {
-            $scope.SepararEtiqueta($scope.nuevaNota.Tema[k].Tema);
-        }
+        $scope.$broadcast('SepararEtiqueta', $scope.nuevaNota.Tema, 'Nota');
     };
+    
+    $scope.$on('TerminarEtiquetaOculta',function()
+    {           
+        $scope.nuevaNota.UsuarioId = $scope.usuarioLogeado.UsuarioId;
+        if($scope.operacion == "Agregar")
+        {
+            $scope.AgregarNota();
+        }
+        if($scope.operacion == "Editar")
+        {
+            $scope.EditarNota();
+        }
+    });
     
     $scope.AgregarNota = function()    
     {
@@ -1782,7 +1499,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
                 $scope.mensaje = "Nota agregada.";
                 $scope.EnviarAlerta('Vista');
                 
-                $('#modalNota').modal('toggle');
+                $('#modalApp').modal('toggle');
                 
                 $scope.nuevaNota.NotaId = data[1].NotaId;
                 $scope.nuevaNota.Etiqueta = data[2].Etiqueta;
@@ -1815,7 +1532,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             if(data[0].Estatus == "Exitoso")
             {
                 $scope.mensaje = "Nota editada.";
-                $('#modalNota').modal('toggle');
+                $('#modalApp').modal('toggle');
                 
                 $scope.nuevaNota.Etiqueta = data[1].Etiqueta;
                 $scope.nuevaNota.Tema = data[2].Tema;
@@ -2101,32 +1818,6 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         });
     };
     
-    //------------------- Borrar Etiqueta ------
-    $scope.BorraEtiqueta = function(etiqueta)
-    {
-        $scope.borrarEtiqueta = etiqueta;
-        ETIQUETA.BorrarEtiqueta(etiqueta);
-    };
-    
-    $scope.$on('EtiquetaBorrada',function()
-    {   
-        $scope.QuitarEtiqueta($scope.borrarEtiqueta);
-        
-        $scope.QuitarEtiquetaEtiquetas($scope.borrarEtiqueta);
-    });
-    
-    $scope.QuitarEtiquetaEtiquetas = function(etiqueta)
-    {
-        for(var k=0; k<$scope.etiqueta.length; k++)
-        {
-            if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
-            {
-                $scope.etiqueta.splice(k,1);
-                break;
-            }
-        }
-    };
-    
     /*--------------------   Imagenes  ----------------*/
     /*$scope.CargarArchivo = function(element) 
     {
@@ -2148,12 +1839,18 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             }
         });
     };*/
+
     
+    //Imagenes de archivo
     function ImagenSeleccionada(evt) 
     {
         var files = evt.target.files;
         
-
+        $scope.index = $scope.nuevaNota.ImagenSrc.length;
+        $scope.lastIndex = $scope.nuevaNota.ImagenSrc.length + 1;
+        $scope.srcSize = $scope.nuevaNota.ImagenSrc.length + files.length;
+        
+        
         for (var i = 0, f; f = files[i]; i++) 
         {
             if (!f.type.match('image.*')) 
@@ -2167,33 +1864,29 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             {
                 return function(e) 
                 {
-                    //$scope.srcImg.push(e.target.result);
-                    
                     $scope.nuevaNota.ImagenSrc.push(theFile);
-                    
-                    //console.log(theFile);
-                    //console.log($scope.nuevaNota.ImagenSrc);
-                    
-                    
                     $scope.nuevaNota.ImagenSrc[$scope.nuevaNota.ImagenSrc.length-1].Src= (e.target.result);
-                   
-                    //$scope.nuevaNota.Imagen[$scope.nuevaNota.Imagen.length-1].src = e.target.result;
+                    $scope.nuevaNota.ImagenSrc[$scope.nuevaNota.ImagenSrc.length-1].Etiqueta = [];
+                    $scope.nuevaNota.ImagenSrc[$scope.nuevaNota.ImagenSrc.length-1].Tema = [];
+
+                    if( $scope.srcSize === $scope.nuevaNota.ImagenSrc.length)
+                    {
+                        $scope.todasImg = "src";
+                        $scope.SetTemaImagenNota($scope.nuevaNota.ImagenSrc[$scope.index], $scope.nuevaNota.Tema);
+                    }
+                    
+                    $scope.SetEtiquetaImagenNota($scope.nuevaNota.ImagenSrc[$scope.nuevaNota.ImagenSrc.length-1], $scope.nuevaNota.Etiqueta);
                     
                     $scope.$apply();
-                    //document.getElementById("PrevisualizarImagenColor").innerHTML = ['<img class="imagenModulo center-block" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
-                    //document.getElementById("PrevisualizarImagenColorDetalles").innerHTML = ['<img class=" center-block img-responsive" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
-                    
                 };
+                
+                debugger;
             })(f);
             
             
             reader.readAsDataURL(f);
-            
-             
         }
          document.getElementById('cargarImagen').value = "";
-        
-        //$scope.CargarArchivo(document.getElementById('cargarImagen'));
     }
  
     document.getElementById('cargarImagen').addEventListener('change', ImagenSeleccionada, false);
@@ -2212,6 +1905,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             $scope.GetNotas();
             $scope.GetTemaActividad();
             $scope.GetEtiqueta();
+            $scope.GetNotaOrdenUsuario();
             $scope.Login = true;
         }
         
@@ -2248,63 +1942,213 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         }
     });
     
-    //---------------- Editar etiqueta exterior---------------------------
-    $scope.EditarRegistroEtiqueta = function(etiqueta)
+    //--------------- Etiquetas de Imagenes -----------------------------
+    $scope.EtiquetarImagen = function(imagen, tipo)
     {
-        ETIQUETA.EditarEtiqueta(etiqueta);
+        $scope.etiquetaImagen = imagen;
+        IMAGEN.EtiquetaImagen(imagen, $scope.etiqueta, $scope.tema, tipo);
     };
     
-    $scope.$on('TerminarEditarEtiqueta',function()
+    $scope.$on('TerminarEtiquetaImagen',function()
     {   
-        $scope.mensaje = "Etiqueta Editada";
+        $scope.mensaje = "Imagen Etiquetada";
         $scope.EnviarAlerta('Modal');
         
-        var nueva = ETIQUETA.GetEtiqueta();
-        $scope.SetNuevaEtiqueta(nueva);
+        $scope.SetEtiquetaImagen(IMAGEN.GetImagen());
     });
     
-    $scope.SetNuevaEtiqueta = function(etiqueta)
-    {
-        for(var k=0; k<$scope.etiqueta.length; k++)
+    $scope.$on('TerminarEtiquetaImagenOcultas',function()
+    {   
+        if($scope.todasImg == "opt" || $scope.todasImg == "tema" || $scope.todasImg == "src")
         {
-            if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+            $scope.TerminarAgregarTemaImagen();
+        }
+    });
+    
+    $scope.TerminarAgregarTemaImagen = function()
+    {
+        var opt = $scope.todasImg;
+        $scope.todasImg = "";
+        if(opt === "tema")
+        {   
+            var index = 0;
+            
+            if($scope.nuevaNota.Imagen.length === 0)
             {
-                $scope.etiqueta[k].Nombre = etiqueta.Nombre;
-                break;
+                index = 1;
+            }
+            
+            for(var k=1; k<$scope.nuevaNota.Imagen.length; k++)
+            {
+                $scope.SetTemaImagenNota($scope.nuevaNota.Imagen[k], $scope.temaAgregar);
+            }
+            
+            for(var i=index; i<$scope.nuevaNota.ImagenSrc.length; i++)
+            {
+                $scope.SetTemaImagenNota($scope.nuevaNota.ImagenSrc[i], $scope.temaAgregar);
+            }
+        }
+        else if(opt == "opt")
+        {
+            for(var k=$scope.lastIndex; k<$scope.nuevaNota.Imagen.length; k++)
+            {
+                $scope.GetImagenEtiqueta($scope.nuevaNota.Imagen[k]);
+            }
+        }
+        else if(opt == "src")
+        {
+            for(var k=$scope.lastIndex; k<$scope.nuevaNota.ImagenSrc.length; k++)
+            {
+                $scope.SetTemaImagenNota($scope.nuevaNota.ImagenSrc[k], $scope.nuevaNota.Tema);
+            }
+        }
+    };
+
+    $scope.SetEtiquetaImagen = function(imagen)
+    {
+        $scope.etiquetaImagen.Etiqueta  = [];
+        $scope.etiquetaImagen.Tema = []; 
+        
+        
+        for(var k=0; k<imagen.Etiqueta.length; k++)
+        {
+            var etiqueta = new Object();
+            etiqueta.Nombre = imagen.Etiqueta[k].Nombre;
+            etiqueta.EtiquetaId = imagen.Etiqueta[k].EtiquetaId;
+            etiqueta.Visible = imagen.Etiqueta[k].Visible;
+            
+            $scope.etiquetaImagen.Etiqueta.push(etiqueta);
+        }
+        
+        for(var k=0; k<imagen.Tema.length; k++)
+        {
+            var tema = new Object();
+        
+            tema.TemaActividadId = imagen.Tema[k].TemaActividadId;
+            tema.Tema = imagen.Tema[k].Tema;
+            
+            $scope.etiquetaImagen.Tema.push(tema);
+        }
+    };
+    
+    $scope.ContarEtiquetasVisibles = function(etiqueta)
+    {
+        if(etiqueta != undefined)
+        {
+            var con = 0;
+        
+            for(var k=0; k<etiqueta.length; k++)
+            {
+                if(etiqueta[k].Visible == "1")
+                {
+                    con++;
+                }
+            }
+
+            return con;
+        }
+    };
+    
+    //destecta cuando se agrego una etiqueta
+    $scope.$on('EtiquetaSet',function(etiqueta)
+    {
+        $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+    });
+    
+    $scope.SetEtiquetaTodasImagenes = function(etiqueta)
+    {
+        var e = [];
+        e[0] = etiqueta;
+
+        for(var i=0; i<$scope.nuevaNota.Imagen.length; i++)
+        {
+            $scope.SetEtiquetaImagenNota($scope.nuevaNota.Imagen[i], e);
+        }
+        
+        for(var i=0; i<$scope.nuevaNota.ImagenSrc.length; i++)
+        {
+            $scope.SetEtiquetaImagenNota($scope.nuevaNota.ImagenSrc[i], e);
+        }
+    };
+    
+    $scope.$on('TemaSet',function(etiqueta)
+    {
+        $scope.todasImg = "tema";
+        $scope.SetTemaTodasImagenes(ETIQUETA.GetEtiqueta());
+    });
+    
+    $scope.SetTemaTodasImagenes = function(tema)
+    {
+        var e = [];
+        e[0] = tema;
+        
+        $scope.temaAgregar = e;
+        
+        if($scope.nuevaNota.Imagen.length > 0)
+        {
+            $scope.SetTemaImagenNota($scope.nuevaNota.Imagen[0], e);
+        }
+        else if($scope.nuevaNota.ImagenSrc.length > 0)
+        {
+            $scope.SetTemaImagenNota($scope.nuevaNota.ImagenSrc[0], e);
+        }
+    };
+    
+    $scope.$on('QuitarEtiqueta',function(nota, etiqueta)
+    {
+        for(var i=0; i<$scope.nuevaNota.Imagen.length; i++)
+        {
+            for(var j=0; j<$scope.nuevaNota.Imagen[i].Etiqueta.length; j++)
+            {
+                if($scope.nuevaNota.Imagen[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.nuevaNota.Imagen[i].Etiqueta.splice(j,1);
+                    break;
+                }
             }
         }
         
-        for(var k=0; k<$scope.nuevaNota.Etiqueta.length; k++)
+        for(var i=0; i<$scope.nuevaNota.ImagenSrc.length; i++)
         {
-            if($scope.nuevaNota.Etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+            for(var j=0; j<$scope.nuevaNota.ImagenSrc[i].Etiqueta.length; j++)
             {
-                $scope.nuevaNota.Etiqueta[k].Nombre = etiqueta.Nombre;
-                break;
+                if($scope.nuevaNota.ImagenSrc[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.nuevaNota.ImagenSrc[i].Etiqueta.splice(j,1);
+                    break;
+                }
             }
         }
-    };
-    
-    //-------------- Etiquetas equivalentes -----------------------------
-    $scope.EtiquetaEquivalente = function(etiqueta)
-    {
-        EEQUIVALENTE.SetEtiquetaEquivalente(etiqueta, $scope.etiqueta);
-    };
-    
-    $scope.$on('SentNuevaEtiqueta',function()
-    {   
-        var nueva = EEQUIVALENTE.GetNueva();
-        $scope.PushNuevaEtiqueta(nueva);
     });
     
-    $scope.PushNuevaEtiqueta = function(etiqueta)
+    $scope.$on('QuitarTema',function(nota, tema)
     {
-        for(var k=0; k<etiqueta.length; k++)
+        for(var i=0; i<$scope.nuevaNota.Imagen.length; i++)
         {
-            var nueva = SetEtiqueta(etiqueta[k]);
-            nueva.show = true;
-            $scope.etiqueta.push(nueva);
+            for(var j=0; j<$scope.nuevaNota.Imagen[i].Tema.length; j++)
+            {
+                if($scope.nuevaNota.Imagen[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.nuevaNota.Imagen[i].Tema.splice(j,1);
+                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevaNota.Imagen[i], $scope.etiqueta, $scope.tema);
+                    break;
+                }
+            }
         }
-    };
+        
+        for(var i=0; i<$scope.nuevaNota.ImagenSrc.length; i++)
+        {
+            for(var j=0; j<$scope.nuevaNota.ImagenSrc[i].Tema.length; j++)
+            {
+                if($scope.nuevaNota.ImagenSrc[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.nuevaNota.ImagenSrc[i].Tema.splice(j,1);
+                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevaNota.ImagenSrc[i], $scope.etiqueta, $scope.tema);
+                    break;
+                }
+            }
+        }
+    });
     
 
     //------------------- Alertas ---------------------------

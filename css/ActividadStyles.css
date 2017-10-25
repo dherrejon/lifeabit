@@ -281,7 +281,7 @@
 
 .actividad.hoyPendiente
 {
-    background: #1859b2;
+    background:  #FFC000;
 }
 
 .actividad.enEspera
@@ -346,3 +346,65 @@
 {
     color: black !important;
 }
+
+.btnEstatusEvento, .btnEstatusEvento:hover, .btnEstatusEvento:active, .btnEstatusEvento:focus
+{
+    border-radius: 0px;
+    border: 2px solid black;
+    background: transparent;
+    text-align: left;
+    color: black;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnEstatusEvento.Hecho
+{
+    border-color: #00B050;
+    background: #00B050;
+    color: white;
+}
+
+.btnEstatusEvento.disabled
+{
+    opacity: 0.7;
+}
+
+.estatusActividad
+{
+    height: 16px;
+    width: 16px;
+    border: 1px solid black;
+    background: white;
+    border-radius: 8px;
+    cursor: default;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.estatusActividad.Hecho
+{
+    border: 1px solid #00B050;
+    background: #00B050;
+}
+
+.estatusActividad.Pendiente
+{
+    border: 1px solid #FFC000;
+    background: #FFC000;
+}
+
+.estatusActividad.Hoy
+{
+    border: 1px solid #1859b2;
+    background: #1859b2;
+}
+
+.estatusActividad.Futuro
+{
+    border: 1px solid gray;
+    background: gray;
+}
+

@@ -6,6 +6,7 @@ class Etiqueta
     {
         this.EtiquetaId = "";
         this.Nombre = "";
+        this.count = "";
     }
 }
 
@@ -41,6 +42,7 @@ function SetEtiqueta(data)
     
     etiqueta.EtiquetaId = data.EtiquetaId;
     etiqueta.Nombre = data.Nombre;
+    etiqueta.count = parseInt(data.count);
     
     return etiqueta;
 }

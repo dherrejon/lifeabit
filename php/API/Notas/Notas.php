@@ -7,7 +7,7 @@ function GetNotas($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT NotaId, Titulo, FechaModificacion FROM Nota WHERE UsuarioId = ".$id;
+    $sql = "SELECT NotaId, Titulo, FechaModificacion, Fecha FROM Nota WHERE UsuarioId = ".$id;
 
     try 
     {
@@ -69,7 +69,7 @@ function GetNotasPorId()
     {
         for($k=0; $k<$numNota; $k++)
         {
-            $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaNotaVista WHERE NotaId = ".$nota[$k]->NotaId;
+            $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaNotaVista WHERE NotaId = ".$nota[$k]->NotaId;
             
             try 
             {
@@ -397,6 +397,66 @@ function AgregarNota()
                 //Subir Imagen
                 //$uploadfile = $_FILES['file']['name'];
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($nota->ImagenSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$nota->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$nota->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($nota->ImagenSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$nota->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
             }
             else
             {
@@ -404,7 +464,6 @@ function AgregarNota()
             }
             
         }
-        
         
         if($count > 0)
         {
@@ -469,6 +528,100 @@ function AgregarNota()
                 $db->rollBack();
                 $app->status(409);
                 $app->stop();
+            }
+        }
+        
+        
+        //----------------------- Etiquetas --------------------
+        for($k=0; $k<$countImg; $k++)
+        {
+            $sql = "DELETE FROM EtiquetaPorImagen WHERE ImagenId =".$nota->Imagen[$k]->ImagenId;
+            try 
+            {
+                $stmt = $db->prepare($sql); 
+                $stmt->execute(); 
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[ { "Estatus": "Fallo" } ]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+
+            $countEtiqueta = count($nota->Imagen[$k]->Etiqueta);
+            if($countEtiqueta > 0)
+            {
+                $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                for($i=0; $i<$countEtiqueta; $i++)
+                {
+                    $sql .= " (".$nota->Imagen[$k]->Etiqueta[$i]->EtiquetaId.", ".$nota->Imagen[$k]->ImagenId.", '".$nota->Imagen[$k]->Etiqueta[$i]->Visible."'),";
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+
+
+            //----------------------- Temas ---------------------------------
+            $sql = "DELETE FROM TemaPorImagen WHERE ImagenId =".$nota->Imagen[$k]->ImagenId;
+            try 
+            {
+                $stmt = $db->prepare($sql); 
+                $stmt->execute(); 
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[ { "Estatus": "Fallo" } ]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+
+            $countTema = count($nota->Imagen[$k]->Tema);
+
+            if($countTema > 0)
+            {
+                $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                for($i=0; $i<$countTema; $i++)
+                {
+                    $sql .= " (".$nota->Imagen[$k]->Tema[$i]->TemaActividadId.", ".$nota->Imagen[$k]->ImagenId."),";
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
             }
         }
     }
@@ -800,6 +953,66 @@ function EditarNota()
             }
             
             move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+            
+            //----------------------- Etiquetas --------------------
+            $countEtiqueta = count($nota->ImagenSrc[$k]->Etiqueta);
+
+            if($countEtiqueta > 0)
+            {
+                $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                for($i=0; $i<$countEtiqueta; $i++)
+                {
+                    $sql .= " (".$nota->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$nota->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+
+            //----------------------- Temas ---------------------------------
+            $countTema = count($nota->ImagenSrc[$k]->Tema);
+
+            if($countTema > 0)
+            {
+                $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                for($i=0; $i<$countTema; $i++)
+                {
+                    $sql .= " (".$nota->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
         }
         
         
@@ -869,6 +1082,99 @@ function EditarNota()
                 $db->rollBack();
                 $app->status(409);
                 $app->stop();
+            }
+        }
+        
+        //----------------------- Etiquetas --------------------
+        for($k=0; $k<$countImg; $k++)
+        {
+            $sql = "DELETE FROM EtiquetaPorImagen WHERE ImagenId =".$nota->Imagen[$k]->ImagenId;
+            try 
+            {
+                $stmt = $db->prepare($sql); 
+                $stmt->execute(); 
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[ { "Estatus": "Fallo" } ]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+
+            $countEtiqueta = count($nota->Imagen[$k]->Etiqueta);
+            if($countEtiqueta > 0)
+            {
+                $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                for($i=0; $i<$countEtiqueta; $i++)
+                {
+                    $sql .= " (".$nota->Imagen[$k]->Etiqueta[$i]->EtiquetaId.", ".$nota->Imagen[$k]->ImagenId.", '".$nota->Imagen[$k]->Etiqueta[$i]->Visible."'),";
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+
+
+            //----------------------- Temas ---------------------------------
+            $sql = "DELETE FROM TemaPorImagen WHERE ImagenId =".$nota->Imagen[$k]->ImagenId;
+            try 
+            {
+                $stmt = $db->prepare($sql); 
+                $stmt->execute(); 
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[ { "Estatus": "Fallo" } ]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+
+            $countTema = count($nota->Imagen[$k]->Tema);
+
+            if($countTema > 0)
+            {
+                $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                for($i=0; $i<$countTema; $i++)
+                {
+                    $sql .= " (".$nota->Imagen[$k]->Tema[$i]->TemaActividadId.", ".$nota->Imagen[$k]->ImagenId."),";
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
             }
         }
     }
@@ -1095,5 +1401,106 @@ function GetTemaPorNota($id)
         $app->stop();
     }
 }
+
+
+//-------- Orden de notas ------------
+function GetNotaOrdenUsuario($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT NotaOrdenId as Id FROM NotaOrdenPorUsuario WHERE UsuarioId = ".$id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        echo '[ { "Estatus": "Exito"}, {"Id":'.json_encode($response[0]).'} ]'; 
+        $db = null;
+ 
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
+function EditarNotaOrdenUsuario()
+{
+    global $app;
+    $request = \Slim\Slim::getInstance()->request();
+    $datos = json_decode($request->getBody());
+   
+    $sql = "SELECT NotaOrdenId FROM NotaOrdenPorUsuario WHERE UsuarioId =".$datos->UsuarioId."";
+    
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ);
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($sql);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $count = count($response);
+    
+    if($count > 0)
+    {
+        $sql = "UPDATE NotaOrdenPorUsuario SET NotaOrdenId = '".$datos->NotaOrdenId."' WHERE UsuarioId =".$datos->UsuarioId."";
+        
+        try 
+        {
+            $db = getConnection();
+            $stmt = $db->prepare($sql);
+
+            $stmt->execute();
+            $db = null;
+
+            echo '[{"Estatus":"Exitoso"}]';
+        }
+        catch(PDOException $e) 
+        {   
+            echo $e;
+            echo '[{"Estatus": "Fallido"}]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    else
+    {
+        $sql = "INSERT INTO NotaOrdenPorUsuario (NotaOrdenId, UsuarioId) VALUES (".$datos->NotaOrdenId.", ".$datos->UsuarioId.")";
+        
+        try 
+        {
+            $db = getConnection();
+            $stmt = $db->prepare($sql);
+
+            $stmt->execute();
+            $db = null;
+
+            echo '[{"Estatus":"Exitoso"}]';
+        }
+        catch(PDOException $e) 
+        {   
+            echo $e;
+            echo '[{"Estatus": "Fallido"}]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+}
+
 
 ?>

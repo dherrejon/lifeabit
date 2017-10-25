@@ -105,76 +105,6 @@
                     </div>
                 </div>
             
-                <!--<div class="row panelOperacionBotonLateral" style="color:black; border-top: 2px  solid #79adf4;">
-                   <div class="col-xs-12 ">        
-                        <!-- Filtrar --
-                        <div class="pull-left" id="filtroPanel">
-
-                            <button class="btn  botonFiltrarBarraLateral text-center"  data-toggle="modal" data-target="#modalFiltro">
-                               <span class="fa fa-filter"></span>
-                           </button>
-                        </div>
-                    
-                      
-                       <!-- Agregar --
-                       <a class="btn  botonOperacionBarraLateral pull-right" ng-click="AbrirNota('Agregar', null)">
-                           <span class="fa fa-plus"></span><span> Agregar</span>
-                       </a>
-                       
-                   </div>
-                </div> -->
-                
-                <!-- Agrupador -->
-                <!--<div class="row panelOperacionBotonLateral" style="color:black">
-                   <div class="col-xs-12">
-                       
-                        <div class="btn-group btn-group-justified">
-                          
-                           <!-- Titulo
-                           <div class="btn-group">
-                               <button class="btn botonAgrupador"  ng-click="CambiarAgrupar('Titulo')" ng-class="{Activo: agrupar == 'Titulo'}">
-                                   <!--<span class="fa fa-calendar-o"></span>
-                                    <span> Título</span>
-                               </button>
-                           </div>
-                           
-                           <!-- Concepto 
-                           <div class="btn-group">
-                               <button class="btn botonAgrupador"  ng-click="CambiarAgrupar('Conceptos')" ng-class="{Activo: agrupar == 'Conceptos'}">
-                                   <!--<span class="fa fa-lightbulb-o "></span>
-                                    <span > Conceptos</span>
-                               </button>
-                            </div>
-                            
-                        </div>    
-                        
-                   </div>
-                </div>-->
-                
-                <!-- buscar -->
-                <!--<div class="row panelOperacionBotonLateral" style="padding-top:5px; padding-bottom:5px">
-
-                    <div class="col-xs-12">
-                       
-                       <!-- Titulo
-                        <div class="input-group" ng-show ="agrupar == 'Titulo'">
-                            <input type="text" class="buscarTexto form-control" placeholder="Buscar Nota" ng-model="buscarTituloBarra">
-                            <span class="input-group-btn">
-                                <a class="btn limpiarTextoBoton"  ng-click="buscarTituloBarra = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>
-                        
-                         <!-- concepto 
-                        <div class="input-group" ng-show="agrupar == 'Conceptos'">
-                            <input type="text" class="buscarTexto form-control" placeholder="Buscar Concepto" ng-model="buscarConceptoBarra">
-                            <span class="input-group-btn">
-                                <a class="btn limpiarTextoBoton"  ng-click="buscarConceptoBarra = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                            </span>
-                        </div>
-                        
-                        
-                    </div>
-                </div>-->
                 
                 <!-- Fitros -->
                 <div class="row verFitros" ng-show="(filtro.tema.length + filtro.fecha.length + filtro.etiqueta.length) > 0">
@@ -249,9 +179,27 @@
                     
                 </div>
                 
+                <div class="row">
+                   <div class="col-xs-12" style="padding-left: 0px; padding-right: 0px">
+                        <a class="btn labelConcepto dropdown-toggle" data-toggle="dropdown" aria-haspopup="true">
+                            <b>{{ordenNota.Nombre}} <span class="fa fa-caret-down pull-right"></span></b> 
+                       </a>
+
+                        <ul class="dropdown-menu dropdown-menu-right" style=" border-radius:0px">
+
+                             <li ng-repeat="orden in notaOrden">
+                                 <a href="" ng-click="CambiarOrden(orden)" class="dropdownOpcion2" >
+                                      {{orden.Nombre}}
+                                  </a>
+                              </li>
+
+                         </ul>
+                    </div>
+                </div>       
+                
                 <!-- Titulo -->
                 <div class="row" ng-if="agrupar == 'Titulo'">
-                    <a  ng-repeat="nota in nota | orderBy:'-FechaModificacion' | filter:BuscarTituloBarra " ng-click="VerDetalles(nota.NotaId, false)"  class="btn itemBarraLateral {{GetClaseDiario(nota.NotaId)}}"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                    <a  ng-repeat="nota in nota | orderBy:ordenNota.Orden | filter:BuscarTituloBarra " ng-click="VerDetalles(nota.NotaId, false)"  class="btn itemBarraLateral {{GetClaseDiario(nota.NotaId)}}"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                         <!-- indicador -->
                         <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
                             {{nota.Titulo}}<br>
@@ -486,7 +434,7 @@
     
     <!-- -------------------------------- Modales ----------------------------------------------------------------------- -->
     <!-- Agregar - Editar -->
-    <div class="modal fade" id="modalNota" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+    <div class="modal fade" id="modalApp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
         <br>    <br>   <br>
         <div class="modal-dialog modalPrincipal">
            
@@ -563,89 +511,6 @@
                     </div>
                     <br>
                     
-                    <!-- Fecha -->
-                    <!--<div class="row">
-
-                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                            <label class="">Fecha</label><br>
-                            <div class="row" >
-                               <div class="col-xs-12" >
-                                <span class="botonFecha">{{nuevaNota.FechaFormato}}</span>
-                                </div>
-                            </div>
-
-                            <!--<div class="row" >
-                                <div class="col-xs-12" >
-                                    <input ng-disabled="FechaDefinida" type="text"  id="fechaNota" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onchange="angular.element(this).scope().CambiarFechaNota(this)"/>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>-->
-
-                    <!-- Fecha -->
-                    <!--<div class="row">
-
-                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                            <label class="">Fecha</label><br>
-                            <div class="row" >
-                               <div class="col-xs-12" >
-                                <span class="botonFecha">{{nuevaNota.FechaFormato}}</span>
-                                </div>
-                            </div>
-
-                            <div class="row" >
-                                <div class="col-xs-12" >
-                                    <input ng-disabled="FechaDefinida" type="text"  id="fechaNota" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onchange="angular.element(this).scope().CambiarFechaNota(this)"/>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>-->
-
-                    <!-- Etiqueta -->
-                    <div class="row" id="AgregarConcepto">
-                         
-                         <div class="col-sm-12">
-                            <label class="etiquetaNormal">Etiquetas</label><br>
-                            
-                             
-                             <!-- Buscar Etiqueta -->
-                             <div class="input-group">
-                                <input type="text" required class="entrada form-control" name="etiqueta" ng-model="buscarConcepto" placeholder="Etiqueta" ng-maxlength="255"  data-toggle="dropdown" id="nuevoConcepto" autocomplete="off" /> <!-- onblur="angular.element(this).scope().AgregarEtiquetaBlur()" -->
-                            
-                                <span class="input-group-btn">
-                                    <a class="btn close cerrarModal"  ng-click="buscarConcepto = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                                </span>
-                                
-                                
-                            </div>
-
-                             <!-- lista de etiquetas -->
-                             <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarConcepto.length > 0">
-
-                                <table  class="table table-responsive">
-                                    <tbody  style="cursor: pointer">
-                                        
-                                        <!-- etiquetas --> 
-                                        <tr   ng-repeat="etiqueta in etiqueta | orderBy:'Nombre' | filter:BuscarEtiqueta" ng-show="etiqueta.show">
-                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarEtiqueta(etiqueta, true)">{{etiqueta.Nombre}}</td>
-                                        </tr>
-                                        
-                                        <!-- temas -->
-                                        <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
-                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
-                                        </tr> 
-
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        </div>
-                    </div>
-                    <br>
-
-                    
                     <div class="row" >
                     
                          <div class="col-sm-12">
@@ -684,104 +549,14 @@
                          </div>
                          <br>
                            
-                           <!--lista de etiquetas Seleccionados -->
-                            <div ng-show="nuevaNota.Etiqueta.length > 0" >
-                                <b>Etiquetas</b><br>
-                                 <span ng-repeat="etiqueta in nuevaNota.Etiqueta | orderBy:'Nombre'" ng-if="etiqueta.Visible">
-                                     <div class="btn-group campoAgregado contornoAzul" role="group" style="border-width: 2px; margin-top: 8px">
-                                        
-                                          <span class="btn-group">
-                                              <a style="border-width: 0px; font-size:10pt;" class="btn campoAgregadoQuitar contornoAzul" data-toggle="dropdown" ng-click="EtiquetaEquivalenteLista(etiqueta)"><span class="fa fa-clone"></span></a>
-                                              <ul class="dropdown-menu  dropdown-menu-left dropdownOpt" style="margin-top: 5px">
-
-                                                    <div  class="row " ng-show="ee.length > 0">
-                                                        <div class="col-xs-12"> 
-                                                            <li  class="dropdown-header tituloFitro"><b>Equivalentes</b></li>
-                                                        </div>
-                                                    </div>
-
-                                                    <li style="width: auto">
-                                                        <form role="infoEtoiqueta">
-                                                            <div  style="margin-top: 10px"></div>
-
-                                                            <div class="panel  panelFiltro" style="border-radius: 0px; padding: 2px important;">
-                                                                <div class="row">
-                                                                    <div class="col-xs-12">
-                                                                        <ul>
-                                                                            <li ng-repeat="eq in ee | orderBy:'Nombre'" >
-                                                                                <span>{{eq.Nombre}}</span>
-                                                                            </li>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                        </form>
-                                                    </li>
-                                                </ul>
-                                          </span>
-                                        
-                                          <span class="btn-group">
-                                              <a class="btn campoAgregado" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="border-width: 0px; font-size:10pt;"  data-toggle="dropdown">{{etiqueta.Nombre}}</a>
-
-                                              <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
-                                                    <li><a class=" dropdownOpcion2" ng-click="EditarRegistroEtiqueta(etiqueta)">
-                                                         <span class="fa fa-pencil"> </span> Editar
-                                                    </a></li>
-
-                                                    <li><a class=" dropdownOpcion2" ng-click="EtiquetaEquivalente(etiqueta)">
-                                                         <span class="fa fa-clone"> </span> Equivalencias
-                                                    </a></li>
-
-                                                    <li><a class=" dropdownOpcion2" ng-click="BorraEtiqueta(etiqueta)">
-                                                         <span class="fa fa-trash"> </span> Borrar
-                                                    </a></li>
-
-                                                </ul>
-                                         </span>
-
-                                          <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(etiqueta.EtiquetaId != '-1')}" style="border-width: 0px; font-size:10pt;" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
-                                    </div>
-                                 </span>
-                                 <br><br>
-                             </div>
-                          
-                             <!-- Temas -->
-                            <div  ng-show="nuevaNota.Tema.length > 0">
-                                <b>Temas</b><br>
-                                <!--<label class="etiquetaNormal">Temas</label><br>-->
-                                 <!--lista de temas Seleccionados -->
-                                 <span ng-repeat="tema in nuevaNota.Tema | orderBy:'Tema'">
-                                     <div class="btn-group" role="group" style="margin-bottom:8px">
-                                      <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
-                                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
-                                    </div>
-                                 </span>
-                             </div>
-                             
-                             <!-- Buscar Tema --
-                             <div class="input-group">
-                                <input type="text" required class="entrada form-control" name="tema" ng-model="buscarTema" placeholder="Tema de la actividad" ng-maxlength="300" data-toggle="dropdown" id="nuevoTema" autocomplete="off" onblur="angular.element(this).scope().AgregarTemaBlur()"/>
-                                <span class="input-group-btn">
-                                    <a class="btn close cerrarModal"  ng-click="buscarTema = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                                </span>
-                            </div>-->
-
-                             <!-- lista de temas 
-                             <div class="dropdown-menu modalAgregarDropdown" ng-show="buscarTema.length > 0">
-
-                                <table  class="table table-responsive">
-                                    <tbody  style="cursor: pointer">
-                                        <tr   ng-repeat="tema in tema | orderBy:'Tema' | filter:BuscarTema" ng-show="tema.show">
-                                          <td style="margin-left:10px; color:black" class="botonSeleccionar" ng-click="AgregarTema(tema)">{{tema.Tema}}</td>
-                                        </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>-->
+                           
 
                         </div>
                     </div>
+                    
+                    <!-- Etiqueta -->
+                    <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Nota')" ng-controller="ControlEtiquetaController as lc"></div>
+                    <br>
                 </div>
                 
                 <!-- Notas -->
@@ -835,7 +610,7 @@
                     
                     <div class="col-xs-12">
                         <a ng-click="AbrirFototeca()" class="pull-right btn operacionEvento"> 
-                            <span class="fa fa-picture-o"></span> Fototeca
+                            <span class="fa fa-picture-o"></span> Mis Imágenes
                         </a>
                     </div>
                 </div>
@@ -864,6 +639,16 @@
                             <tbody  style="cursor: pointer">
                                
                                 <tr   ng-repeat="img in nuevaNota.ImagenSrc" ng-if="nuevaNota.ImagenSrc.length > 0">
+                                
+                                 <td class="text-center">
+                                      <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarImagen(img, 'prev')">
+                                        <span >
+                                         <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                         <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                        </span>
+                                     </a>
+                                  </td>
+                                      
                                   <td style="width: 100px; max-width: 100px">
                                       <div class="imgContainer" style="height:50px">
                                           <a style="overflow: hidden !important; max-height: 50px">
@@ -883,6 +668,14 @@
                                 
                                 <tr ng-repeat="img in nuevaNota.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
                                   
+                                  <td class="text-center">
+                                      <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarImagen(img, 'prev')">
+                                        <span >
+                                         <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                         <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                        </span>
+                                     </a>
+                                    </td>
                                   
                                   <td style="width: 100px">
                                     <div class="imgContainer" style="height:50px">
@@ -920,6 +713,7 @@
                             <tbody  style="cursor: pointer">
                                 
                                 <tr ng-repeat="img in nuevaNota.Imagen"  ng-if="img.Eliminada == true">
+                                      
                                   <td style="width: 100px">
                                       <div class="imgContainer" style="height:50px">
                                           <a style="overflow: hidden !important; max-height: 50px">
@@ -1170,7 +964,6 @@
                  </div>
             </div>
                
-            <br>
             <!-- Datos notas -->
             <div class="row">
                 <div class="col-xs-12">
@@ -1489,6 +1282,7 @@
     
 </div>
    
+<div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
 

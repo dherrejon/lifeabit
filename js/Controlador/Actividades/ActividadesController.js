@@ -38,7 +38,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.buscarFrecuenciaFiltro = "";
     
     $scope.mostrarFiltro = "etiqueta";
-    $scope.filtro = {tema:[], etiqueta:[], frecuencia:[],  fecha:{Fecha:"", FechaFormato:"", Seleccion:""}};
+    $scope.filtro = {tema:[], etiqueta:[], frecuencia:[],  fecha:{Fecha:"", FechaFormato:"", Seleccion:""}, pendiente: false};
     $scope.filtroFecha = {Fecha:"", FechaFormato:"", Seleccion:""};
     $scope.campoBuscar = "Conceptos";
     $scope.buscarActividad = "";
@@ -78,25 +78,73 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.filtro.UsuarioId = $rootScope.UsuarioId;
         GetActividad($http, $q, CONFIG, $scope.filtro).then(function(data)
         {
-            /*var actividad = []; 
-            for(var k=0; k<data.length; k++)
-            {
-                actividad[k] = SetActividad(data[k]);
-                
-                //Notas
-                actividad[k].NotasHTML = $sce.trustAsHtml(actividad[k].NotasHTML);
-            }*/
             
             $scope.actividad = data;
-
-            //var sql = "SELECT DISTINCT FrecuenciaId, NombreFrecuencia as Nombre FROM ? WHERE FrecuenciaId IS NOT NULL";
-            //$scope.frecuenciaF = alasql(sql, [data]);
             
-            //$scope.GetEtiquetaPorActividad($scope.actividad);
+            for(var k=0; k<$scope.actividad.length; k++)
+            {
+                $scope.SetActividadEstatus($scope.actividad[k]);
+            }
+            
         }).catch(function(error)
         {
             alert(error);
         });
+    };
+    
+    $scope.SetActividadEstatus = function(actividad)
+    {
+        var hoy = false;
+        var pendiente = false;
+        var futuro = false;
+        var hecho = false;
+        
+        if(actividad.EventoAux.length > 0)
+        {
+            hecho = true;
+        }
+        
+        for(var k=0; k<actividad.EventoAux.length; k++)
+        {
+            if(actividad.EventoAux[k].Fecha == $scope.hoy)
+            {
+                hoy = true;
+                break;
+            }
+            else if(actividad.EventoAux[k].Fecha < $scope.hoy && actividad.EventoAux[k].Hecho == "0")
+            {
+                pendiente = true;
+            }
+            else if(actividad.EventoAux[k].Fecha > $scope.hoy)
+            {
+                futuro = true;
+            }
+            else if(actividad.EventoAux[k].Hecho == "0")
+            {
+                hecho = false;
+            }
+        }
+        
+        if(hoy)
+        {
+            actividad.Estatus = "Hoy";
+        }
+        else if(pendiente)
+        {
+            actividad.Estatus = "Pendiente";
+        }
+        else if(futuro)
+        {
+            actividad.Estatus = "Futuro";
+        }
+        else if(hecho)
+        {
+            actividad.Estatus = "Hecho";
+        }
+        else
+        {
+            actividad.Estatus = "";
+        }
     };
     
     $scope.GetEtiquetaPorActividad = function(actividad)              
@@ -403,7 +451,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 //console.log($scope.eventoActividad);
             }
             
-            //console.log($scope.eventoActividad);
+            //console.log($scope.detalle);
            
         }).catch(function(error)
         {
@@ -620,6 +668,28 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         else
         {
             return true;
+        }
+    };
+    
+    $scope.FiltroActividadPendiente = function(actividad)
+    {
+        if(!$scope.filtro.pendiente)
+        {
+            return true;
+        }
+        else
+        {
+            var pendiente = false;
+            
+            for(var k=0; k<actividad.EventoAux.length; k++)
+            {
+                if(actividad.EventoAux[k].Hecho == "0" && actividad.EventoAux[k].Fecha <= $scope.hoy)
+                {
+                    return true;
+                }
+            }
+            
+            return false;
         }
     };
     
@@ -1344,6 +1414,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             actividad.Etiqueta[k].EtiquetaId = data.Etiqueta[k].EtiquetaId;
             actividad.Etiqueta[k].Nombre = data.Etiqueta[k].Nombre;
             actividad.Etiqueta[k].Visible = data.Etiqueta[k].Visible;
+            actividad.Etiqueta[k].count = parseInt(data.Etiqueta[k].count);
         }
         
         for(var k=0; k<data.Tema.length; k++)
@@ -1436,6 +1507,66 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         $scope.buscarEtiqueta = "";
         $scope.buscarTema = "";
+    };
+    
+    $scope.CrearEtiquetaSugerida = function()
+    {
+        $scope.etiquetaSugerida = $scope.nuevaActividad.Nombre.split(" ");
+        $scope.temaSugerido = [];
+        
+        for(var k=0; k<$scope.etiquetaSugerida.length; k++)
+        {
+            if($scope.etiquetaSugerida[k] === "")
+            {
+                $scope.etiquetaSugerida.splice(k,1);
+                k--;
+                continue;
+            }
+            
+            for(var i=0; i<$scope.nuevaActividad.Etiqueta.length; i++)
+            {
+                if($scope.nuevaActividad.Etiqueta[i].Nombre.toLowerCase() == $scope.etiquetaSugerida[k].toLowerCase())
+                {
+                    if($scope.nuevaActividad.Etiqueta[i].Visible)
+                    {
+                        $scope.etiquetaSugerida.splice(k,1);
+                        k--;
+                    }
+                    
+                    break;
+                }
+            }
+        }
+    };
+    
+    $scope.AgregarEtiquetaSugerida = function(etiqueta, k)
+    {
+        if($rootScope.erEtiqueta.test(etiqueta))
+        {
+            $scope.$broadcast('AgregarEtiquetaSugerida', $scope.etiqueta, $scope.tema, $scope.nuevaActividad, 'Actividad', etiqueta);
+        }
+        else
+        {
+            $scope.mensajeError = [];
+            $scope.mensajeError[0] = "*Etiqueta no válida. " + etiqueta;
+        }
+        
+        if( k != -1)
+        {
+            $scope.etiquetaSugerida.splice(k,1);
+        }
+    };
+    
+    $scope.AgregarTodaEtiquetaSugerida = function()
+    {
+        $scope.verEtiqueta = true;
+        
+        for(var k=0; k<$scope.etiquetaSugerida.length; k++)
+        {
+            $scope.AgregarEtiquetaSugerida($scope.etiquetaSugerida[k], -1);
+        }
+        
+        $scope.etiquetaSugerida = [];
     };
     
     //---------- Operaciones Actividad ------------------------------
@@ -2487,17 +2618,46 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {   
         $scope.eventoOpt = evento;
         
-        $('#OperacionEvento').modal('toggle');
+        if(evento.Hecho != "1")
+        {
+            $('#OperacionEvento').modal('toggle');
+        }
+        else
+        {
+            $scope.mensajeAdvertencia = "¿Estás seguro de que desea desmarcar como ya realizado este evento";
+            $('#CancelarEventoHecho').modal('toggle');
+        }
     };
     
     $scope.HechoEvento = function()
     {
-        HechoEvento($http, CONFIG, $q, $scope.eventoOpt.EventoActividadId).then(function(data)
+        var evento = {hecho: "", id:$scope.eventoOpt.EventoActividadId};
+    
+        $scope.eventoOpt.Hecho == "1" ? evento.hecho = "0" : evento.hecho = "1";
+        
+        HechoEvento($http, CONFIG, $q, evento).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
             {
-                $scope.eventoOpt.Hecho = "1";
-                //$scope.eventoOpt.FechaHecho = data[1].Fecha;
+                $scope.eventoOpt.Hecho = evento.hecho;
+                
+                for(var k=0; k<$scope.actividad.length; k++)
+                {
+                    if($scope.actividad[k].ActividadId == $scope.eventoOpt.ActividadId)
+                    {
+                        for(var i=0; i<$scope.actividad[k].EventoAux.length; i++)
+                        {
+                            if($scope.actividad[k].EventoAux[i].EventoActividadId == $scope.eventoOpt.EventoActividadId)
+                            {
+                                $scope.actividad[k].EventoAux[i].Hecho = $scope.eventoOpt.Hecho;
+                                break;
+                            }
+                        }
+                        
+                        $scope.SetActividadEstatus($scope.actividad[k]);
+                        break;
+                    }
+                }
             }
             else
             {
@@ -2836,6 +2996,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             etiqueta.EtiquetaId = data.Etiqueta[k].EtiquetaId;
             etiqueta.Nombre = data.Etiqueta[k].Nombre;
             etiqueta.Visible = data.Etiqueta[k].Visible;
+            etiqueta.count = data.Etiqueta[k].count;
             
             evento.Etiqueta.push(etiqueta);
             
@@ -3261,7 +3422,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     //destecta cuando se agrego una etiqueta
     $scope.$on('EtiquetaSet',function(etiqueta)
     {
-        $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+        if($scope.modulo == "Evento")
+        {
+            $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+        }
     });
     
     $scope.SetEtiquetaTodasImagenes = function(etiqueta)
@@ -3282,8 +3446,11 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.$on('TemaSet',function(etiqueta)
     {
-        $scope.todasImg = "tema";
-        $scope.SetTemaTodasImagenes(ETIQUETA.GetEtiqueta());
+        if($scope.modulo == "Evento")
+        {
+            $scope.todasImg = "tema";
+            $scope.SetTemaTodasImagenes(ETIQUETA.GetEtiqueta());
+        }
     });
     
     $scope.SetTemaTodasImagenes = function(tema)

@@ -80,7 +80,7 @@ function GetImagenEtiqueta($id)
         $app->stop();
     }
     
-     $sql = "SELECT EtiquetaId, Nombre, Visible FROM EtiquetaImagenVista WHERE ImagenId = ".$id;
+     $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaImagenVista WHERE ImagenId = ".$id;
 
     try 
     {
