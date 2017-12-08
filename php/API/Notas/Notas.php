@@ -1419,7 +1419,7 @@ function GetNotaOrdenUsuario($id)
         $stmt = $db->query($sql);
         $response = $stmt->fetchAll(PDO::FETCH_OBJ);
         
-        echo '[ { "Estatus": "Exito"}, {"Id":'.json_encode($response[0]).'} ]'; 
+        echo '[ { "Estatus": "Exito"}, {"Id":'.$response[0]->Id.'} ]'; 
         $db = null;
  
     } 

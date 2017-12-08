@@ -34,13 +34,14 @@
                           </span>
 
                           <!-- entradas -->
-                          <span style="color: black">
-                              <input  type="submit" id="fechaFiltro" class="form-control entrada"  style="display: block; position: static; background: transparent; width:1%; margin-top:-35px; border-color: transparent; z-index: -9999999" onblur="angular.element(this).scope().CambiarFechaFiltro(this)"/> 
+                          
+                          <span style="color: black;" ng-class="{'pull-right': anchoPantalla<767}">
+                              <input  type="submit" id="fechaFiltro" class="form-control entrada"  style="display: block; position: static; background: transparent; width:1%; margin-top:-35px; border-color: transparent; z-index: -9999" onblur="angular.element(this).scope().CambiarFechaFiltro(this)"/> 
                           </span>
                           
-                          <input ng-show="campoBuscar=='Conceptos'" type="text"  style="display: block; position: block;" placeholder="Consultar" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConcepto" id="buscarConcepto" autocomplete="off">
+                        <input ng-show="campoBuscar=='Conceptos'" type="text"  style="display: block; position: block;" placeholder="Consultar" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConcepto" id="buscarConcepto" autocomplete="off">
                         
-                          <button ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscar text-left" ng-click="AbrirCalendario()">{{filtro.fechaFormato}}</button>
+                          <input ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscador bordeAzulLeft" ng-click="AbrirCalendario()" ng-model="filtro.fechaFormato">
                         
                           <div ng-show="buscarConcepto.length > 0" class="dropdown-menu modalAgregarDropdown" style="margin-left:130px; padding: 5px">
 
@@ -53,43 +54,18 @@
                               </a></li>
 
                           </div>
+                          
 
                           <!-- origen de informacion -->
                           <span class="input-group-btn">
 
                              <button class="btn botonBuscarFiltro hidden-xs" ng-click="LimpiarBuscar()" style="border-width: 0px; border-right: 3px solid #1859b2; border-radius: 0px !important">
-                                   <span class="fa fa-times-circle" ></span>
-                                </button>
-
-                               <!--<button class="btn botonBuscarFiltro hidden-xs" ng-class="{noActivo: !filtro.origen.texto}" ng-click="CambiarFiltroOrigen(1, filtro.origen.texto)">
-                                   <span class="fa fa-commenting-o"></span>
-                                </button>
-
-                               <button class="btn botonBuscarFiltro  hidden-xs" ng-class="{noActivo: !filtro.origen.imagen}" ng-click="CambiarFiltroOrigen(2, filtro.origen.imagen)">
-                                   <span class="fa fa-file-image-o"></span>
-                               </button>
-                               <button class="btn botonBuscarFiltro  hidden-xs" ng-class="{noActivo: !filtro.origen.archivo}" ng-click="CambiarFiltroOrigen(3, filtro.origen.archivo)">
-                                   <span class="fa fa-file-text-o"></span>
-                               </button>
-
-
-                               <button type="button" class="btn botonBuscarFiltro dropdown-toggle hidden-sm hidden-md hidden-lg" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span class="fa fa-caret-down"></span>
-                               </button>
-                                <ul class="dropdown-menu dropdown-menu-right">
-                                  <li><a href="" ng-click="CambiarFiltroOrigen(1, filtro.origen.texto)" class="botonBuscarFiltro" ng-class="{noActivo: !filtro.origen.texto}">
-                                      <span class="fa fa-commenting-o"></span> Textos
-                                  </a></li>
-                                  <li><a href="" ng-click="CambiarFiltroOrigen(2, filtro.origen.imagen)" class="botonBuscarFiltro" ng-class="{noActivo: !filtro.origen.imagen}">
-                                       <span class="fa fa-file-image-o"></span> Imagen
-                                  </a></li>
-                                  <li><a href="" ng-click="CambiarFiltroOrigen(3, filtro.origen.archivo)" class="botonBuscarFiltro" ng-class="{noActivo: !filtro.origen.archivo}"> 
-                                      <span class="fa fa-file-text-o"></span> Archivos
-                                  </a></li>
-                                </ul>-->
-
+                                <span class="fa fa-times-circle" ></span>
+                            </button>
                           </span>
+                                          
                     </div>
+                    
                     
                </div>
             </div>

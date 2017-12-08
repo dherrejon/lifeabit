@@ -1,0 +1,69 @@
+<div ng-controller="ArchivoController as archivo"> 
+   
+    <div id="fileseccion">
+       <div class="row">
+
+            <div class="col-sm-12">
+
+               <div  method="post" enctype="multipart/form-data">
+
+                    <div class="form-group files file">
+                        <input id="loadfile" type="file" class="form-control" multiple accept=".pdf" name="archivo" > <!-- onchange="angular.element(this).scope().CargarArchivo(this)" -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <br>
+
+        <div class="row" >
+           <div class="col-xs-12">
+               <table  class="table table-responsive">
+
+                    <tbody  style="cursor: pointer">
+
+                        <tr ng-repeat="file in archivo" ng-if="archivo.length > 0">
+
+                          <td class="text-center">
+                              <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarFile(file, file.name)">
+                                <span >
+                                 <span class="fa fa-tag"> </span> <span> ({{(file.Etiqueta | filter:{Visible:true}).length}}) </span>
+                                 <span class="fa fa-comment-o"> </span> <span> ({{file.Tema.length}}) </span>
+                                </span>
+                             </a>
+                          </td>
+
+                          <td >
+                              <span class="infoCenterCell">
+                                  <span>{{file.name}}</span>
+                               </span> 
+                          </td>
+
+                          <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.size/1000000).toFixed(2)}} MB</span> </td>
+
+                          <td class="text-center">
+                              <a class="btn btnOptDiarioDetalles boton" ng-click="DescargarArchivo(file.Src, file.name)">
+                                 <span class="fa fa-download"></span>
+                             </a>
+                          </td>
+
+                          <td class="text-center">
+                              <a class="btn btnQuitarImg" style="font-size: 14pt;" ng-click="archivo.splice($index,1)">
+                                 <span class="fa fa-times-circle"></span>
+                             </a>
+                          </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+           </div>
+        </div>
+    </div>
+                    
+</div>
+    
+
+
+    

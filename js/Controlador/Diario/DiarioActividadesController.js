@@ -920,7 +920,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         $scope.operacion = operacion;
     
         document.getElementById("fechaDiaria");
-        $scope.tabModal = "Diario";
+        //$scope.tabModal = "Archivos";
         
         if(operacion == "Agregar")
         {
@@ -959,6 +959,8 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             }
             
             $scope.inicioDiario = jQuery.extend({}, $scope.nuevoDiario);
+            
+            $scope.ciudadActual = objeto.Ciudad.CiudadId;
         }
         else if(operacion == "ClonarEtiquetas")
         {
@@ -1978,6 +1980,9 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     
     $scope.EditarDiario = function()    
     {
+        
+        $scope.nuevoDiario.CambiarCiudad = $scope.nuevoDiario.Ciudad.CiudadId == $scope.ciudadActual ? false : true;
+            
         EditarDiario($http, CONFIG, $q, $scope.nuevoDiario).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
@@ -2091,17 +2096,20 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
                 $scope.VerDetalles(nf);
             }
         }
-        
+
         //Ciudad
-        for(var k=0; k<$scope.ciudad.length; k++)
+        if($scope.operacion != "Editar" || diario.CambiarCiudad)
         {
-            if(ndiario.Ciudad.CiudadId == $scope.ciudad[k].CiudadId)
+            for(var k=0; k<$scope.ciudad.length; k++)
             {
-                $scope.ciudad[k].DiarioDefecto = "1";
-            }
-            else
-            {
-                $scope.ciudad[k].DiarioDefecto = "0";
+                if(ndiario.Ciudad.CiudadId == $scope.ciudad[k].CiudadId)
+                {
+                    $scope.ciudad[k].DiarioDefecto = "1";
+                }
+                else
+                {
+                    $scope.ciudad[k].DiarioDefecto = "0";
+                }
             }
         }
         

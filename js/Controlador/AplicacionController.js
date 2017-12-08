@@ -570,7 +570,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         
         $scope.LimpiarBusqueda();
         
-        document.getElementById("fechaFiltro").value = "";
+        $('#fechaFiltro').data("DateTimePicker").clear();
     };
     
     $scope.QuitarTemaFiltro = function(tema)
@@ -715,12 +715,12 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         {
             $scope.campoBuscar = campo;
             
+            $scope.LimpiarFiltro();
+            
             if(campo == "Fecha")
             {
                 $scope.AbrirCalendario();
             }
-            
-            $scope.LimpiarFiltro();
         }
     };
     

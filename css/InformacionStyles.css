@@ -280,6 +280,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     
+    
     outline: none !important;
     box-shadow: none !important;
 }

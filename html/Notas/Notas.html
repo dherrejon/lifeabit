@@ -425,6 +425,8 @@
                                     
                       </div>
                    </div>
+                   
+                   <div ng-include=" 'html/Control/BotonTop.html' "></div>
                 </div>
                 
             </div>
@@ -476,14 +478,14 @@
                  <div class="row">
                      <div class="col-xs-12">
                          
-                         <div class="barraOperacionesModal text-center">
+                         <div class=" text-center">
                             
                              <div class="btn-group">
-                                 <div class="btn botonBarraModal" ng-click="tabModal = 'Nota'">Nota</div>
-                                 <div class="btn botonBarraModal" ng-click="tabModal = 'Datos'">Datos</div>
-                                 <div class="btn botonBarraModal" ng-click="tabModal = 'Observación'">Observación</div>
-                                 <div class="btn botonBarraModal" ng-click="tabModal = 'Imagen'"><span class="fa fa-image"></span>    </div>
-                                 <div class="btn botonBarraModal"><span class="fa fa-file"></span> </div>
+                                <div class="text-center">
+                                    <a class="btn btnTabModal" ng-click="tabModal = 'Nota'" ng-class="{active: tabModal == 'Nota'}"><div class="fa fa-calendar-o tabModal"></div><br>Nota</a>
+                                    <a class="btn btnTabModal" ng-click="tabModal = 'Imagen'" ng-class="{active: tabModal == 'Imagen'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
+                                    <a class="btn btnTabModal" ng-click="tabModal = 'Archivos'" ng-class="{active: tabModal == 'Archivos'}"><div class="fa fa-file  tabModal"></div><br>Archivos</a>
+                                </div>
                              </div>
                          </div>
                          
@@ -493,6 +495,12 @@
                  <br>
                  <!-- Datos -->
                  <div ng-show="tabModal == 'Datos'">
+                   
+                </div>
+                
+                <!-- Notas -->
+                <div ng-show="tabModal == 'Nota'">
+                   <br><br>
                     <!-- Fecha -->
                     <div class="row">
                         <div class="col-xs-12">
@@ -510,7 +518,40 @@
                         </div>
                     </div>
                     <br>
+                    <br>
+                   <!-- Titulo -->
+                    <div class="row">
+
+                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                            
+
+                             <div class="input-group">
+                               
+                                <div class="entrada2">
+                                    <input type="text" required class="entrada form-control" name="titulo" ng-model="nuevaNota.Titulo"  ng-maxlength="300" autocomplete="off" ng-blur="CrearEtiquetaSugerida()"/>
+                                    <label class="">Título</label><br>
+                                 </div>
+                                <span class="input-group-btn">
+                                    <a class="btn close cerrarModal"  ng-click="nuevaNota.Titulo = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
                     
+                    <!-- Nota -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                             <div class="">
+                                <label class="etiquetaNormal">Notas</label>
+                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 300px !important" name="contenido" id="contenido" ng-model="nuevaNota.Notas" maxlength="20000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    
+                    <!-- Etiquetas sugeridas -->
                     <div class="row" >
                     
                          <div class="col-sm-12">
@@ -559,42 +600,8 @@
                     <br>
                 </div>
                 
-                <!-- Notas -->
-                <div ng-show="tabModal == 'Nota'">
-                   <br><br>
-                   <!-- Titulo -->
-                    <div class="row">
-
-                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
-                            
-
-                             <div class="input-group">
-                               
-                                <div class="entrada2">
-                                    <input type="text" required class="entrada form-control" name="titulo" ng-model="nuevaNota.Titulo"  ng-maxlength="300" autocomplete="off" ng-blur="CrearEtiquetaSugerida()"/>
-                                    <label class="">Título</label><br>
-                                 </div>
-                                <span class="input-group-btn">
-                                    <a class="btn close cerrarModal"  ng-click="nuevaNota.Titulo = ''" type="button"><span class="fa fa-times-circle"></span></a>
-                                </span>
-                            </div>
-
-                        </div>
-
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-sm-12">
-                             <div class="">
-                                <label class="etiquetaNormal">Notas</label>
-                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 300px !important" name="contenido" ng-model="nuevaNota.Notas" maxlength="20000"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <!-- Observaciones -->
-                <div ng-show="tabModal == 'Observación'">
+                <!--<div ng-show="tabModal == 'Observación'">
                     <div class="row">
                         <div class="col-sm-12">
                              <div class="">
@@ -603,7 +610,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>-->
                 
                 <!-- Imagenes -->
                 <div class="row" ng-show="tabModal == 'Imagen'">

@@ -232,25 +232,52 @@
                 
                 <!-- Actividades -->
                 <div class="row">
-                    <a class="btn itemBarraLateral" ng-class="GetClaseActividad(actividad.ActividadId)" ng-repeat="actividad in actividad  | filter:FiltroActividadPendiente  | orderBy:'Nombre'" ng-click="VerDetalles(actividad)">
-                        
-                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden; display: inline-block" >
-                            <div class="estatusActividad {{actividad.Estatus}} pull-left" style="margin-top: 2px"> </div>
-                             <span style="margin-left: 5px">{{actividad.Nombre}}</span>
-                        </span>
+                   
+                   <div ng-repeat="actividad in actividad  | filter:FiltrarBuscarActividad | filter:FiltroActividadPendiente  | orderBy:'Nombre'" class="itemBarraLateral" ng-class="GetClaseActividad(actividad.ActividadId)">
+                       <div class="input-group" >
 
-                        <!-- "context menu" -->
-                        <div class="dropdown pull-rigth hidden-xs">
-                            <button class="fa fa-ellipsis-v btn botonVacio" data-toggle="dropdown"></button>
+                            <a class="btn itemBarraLateralbtn"   ng-click="VerDetalles(actividad)">
 
-                            <ul class="dropdown-menu dropdown-menu-right contextMenu">
-                                <button class="col-xs-12 btn botonCM" ng-click="RegistrarEvento('Agregar', actividad, null)"> <span class="fa fa-calendar-plus-o "></span> Registrar</button>
-                                <button class="col-xs-12 btn botonCM" ng-click="AbrirActividad('Copiar', detalle)"> <span class="fa fa-files-o "></span> Copiar</button>
-                                <button class="col-xs-12 btn botonCM" ng-click="AbrirActividad('Editar', detalle)"> <span class="fa fa-pencil"></span> Editar</button><br>
-                                <button class="col-xs-12 btn botonCM" ng-click="BorrarActividad(actividad)"> <span class="fa fa-minus-circle "></span> Borrar</button>
-                            </ul>
+                                <span class="col-xs-12"  style="white-space: normal; overflow: hidden; display: inline-block" >
+                                    <div class="estatusActividad {{actividad.Estatus}} pull-left" style="margin-top: 2px"> </div>
+                                     <span style="margin-left: 5px">{{actividad.Nombre}}</span>
+                                </span>
+
+                                
+                            </a>
+                            
+                            <div class="input-group-btn">
+                               
+                               <!-- "context menu" -->
+                                <div class="dropdown  ">
+                                    <button class=" btn itemBarraLateralbtn"  data-toggle="dropdown">
+                                        <span class="fa fa-ellipsis-v"></span>
+                                    </button>
+
+                                    <ul class="dropdown-menu dropdown-menu-right dropdownRight">
+                                       <li>
+                                           <a class=" dropdownOpcion2" ng-click="RegistrarEvento('Agregar', actividad, null)"> <span class="fa fa-calendar-plus-o "></span> Registrar</a>
+                                       </li>
+                                       
+                                       <li>
+                                            <a class="  dropdownOpcion2" ng-click="AbrirActividad('Copiar', detalle)"> <span class="fa fa-files-o "></span> Copiar</a>
+                                        </li>
+                                        
+                                        <li>
+                                            <a class="  dropdownOpcion2" ng-click="AbrirActividad('Editar', detalle)"> <span class="fa fa-pencil"></span> Editar</a>
+                                        </li>
+                                        
+                                        <li>
+                                            <a class="  dropdownOpcion2" ng-click="BorrarActividad(actividad)"> <span class="fa fa-minus-circle "></span> Borrar</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                            </div>
+
                         </div>
-                    </a>
+                    </div>
+                    
                 </div>
                 
             </div>
@@ -389,10 +416,25 @@
                 <br>
                 
                 <!-- Eventos Actividades -->
+                <div class="row" ng-show="filtro.fecha.Fecha.length > 0">
+                   <div class="col-xs-12 ">
+                        <div class="text-right" >
+                            <div class="checkbox">
+                                <label>
+                                    Ver todos
+                                    <input type="checkbox" ng-model="verTodos"  value="">
+                                    <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                
                 <div class="row">
                    <div class="col-xs-12">
                         
-                      <div  class="eventoVista" style="position: relative" ng-repeat="evento in eventoActividad | orderBy:['-Fecha', '-HoraFormato'] "> <!-- | filter: {Fecha:filtroFecha.Fecha} -->
+                      <div  class="eventoVista" style="position: relative" ng-repeat="evento in eventoActividad | orderBy:['-Fecha', '-HoraFormato'] " ng-show="MostrarEvento(evento.Fecha)"> <!-- | filter: {Fecha:filtroFecha.Fecha} -->
                         
                          <div class="actividad {{GetClaseEvento(evento)}}" style="margin-top: -1px">
                          
@@ -581,6 +623,8 @@
                       </div>
                    </div>
                 </div>
+                
+                <div ng-include=" 'html/Control/BotonTop.html' "></div>
                 
             </div>
 
@@ -1356,7 +1400,7 @@
                         
                         <div class="col-xs-12 col-sm-6" >
                         
-                            <a class="btn btn-block btnEstatusEvento" style="margin-top: 5px" ng-class="{disabled : (operacion != 'Editar' || nuevoEvento.Fecha > hoy), Hecho : nuevoEvento.Hecho == '1'}" ng-click="nuevoEvento.Hecho == '1' ? nuevoEvento.Hecho = '0' : nuevoEvento.Hecho = '1'"> 
+                            <a class="btn btn-block btnEstatusEvento" style="margin-top: 5px" ng-class="{disabled : (nuevoEvento.Fecha > hoy), Hecho : nuevoEvento.Hecho == '1'}" ng-click="nuevoEvento.Hecho == '1' ? nuevoEvento.Hecho = '0' : nuevoEvento.Hecho = '1'"> 
                                 <span class="fa {{nuevoEvento.Hecho == '1' ? 'fa-check-circle-o' : 'fa-circle-o'}}" style="font-size: 14pt"></span>
                                 <spna>{{nuevoEvento.Hecho == '1' ? 'Hecho' : 'No Hecho'}}</spna>
                             </a>

@@ -150,6 +150,11 @@
     text-align: center;
 }
 
+.files.file:before 
+{
+    content: " Selecciona o arrastra tu archivo aqui. ";
+}
+
 /*------- previsualizar imagen -------------*/
 .imagenPrevisualizarModal
 {

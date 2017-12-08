@@ -55,3 +55,40 @@
 {
     font-size: 16pt;
 }
+
+.inputBuscador
+{
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: middle;
+    
+    width: 100%;
+    position: absolute;
+    left: 0;
+    padding-left: 30px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    
+    background: white;
+    color: black;
+    border-width: 0px;
+    
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.inputBuscador:focus, .inputBuscador:hover
+{
+    background: white;
+    color: black;
+    border-color: white;
+    
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.inputBuscador.bordeAzulLeft
+{
+    border-left-width: 2px;
+    border-left-color: #1859b2;
+}

@@ -73,6 +73,10 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     {
         GetNotaOrdenUsuario($http, $q, CONFIG, $rootScope.UsuarioId).then(function(data)
         {    
+            if(data == null)
+            {
+                return;
+            }
             for(var k=0; k<$scope.notaOrden.length; k++)
             {
                 if(data.Id == $scope.notaOrden[k].Id)
@@ -1224,10 +1228,22 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             document.getElementById("fechaNota").value = $scope.nuevaNota.Fecha;
         }
         
-        $('#modalApp').modal('toggle');
-        
         $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaNota, 'Nota');
+        
+        $('#modalApp').modal('toggle'); 
+        
+        
+        //document.getElementById('contenido').value = $scope.nuevaNota.Notas;
+        //autosize.update($scope.nuevaNota.Notas);
     };
+    
+    /*$('textarea').each(function(){
+        autosize(this);
+    }).on('autosize:resized', function(){
+      console.log('textarea height updated');
+        
+        
+    });*/
     
     $scope.IniciarNota = function(fecha)
     {
@@ -1350,6 +1366,9 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         {
             $('#cerrarNota').modal('toggle');
         }
+        
+        $scope.etiquetaSugerida = [];
+        $rootScope.buscarConcepto = "";
     };
     
     $scope.ConfirmarCerrarNota = function()
@@ -1361,7 +1380,6 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     $scope.LimpiarInterfaz = function()
     {
-        $scope.buscarConcepto = "";
         $scope.etiquetaSugerida = [];
         //$scope.buscarTema = "";
     };
@@ -2195,6 +2213,8 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             alert(error);
         });
     };
+    
+    autosize(('#contenido'));
     
 });
 

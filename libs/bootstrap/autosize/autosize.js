@@ -247,6 +247,7 @@
 
 	function update(ta) {
 		var methods = map.get(ta);
+        
 		if (methods) {
 			methods.update();
 		}

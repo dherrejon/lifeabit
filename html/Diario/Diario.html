@@ -469,6 +469,8 @@
                                     
                       </div>
                    </div>
+                   
+                   <div ng-include=" 'html/Control/BotonTop.html' "></div>
                 </div>
                 
             </div>
@@ -521,6 +523,7 @@
                          <div class="text-center">
                              <a class="btn btnTabModal" ng-click="tabModal = 'Diario'" ng-class="{active: tabModal == 'Diario'}"><div class="fa fa-book tabModal"></div><br>Diario</a>
                              <a class="btn btnTabModal" ng-click="tabModal = 'Imagenes'" ng-class="{active: tabModal == 'Imagenes'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Archivos'" ng-class="{active: tabModal == 'Archivos'}"><div class="fa fa-file  tabModal"></div><br>Archivos</a>
                          </div>
                                           
                      </div>
@@ -735,6 +738,12 @@
                             </table>
                        </div>
                     </div>
+                </div>
+                
+                <div ng-show="tabModal == 'Archivos'">
+                
+                    <div ng-include=" 'html/Archivo/Archivo.html' "></div>
+                
                 </div>
                 
                 <br><br>
@@ -1131,6 +1140,8 @@
 
         </div>
     </div>
+    
+    <div ng-include=" 'html/Archivo/EtiquetaArchivo.html' "></div>
      
 </div>
  
@@ -1140,7 +1151,8 @@
 <div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
-  
+ 
+
 
 
    

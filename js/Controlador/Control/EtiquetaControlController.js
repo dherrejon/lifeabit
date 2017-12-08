@@ -34,6 +34,8 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             
             $scope.verEtiqueta  = true;
             $scope.AgregarNuevaEtiqueta(sugerida);
+            
+            
         }
     });
     

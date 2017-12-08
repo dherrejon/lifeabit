@@ -71,6 +71,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.buscarCiudad = "";
     
     $scope.modulo = "";
+    $scope.buscarTituloFiltro = "";
+    $scope.verTodos = false;
 
     /*------------------ Catálogos -----------------------------*/
     $scope.GetActividad = function()              
@@ -106,7 +108,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         
         for(var k=0; k<actividad.EventoAux.length; k++)
         {
-            if(actividad.EventoAux[k].Fecha == $scope.hoy)
+            if(actividad.EventoAux[k].Fecha == $scope.hoy && actividad.EventoAux[k].Hecho == '0')
             {
                 hoy = true;
                 break;
@@ -998,10 +1000,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.SetFiltroEtiqueta = function(etiqueta)
     {
-        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) === 0)
+        /*if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) === 0)
         {
             $scope.LimpiarFiltroFecha();
-        }
+        }*/
         
         etiqueta.filtro = false;
         $scope.filtro.etiqueta.push(etiqueta);
@@ -1034,6 +1036,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         //$scope.verTodos = false;
         
         $scope.GetActividad();
+        
+        $scope.verTodos = false;
         
         //document.getElementById("fechaFiltro").value = "";
     };
@@ -1220,6 +1224,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             $scope.filtro.fecha = {Fecha:"", FechaFormato:"", Seleccion:""};
             $scope.GetActividad();
+            $scope.verTodos = false;
         }
         
     };
@@ -1300,6 +1305,48 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         $scope.nuevoEvento.Ciudad = new Ciudad();
         $scope.buscarCiudad = "";
+    };
+    
+    
+    $scope.FiltrarBuscarActividad = function(actividad)
+    {
+        var buscar = $scope.buscarActividad;
+        
+        if(buscar !== undefined)
+        {
+            if(buscar.length > 0)
+            {
+                var index = actividad.Nombre.toLowerCase().indexOf(buscar.toLowerCase());
+
+
+                if(index < 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    if(index === 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        if(actividad.Nombre[index-1] == " ")
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
     };
     
     /*-----------------Abrir Panel Agregar-Editar termino-------------------*/
@@ -2424,6 +2471,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         
         $scope.nuevoEvento.Hora = actividad.Hora;
+         $('#horaEvento').data("DateTimePicker").clear();
         document.getElementById("horaEvento").value = actividad.Hora;
     };
     
@@ -2436,7 +2484,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.nuevoEvento.FechaFormato = TransformarFecha($scope.nuevoEvento.Fecha);
         
         $scope.nuevoEvento.Lugar = SetLugar($scope.detalle.Lugar);
-
+        
         document.getElementById("fechaEvento").value = $scope.nuevoEvento.Fecha;
     };
     
@@ -2458,14 +2506,18 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         locale: 'es',
         format: 'YYYY-MM-DD',
     });
-    
-    
+
     $scope.CambiarFecha = function(element) 
     {
         $scope.$apply(function($scope) 
         {
             $scope.nuevoEvento.Fecha = element.value;
             $scope.nuevoEvento.FechaFormato = TransformarFecha(element.value);
+            
+            if($scope.nuevoEvento.Fecha > $scope.hoy)
+            {
+                $scope.nuevoEvento.Hecho = "0";
+            }
         });
     };
     
@@ -2746,7 +2798,24 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
            
     });
 
-    
+    $scope.MostrarEvento = function(fechaevento)
+    {
+        if($scope.filtro.fecha.Fecha.length > 0 && !$scope.verTodos)
+        {
+            if(fechaevento == $scope.filtro.fecha.Fecha)
+            {
+                return true; 
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    };
     
     //----------------- terminar evento actividad -------------------
     $scope.TerminarEventoActividad = function()

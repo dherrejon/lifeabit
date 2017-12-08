@@ -47,6 +47,20 @@
     box-shadow: none;
 }
 
+.itemBarraLateralbtn, .itemBarraLateralbtn:focus, .itemBarraLateralbtn:active, .itemBarraLateralbtn:hover, .itemBarraLateralbtn.active
+{
+    background: transparent;
+    color:  #262626 !important;
+    
+    border-radius: 0px;
+    
+    text-align: left;
+    width: 100%;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
 .itemBarraLateral.active
 {
     background: #E0F2F7;

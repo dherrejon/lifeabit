@@ -872,42 +872,45 @@ function EditarDiario()
         $app->stop();
     }
     
-    $sql = "UPDATE Ciudad SET DiarioDefecto = 0 WHERE DiarioDefecto = 1 AND UsuarioId = :UsuarioId";
-    
-    try 
+    if($diario->CambiarCiudad)
     {
-        $stmt = $db->prepare($sql);
+        $sql = "UPDATE Ciudad SET DiarioDefecto = 0 WHERE DiarioDefecto = 1 AND UsuarioId = :UsuarioId";
 
-        $stmt->bindParam("UsuarioId", $diario->UsuarioId);
+        try 
+        {
+            $stmt = $db->prepare($sql);
 
-        $stmt->execute();
+            $stmt->bindParam("UsuarioId", $diario->UsuarioId);
 
-    } catch(PDOException $e) 
-    {
-        echo $e;
-        echo '[{"Estatus": "Fallo"}]';
-        $db->rollBack();
-        $app->status(409);
-        $app->stop();
-    }
-    
-    $sql = "UPDATE Ciudad SET DiarioDefecto = 1 WHERE CiudadId = :CiudadId";
-    
-    try 
-    {
-        $stmt = $db->prepare($sql);
+            $stmt->execute();
 
-        $stmt->bindParam("CiudadId", $diario->Ciudad->CiudadId);
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
 
-        $stmt->execute();
+        $sql = "UPDATE Ciudad SET DiarioDefecto = 1 WHERE CiudadId = :CiudadId";
 
-    } catch(PDOException $e) 
-    {
-        echo $e;
-        echo '[{"Estatus": "Fallo"}]';
-        $db->rollBack();
-        $app->status(409);
-        $app->stop();
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("CiudadId", $diario->Ciudad->CiudadId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
     }
     
     $sql = "DELETE FROM TemaPorDiario WHERE DiarioId =".$diario->DiarioId;

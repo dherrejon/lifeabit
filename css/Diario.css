@@ -289,4 +289,27 @@
     text-overflow: ellipsis;
 }
 
+/*boton de arriba*/
+#btnTop 
+{
+    display: none;
+    position: fixed;
+     z-index: 99;
+    bottom: 20px;
+    right: 30px;
+   
+    height: 36px;
+    width: 36px;
+    border-radius: 18px;
+    background: white;
+    color: #1859b2;
+    border: 2px solid #1859b2;
+    font-size: 20px;
+    text-align: center;
+    padding: 0px;
+    
+    outline: none;
+    box-shadow: none;
+}
+
 
