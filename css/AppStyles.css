@@ -95,3 +95,25 @@
 .tab-content {
     
 }
+
+/*-------- alertas ------------*/
+.alertaPanel 
+{
+    width: 80%;	        
+    position: fixed;	    
+    z-index: 1000000000000001;
+    display: none;        
+    right: 0;
+    left: 0;
+    bottom: 30px;
+    margin-right: auto;
+    margin-left: auto; 
+}
+
+.addonGroup
+{
+    border-color: white;
+    border-radius: 0px !important;
+    color: #1859b2 !important;
+    background: white;
+}

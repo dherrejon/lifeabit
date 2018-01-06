@@ -38,6 +38,7 @@
     border-radius: 0px;
     outline: none !important;
     box-shadow: none;
+    height: 33px;
 }
 
 .entrada:disabled

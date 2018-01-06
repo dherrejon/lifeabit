@@ -258,6 +258,24 @@
                     </a>
                 </div>
                 
+                <!-- Pendientes -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.pendiente = !verApp.pendiente">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Pendiente ({{pendiente.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.nota "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.nota "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.pendiente && appFiltro == 'Todo') || appFiltro == 'Pendientes'" > <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="pendiente in pendiente | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(nota.Titulo)}}" ng-click="GetDatosPendiente(pendiente)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                            {{pendiente.Nombre}}
+                        </span>
+                    </a>
+                </div>
+                
                 
             </div>
         </div>
@@ -285,7 +303,116 @@
         <br>
         
         <div ng-repeat="detalle in detalle">
-            <div class="row" ng-show="tipoDetalle != 'Evento'">
+           
+            <div class="row" ng-show="tipoDetalle == 'Pendiente' ">
+                <div class="col-xs-12">
+                    <!-- Nombre -->
+                    <span class="tituloModal">{{detalle.Nombre}}</span><br><br>
+
+                    <!-- Prioridad -->
+                    <span>
+                        <b>Prioridad: </b> 
+                        <span ng-if="detalle.Prioridad.PriridadId">
+                            {{detalle.Prioridad.Nombre}}
+                        </span>
+                        <span ng-if="!detalle.Prioridad.PriridadId">
+                            Sin Prioridad
+                        </span>
+                        <br>
+                    </span>
+
+                    <!-- Lugar -->
+                    <span ng-if="detalle.Lugar.LugarId">
+                        <b>Lugar: </b> 
+                        <span >
+                            {{detalle.Lugar.Nombre}}
+                        </span>
+                        <br>
+                    </span>
+
+                    <!-- Cantidad -->
+                    <span ng-if="detalle.Unidad.UnidadId">
+                        <b>Cantidad: </b> 
+                        <span >
+                            {{detalle.Unidad.Cantidad}} {{detalle.Unidad.Unidad}}
+                        </span>
+                        <br>
+                    </span>
+
+                    <!-- Costo -->
+                    <span ng-if="detalle.Divisa.DivisaId">
+                        <b>Costo: </b> 
+                        <span >
+                           {{detalle.Divisa.Costo}}  {{detalle.Divisa.Divisa}}
+                        </span>
+                        <br>
+                    </span>
+                    <br>
+
+                    <span style="color: #808080">
+                        <!-- Etiqueta -->
+                        <span ng-if="detalle.EtiquetaVisible.length > 0">
+                            <b>Etiquetas: </b> 
+                            <span ng-repeat="etiqueta in detalle.EtiquetaVisible">
+                                <span ng-if="!$last">{{etiqueta.Nombre}},</span>
+                                <span ng-if="$last">{{etiqueta.Nombre}}.</span>
+                            </span><br>
+                        </span>
+
+                        <!-- tema -->
+                        <span ng-if="detalle.Tema.length > 0">
+                            <b>Temas: </b> 
+                            <span ng-repeat="tema in detalle.Tema">
+                                <span ng-if="!$last">{{tema.Tema}},</span>
+                                <span ng-if="$last">{{tema.Tema}}.</span>
+                            </span><br>
+                        </span>
+
+                        <!-- Fecha Creación -->
+                        <span>
+                            <b>Fecha Creación: </b> 
+                            <span>
+                                {{detalle.FechaCreacionFormato}}
+                            </span><br>
+                        </span>
+
+                         <!-- Fecha Intención -->
+                        <span>
+                            <b>Fecha Intención: </b> 
+                            <span>
+                                {{detalle.FechaIntencionFormato}}
+                            </span><br>
+                        </span>
+
+                         <!-- Fecha Realización -->
+                        <span>
+                            <b>Fecha Realización: </b> 
+                            <span>
+                                {{detalle.FechaRealizacionFormato}}
+                            </span><br>
+                        </span>
+                  </span>
+                   <br>
+
+                   <!-- Notas -->
+                    <span ng-if="detalle.Nota">
+                        <b>Nota: </b> <br>
+                        <span >
+                           <p style="font-size:12pt" ng-bind-html="detalle.NotaHTML"></p>
+                        </span>
+                        <br>
+                    </span>
+                    <br>
+
+
+
+                </div>
+                <br>
+
+
+            </div>
+           
+            <div class="row" ng-show="tipoDetalle != 'Evento' && tipoDetalle != 'Pendiente'">
                 <div class="col-xs-12">
                     <div >
                         
@@ -386,7 +513,7 @@
              </div>
              
              <!-- Divisor -->
-            <div class="row" ng-show="tipoDetalle != 'Evento'">
+            <div class="row" ng-show="tipoDetalle != 'Evento' && tipoDetalle != 'Pendiente'">
                <div class="col-sm-12"> 
                    <div class="divisorAzul"></div>                      
                </div>
@@ -590,7 +717,7 @@
             </div>
             
             <!-- Imagenes -->
-            <div ng-repeat="img in detalle.Imagen" ng-if="tipoDetalle == 'Nota' || tipoDetalle == 'Diario'">
+            <div ng-repeat="img in detalle.Imagen" ng-if="tipoDetalle == 'Nota' || tipoDetalle == 'Diario' || tipoDetalle == 'Pendiente'">
                 <div style="padding-left: 12px; padding-right: 12px">
                      <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                        <div class="imgContainer" >

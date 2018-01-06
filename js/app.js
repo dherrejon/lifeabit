@@ -1,5 +1,10 @@
 var app = angular.module('MQR',['ngRoute','angular-md5', 'angular-loading-bar', 'ui.bootstrap']);
 
+function getUrlBase ()
+{
+    return "php/API/index.php/";
+}
+
 app.constant('CONFIG',{
         APIURL: "php/API/index.php",
         APIKEY: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoid2ViLmFwcCIsImlhdCI6MTQ4NjUyMDMzMn0.y0ZN77h-2Ur4Sv4LkwW8XIuJ8sg6BIThF8dI2amVXPg",
@@ -119,6 +124,12 @@ app.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpPro
         when('/Notas',{
             templateUrl: 'html/Notas/Notas.html'
         }).
+    
+    //Pendiente
+        when('/Pendiente',{
+            templateUrl: 'html/Pendiente/Pendiente.html'
+        }).
+    
     
     //Conocimiento
         when('/Conocimiento',{

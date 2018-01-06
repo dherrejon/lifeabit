@@ -1,0 +1,218 @@
+.PendienteOpt
+{
+    right: 0; 
+    top: 0; 
+    position: absolute;
+    margin-top: -1px;
+    width: 25px;
+}
+
+.PendienteOptBtn, .PendienteOptBtn:focus, .PendienteOptBtn:active
+{
+    background: transparent;
+    color: black;
+    height: 90px;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.PendienteOptBtn:hover
+{
+    color: #1859b2;
+}
+
+.btnOptPendiente, .btnOptPendiente:active, .btnOptPendiente:hover, .btnOptPendiente:focus
+{
+    height: 90px;
+    border-radius: 0px;
+    color: white;
+    
+    outline: none !important;
+    box-shadow: none;
+    width: 70px;
+}
+
+.btnOptPendiente.Editar
+{
+    background: #088A08;
+}
+
+.btnOptPendiente.Borrar
+{
+    background: #970000;
+}
+
+.btnOptPendiente.Detalle
+{
+    background: #1859b2;
+}
+
+.btnOptPendiente.Copiar
+{
+    background: #808080;
+}
+
+
+.cleanTxtBtn, cleanTxtBtn:active, cleanTxtBtn:focus
+{
+    color: gray;
+    border-bottom: 3px solid #262626;
+    border-radius: 0px;
+    border-width: 0px 0px 3px 0px;
+    height: 33px;
+    
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.cleanTxtBtn:hover
+{
+    color: #262626;
+}
+
+/*.labelHoy
+{
+    position: absolute; 
+    top: 0; 
+    margin-left: 45;
+    width: 45px; 
+    height: 45px;
+    
+    border-radius: 0px;
+    
+    text-align: center;
+    background: red;
+    color: white;
+    
+    border-top: 1px solid white;
+}
+
+.labelHoy:before
+{
+    background: black;
+    border-radius: 30px;
+}
+
+.labelHoy:after
+{
+    background: black;
+    border-radius: 30px;
+}*/
+
+/*.labelHoy
+{
+    position: absolute; 
+    top: 0;
+    right: 0px;
+    border-radius: 0px;
+    margin-top: 0px;
+    
+    width: 40px; 
+    height: 40px;
+    
+    background: red;
+    color: white;
+    
+    transform: rotate(45deg);
+    
+}
+
+.labelHoy:before
+{
+    content: "";
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    
+    border-width: 0px 15px 15px 15px;
+    border-style: solid;
+    border-color: transparent;
+    border-right-color: black;
+}
+
+.labelHoy:after
+{
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    
+    border-width: 40px 10px 0px 40px;
+    border-style: solid;
+    border-color: transparent;
+    border-left-color: black;
+}*/
+
+.labelHoyTxt
+{
+    position: absolute; 
+    top: 0;
+    right: 0px;
+    border-radius: 0px;
+    margin-top: 0px;
+    
+    width: 40px; 
+    height: 40px;
+    font-style: bold;
+    color: white;
+    
+    transform: rotate(45deg);
+}
+
+.labelHoy
+{
+    position: absolute; 
+    top: 0px;
+    right: 0px;
+    border-radius: 0px 10px 0px 0px;
+    margin-top: 0px;
+    
+    
+    color: white;
+    
+    border-width: 20px;
+    border-style: solid;
+    border-color: transparent;
+    
+    border-top-color: #fa4915;
+    border-right-color: #fa4915; 
+}
+
+.labelHoy2
+{
+    position: absolute; 
+    top: 0px;
+    right: 0px;
+    border-radius: 0px 7px 0px 0px;
+    margin-top: 0px;
+    
+    
+    color: white;
+    
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent;
+    
+    border-top-color: black;
+    border-right-color: black; 
+}
+
+.labelHoy2.enEspera
+{
+    border-top-color: #b3b3b3;
+    border-right-color: #b3b3b3; 
+}
+
+.labelHoy2.done
+{
+    border-top-color: #2076ed;
+    border-right-color: #2076ed; 
+}
+
+.labelHoy2.pendiente, .labelHoy2.hoyPendiente
+{
+    border-top-color: #fabf15;
+    border-right-color: #fabf15; 
+}

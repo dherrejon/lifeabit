@@ -32,8 +32,16 @@ app.controller("EncabezadoControlador", function($scope, $window, $http, $rootSc
                 $scope.barraNavegacion = EncabezadoNotas;
                 break;
                 
+            case "Mis Pendientes": 
+                $scope.barraNavegacion = EncabezadoPendiente;
+                break;
+                
             case "Home": 
                 $scope.barraNavegacion = EncabezadoAplicaciones;
+                break;
+                
+            case "Mis Pendientes": 
+                $scope.barraNavegacion = EncabezadoPendiente;
                 break;
             
             default:
@@ -392,6 +400,21 @@ var EncabezadoNotas =
                                                 {texto:"Temas", referencia:"#TemaActividad", funcion:"", show:true}
                                             ]},
                     
+              ]                       
+};
+
+var EncabezadoPendiente =
+{ 
+    titulo:"Mis Pendientes", 
+    opcion: [ 
+                    { texto:"Inicio", tipo:"link", referencia:"#Pendiente", show: true},
+                    { texto:"Administrar", tipo:"dropdown", show: true,
+                                                elemento:
+                                                [
+                                                    {texto:"Etiquetas", referencia:"#Etiqueta", funcion:"", show:true},
+                                                    {texto:"Lugares", referencia:"#Lugar", funcion:"", show:true},
+                                                    {texto:"Unidades", referencia:"#Unidades", funcion:"", show:true},
+                                                ]},
               ]                       
 };
 

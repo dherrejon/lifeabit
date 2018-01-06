@@ -1,4 +1,4 @@
-app.controller("AplicacionController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce)
+app.controller("AplicacionController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, LifeService)
 {   
     
     $scope.IniciarApp = function(app)
@@ -37,9 +37,9 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.buscarConcepto = "";
     $scope.campoBuscar = "Conceptos";
     
-    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Eventos", "Imagenes", "Notas"];
+    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Eventos", "Imagenes", "Notas", "Pendientes"];
     $scope.appFiltro = "Todo";
-    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true};
+    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true, pendiente:true};
     
     //------------------- Catálogos (coneptos) -----------------------------------
     $scope.GetTemaActividad = function()              
@@ -110,6 +110,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 $scope.actividad = data[3].Actividad;
                 $scope.imagen = data[4].Imagen;
                 $scope.evento = data[5].Evento;
+                $scope.pendiente = data[6].Pendiente;
             }
             else
             {
@@ -724,6 +725,32 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         }
     };
     
+    //---Pendiente --
+     $scope.GetDatosPendiente = function(pendiente)
+    {
+          var datos = {Tipo:"Pendiente", Id:pendiente.PendienteId};
+            $scope.tipoDetalle = "Pendiente";
+         
+        (self.servicioObj = LifeService.Get('GetPendiente/Datos/' + pendiente.PendienteId)).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                $scope.detalle[0] = SetPendiente(dataResponse.data);
+                $scope.detalle[0].NotaHTML = $sce.trustAsHtml($scope.detalle[0].NotaHTML);
+                $scope.GetEtiquetaVisible($scope.detalle[0]);
+            } 
+            else 
+            {
+                 $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+    };
+    
     /*------------------Indentifica cuando los datos del usuario han cambiado-------------------*/
     $scope.InicializarControlador = function()
     {
@@ -778,5 +805,6 @@ var aplicaciones = [
                         {texto:"Mis Actividades", habilitada:true, paginaPrincipal:"/Actividades",   icono:"fa fa-calendar"},
                         {texto:"Mi Diario", habilitada:true, paginaPrincipal:"/Diario", icono:"fa fa-clock-o"},
                         {texto:"Mis Notas", habilitada:true, paginaPrincipal:"/Notas", icono:"fa fa-sticky-note"},
+                        {texto:"Mis Pendientes", habilitada:true, paginaPrincipal:"/Pendiente", icono:"fa fa-calendar-times-o"},
                     ];
 

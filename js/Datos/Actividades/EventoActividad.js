@@ -373,6 +373,26 @@ function TransformarFecha2(fecha)
     return fechaF;
 }
 
+function TransformarDateToFecha(fecha)
+{
+    var mes = parseInt(fecha.getMonth());
+    
+    var mes2 = mes + 1;
+    if(mes2 < 10)
+    {
+        mes2 = "0" + mes2;
+    }
+
+    var dia = parseInt(fecha.getDate());
+    if(dia < 10)
+    {
+        dia = "0" + dia;
+    }
+
+
+    return fecha.getFullYear()+ "-" + mes2 + "-" + dia;
+}
+
 function GetDate()
 {
     var fecha;

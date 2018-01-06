@@ -28,6 +28,10 @@
 
     require 'Imagen/Imagen.php';
 
+    require 'Pendiente/Pendiente.php';   
+    
+    require 'Pendiente/Prioridad.php';  
+
     /*-----Seguridad-----*/
     require 'PHP-JWT/Authentication/JWT.php';
     require 'PHP-JWT/Exceptions/SignatureInvalidException.php';
@@ -307,6 +311,20 @@
     $app->post('/GetNotasFiltro', $seguridad, $ChecarSesion, 'GetNotasFiltro');
     $app->get('/GetNotaOrdenUsuario/:id', $seguridad, $ChecarSesion, 'GetNotaOrdenUsuario');
     $app->post('/EditarNotaOrdenUsuario', $seguridad, $ChecarSesion, 'EditarNotaOrdenUsuario');
+
+    //---------------------------------------------------------------------------------------------------------------Pendientes
+
+    /*-----------------------  Pendiente ------------------------------------------*/
+    $app->post('/GetPendiente', $seguridad, $ChecarSesion, 'GetPendiente');
+    $app->get('/GetPendiente/Datos/:id', $seguridad, $ChecarSesion, 'GetPendienteDatos');
+    $app->post('/AgregarPendiente', $seguridad, $ChecarSesion, 'AgregarPendiente');
+    $app->post('/EditarPendiente', $seguridad, $ChecarSesion, 'EditarPendiente');
+    $app->delete('/BorrarPendiente', $seguridad, $ChecarSesion, 'BorrarPendiente');
+
+    $app->put('/HechoPendiente', $seguridad, $ChecarSesion, 'HechoPendiente');
+
+    /*-----------------------  Prioridad ------------------------------------------*/
+    $app->get('/GetPrioridad/:id', $seguridad, $ChecarSesion, 'GetPrioridad');
 
     //---------------------------------------------------------------------------------------------------------------Buscador
 

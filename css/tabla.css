@@ -80,8 +80,6 @@
 
 .dropdownListModal:hover, .dropdownListModalError:hover
 {
-    background:  rgb(41,69,77); 
-    color: white;  
     cursor: hand;
 }
 

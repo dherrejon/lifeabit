@@ -1287,7 +1287,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         e.preventDefault(); // prevent the default action (scroll / move caret)
     });
     
-     $scope.AgregarEtiqueta = function(etiqueta, ver)
+    $scope.AgregarEtiqueta = function(etiqueta, ver)
     {
         etiqueta.Visible = ver;
         $scope.nuevoDiario.Etiqueta.push(etiqueta);
@@ -1298,40 +1298,6 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         if(ver)
         {
             $scope.SetEtiquetaTodasImagenes(etiqueta);
-        }
-        
-    };
-    
-    $scope.SetEtiquetaTodasImagenes = function(etiqueta)
-    {
-        var e = [];
-        e[0] = etiqueta;
-
-        for(var i=0; i<$scope.nuevoDiario.Imagen.length; i++)
-        {
-            $scope.SetEtiquetaImagenDiario($scope.nuevoDiario.Imagen[i], e);
-        }
-        
-        for(var i=0; i<$scope.nuevoDiario.ImagenSrc.length; i++)
-        {
-            $scope.SetEtiquetaImagenDiario($scope.nuevoDiario.ImagenSrc[i], e);
-        }
-    };
-    
-    $scope.SetTemaTodasImagenes = function(tema)
-    {
-        var e = [];
-        e[0] = tema;
-        
-        $scope.temaAgregar = e;
-        
-        if($scope.nuevoDiario.Imagen.length > 0)
-        {
-            $scope.SetTemaImagenDiario($scope.nuevoDiario.Imagen[0], e);
-        }
-        else if($scope.nuevoDiario.ImagenSrc.length > 0)
-        {
-            $scope.SetTemaImagenDiario($scope.nuevoDiario.ImagenSrc[0], e);
         }
     };
     
@@ -2896,6 +2862,107 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             return con;
         }
     };
+    
+    //destecta cuando se agrego una etiqueta
+    $scope.$on('EtiquetaSet',function(etiqueta)
+    {
+        $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+    });
+    
+    $scope.SetEtiquetaTodasImagenes = function(etiqueta)
+    {
+        var e = [];
+        e[0] = etiqueta;
+
+        for(var i=0; i<$scope.nuevoDiario.Imagen.length; i++)
+        {
+            $scope.SetEtiquetaImagenDiario($scope.nuevoDiario.Imagen[i], e);
+        }
+        
+        for(var i=0; i<$scope.nuevoDiario.ImagenSrc.length; i++)
+        {
+            $scope.SetEtiquetaImagenDiario($scope.nuevoDiario.ImagenSrc[i], e);
+        }
+    };
+    
+    $scope.$on('TemaSet',function(etiqueta)
+    {
+        $scope.todasImg = "tema";
+        $scope.SetTemaTodasImagenes(ETIQUETA.GetEtiqueta());
+    });
+    
+    $scope.SetTemaTodasImagenes = function(tema)
+    {
+        var e = [];
+        e[0] = tema;
+        
+        $scope.temaAgregar = e;
+        
+        if($scope.nuevoDiario.Imagen.length > 0)
+        {
+            $scope.SetTemaImagenDiario($scope.nuevoDiario.Imagen[0], e);
+        }
+        else if($scope.nuevoDiario.ImagenSrc.length > 0)
+        {
+            $scope.SetTemaImagenDiario($scope.nuevoDiario.ImagenSrc[0], e);
+        }
+    };
+    
+    $scope.$on('QuitarEtiqueta',function(nota, etiqueta)
+    {
+        for(var i=0; i<$scope.nuevoDiario.Imagen.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoDiario.Imagen[i].Etiqueta.length; j++)
+            {
+                if($scope.nuevoDiario.Imagen[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.nuevoDiario.Imagen[i].Etiqueta.splice(j,1);
+                    break;
+                }
+            }
+        }
+        
+        for(var i=0; i<$scope.nuevoDiario.ImagenSrc.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoDiario.ImagenSrc[i].Etiqueta.length; j++)
+            {
+                if($scope.nuevoDiario.ImagenSrc[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.nuevoDiario.ImagenSrc[i].Etiqueta.splice(j,1);
+                    break;
+                }
+            }
+        }
+    });
+    
+    $scope.$on('QuitarTema',function(nota, tema)
+    {
+        for(var i=0; i<$scope.nuevoDiario.Imagen.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoDiario.Imagen[i].Tema.length; j++)
+            {
+                if($scope.nuevoDiario.Imagen[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.nuevoDiario.Imagen[i].Tema.splice(j,1);
+                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevoDiario.Imagen[i], $scope.etiqueta, $scope.tema);
+                    break;
+                }
+            }
+        }
+        
+        for(var i=0; i<$scope.nuevoDiario.ImagenSrc.length; i++)
+        {
+            for(var j=0; j<$scope.nuevoDiario.ImagenSrc[i].Tema.length; j++)
+            {
+                if($scope.nuevoDiario.ImagenSrc[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.nuevoDiario.ImagenSrc[i].Tema.splice(j,1);
+                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevoDiario.ImagenSrc[i], $scope.etiqueta, $scope.tema);
+                    break;
+                }
+            }
+        }
+    });
     
     
     //------------------- Alertas ---------------------------

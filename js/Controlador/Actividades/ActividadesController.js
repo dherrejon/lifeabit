@@ -2676,7 +2676,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         else
         {
-            $scope.mensajeAdvertencia = "¿Estás seguro de que desea desmarcar como ya realizado este evento";
+            $scope.mensajeAdvertencia = "¿Estás seguro de que desea desmarcar como ya realizado este evento?";
             $('#CancelarEventoHecho').modal('toggle');
         }
     };

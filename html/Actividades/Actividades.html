@@ -615,8 +615,8 @@
                                          </a>
                                        </li>
 
-                                    </ul>
-                                </span>
+                                </ul>
+                            </span>
                         </div>
                           
                           
@@ -856,7 +856,7 @@
                     </div>
                 </div>
             
-                <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Actividad')" ng-controller="ControlEtiquetaController as lc"></div>
+                <div ng-show="modulo == 'Actividad'" ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Actividad')" ng-controller="ControlEtiquetaController as lc"></div>
                 
                 <!-- Temas -->
                 <!--<div class="row" >
@@ -1593,7 +1593,7 @@
                     </div>
                      <br>
 
-                    <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Evento')" ng-controller="ControlEtiquetaController as ac"></div>
+                    <div ng-show="modulo == 'Evento'" ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Evento')" ng-controller="ControlEtiquetaController as ac"></div>
 
                 </div>
                    

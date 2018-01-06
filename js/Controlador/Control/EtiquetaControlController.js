@@ -289,7 +289,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 
                 
                 $rootScope.mensaje = "Etiqueta Agregada.";
-                $scope.EnviarAlerta('Modal');
+                $rootScope.$broadcast('Alerta', 'Etiqueta Agregada', 'exito');
                 
                 if($scope.verEtiqueta)
                 {   
@@ -349,7 +349,6 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.AgregarTema = function(tema)
     {
         $scope.elemento.Tema.push(tema);
-        
         tema.show = false;
         $scope.buscarConcepto = "";
         
@@ -398,7 +397,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 
                 $scope.mensaje = "Tema Agregado.";
 
-                $scope.EnviarAlerta('Modal');
+                $rootScope.$broadcast('Alerta', 'Tema Agregado', 'exito');
                 
                 ETIQUETA.TemaSet(data[2].Tema);
 
@@ -564,7 +563,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.$on('TerminarEditarEtiqueta',function()
     {   
         $rootScope.mensaje = "Etiqueta Editada";
-        $scope.EnviarAlerta('Modal');
+        $rootScope.$broadcast('Alerta', 'Etiqueta Editada', 'exito');
         
         var nueva = ETIQUETA.GetEtiqueta();
         $scope.SetNuevaEtiqueta(nueva);

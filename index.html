@@ -21,6 +21,8 @@
 
         <!-- Bootstrap-->
         <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.css">
+        
+        <script src="libs/bootstrap/js/tether.min.js"></script>
         <script src="libs/bootstrap/js/bootstrap.min.js"></script>
         
         <!-- UI -->
@@ -84,12 +86,18 @@
             <script src="js/Controlador/Imagen/EtiquetaImagen.js"></script>
             <script src="js/Controlador/Arhivo/ArchivoController.js"></script>
             <script src="js/Controlador/Arhivo/EtiquetaArchivoController.js"></script>
+              
+            <script src="js/Controlador/MensajeControlador.js"></script>
                
         <!-- Diario -->
         <script src="js/Controlador/Diario/DiarioActividadesController.js"></script>
         
         <!-- Notas -->
         <script src="js/Controlador/Notas/NotasController.js"></script>
+        
+        <!-- Pendientes -->
+        <script src="js/Controlador/Pendiente/PendienteController.js"></script>
+        <script src="js/Datos/Pendiente/Pendiente.js"></script>
         
         <!-- Conocimiento -->
         <script src="js/Controlador/Conocimiento/ConocimientoController.js"></script>
@@ -140,6 +148,9 @@
         <!-- Archivos -->
         <script src="js/Datos/Archivo/Archivo.js"></script>
         
+        <!-- Servicios -->
+        <script src="js/Service/LifeaBitService.js"></script>
+        
         <!--css-->
         <link rel="stylesheet" href="css/HeaderStyles.css">
         <link rel="stylesheet" href="css/LoginStyles.css">
@@ -156,6 +167,8 @@
         <link rel="stylesheet" href="css/Notas.css">
         <link rel="stylesheet" href="css/Conocimiento.css">
         <link rel="stylesheet" href="css/Buscador.css">
+        <link rel="stylesheet" href="css/Pendiente.css">
+        <link rel="stylesheet" href="css/animaciones.css">
         
         <!--awesome font-->
         <link rel="stylesheet" href="css/font-awesome.min.css">
@@ -177,5 +190,10 @@
                 <footer ng-include=" 'html/Footer.html' "></footer>
             </div>-->
         </div>
+        
+        <div>
+            <div ng-include=" 'html/Mensaje.html' " ></div>
+        </div>
+        
     </body>
 </html>

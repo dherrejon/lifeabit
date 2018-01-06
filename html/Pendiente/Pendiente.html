@@ -1,0 +1,1077 @@
+<div ng-controller="PendienteController as pendiente" id="pendienteform">
+
+   <div class="container-fluid" ng-show="!detalle">
+       
+       <div class="row" style="height: 1px;">
+
+            <div class="col-xs-12">
+               <div class="pull-right" style="margin-right: 14%">
+                    <div style="position: fixed; display: block; z-index: 10; top:160px;  padding: 0px; color: black; ">
+                       <input id="fechaFiltro" type="button" class="form-control entrada" style="height: 1px; color: transparent;  background: transparent; width:1px; border-color: transparent; margin-top: -15px"  onblur="angular.element(this).scope().CambiarFechaFiltro(this)">
+                    </div>
+                </div>
+            </div> 
+            
+        </div>
+        
+        <!-- Barra de Busqueda -->
+        <div class="barraBuscarInformacion">
+            
+
+            <div class="row ">
+               <div class="col-xs-12">
+
+                   <div class="input-group input-group-lg" style="color: black">
+
+                         <!-- Agregar -->
+                         <span class="input-group-btn ">
+                               <button type="button" class="btn botonBuscarFiltro botonAgregarBusqueda" ng-click="AbrirPendiente('Agregar', null)">
+                                    <span class="fa fa-plus"></span> <span class="hidden-xs"> Agregar</span>
+                               </button>
+                          </span>
+
+                         <!-- Span Buscar -->
+                         <div class="input-group-addon addonGroup" style="border-right-width: 0px">
+                            <span class="fa fa-search"></span>
+                        </div>
+
+                          <!-- entradas -->
+                          <input type="text" placeholder="Buscar por Concepto" class="form-control inputBuscar" ng-model="buscarConceptoBarra" uib-typeahead="e as (e.Nombre + e.Tema) for e in FiltroConcepto($viewValue)  | limitTo:7" typeahead-on-select="SetFiltroEtiqueta()" typeahead-select-on-blur="true" typeahead-focus-first="true" typeahead-editable="true" id="filtroConcepto" autocomplete="off" style="border-left-width: 0px"><!-- ng-blur="SetFiltroEtiquetaBlur(selected)" --> 
+                          
+                          <!-- limpiar texto -->
+                          <span class="input-group-btn">
+
+                             <button class="btn botonBuscarFiltro"  ng-click="buscarConceptoBarra = ''" style="border-width: 0px; border-right: 3px solid #1859b2; border-radius: 0px !important">
+                                   <span class="fa fa-times-circle" ></span>
+                             </button>
+                          </span>
+                    </div>
+
+               </div>
+            </div>
+
+        </div>
+        
+        <div class="row">
+
+            <div class="col-xs-12">
+                
+                
+                <!-- Separador -->
+                <div class="row" style="height:56px">
+                   <div class="col-xs-12" >
+                   </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-12" style="width: 100%">
+
+                      <!-- Separador -->
+                        <div class="row" style="height:74px">
+                           <div class="col-xs-12  text-center" >
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            
+                
+                <!-- Filtro fecha -->
+                <div class="row panelOperacionBotonLateral" style="padding-top:5px; padding-bottom:5px; border-top: 2px  solid #79adf4;">
+                    
+                    <div class="col-xs-12">
+                       <input type="text"  id="" class="form-control entrada"  style="display: block; position: fixed; width:1%; border-color: transparent" onchange="angular.element(this).scope().CambiarFechaFiltro(this)"/> 
+                    </div>
+
+                    <div class="col-xs-12">
+                        <div class="input-group btn-group-justified">
+                           
+                           <div class="btn-group">
+                                <button class="btn botonAgrupador"  ng-click="filtro.pendiente = !filtro.pendiente" type="button" ng-class="{Activo: filtro.pendiente}" style="overflow: visible">
+                                    <span class="fa fa-exclamation "></span>
+                                </button>
+                           </div>
+                           
+                           <div class="btn-group">
+                                <button class="btn botonAgrupador"  ng-click="LimpiarFiltroFecha()" type="button" ng-class="{Activo: filtro.fecha ==''}">Todo</button>
+                           </div>
+                            
+                            <div class="btn-group">
+                                <button class="btn botonAgrupador"  ng-click="FiltroFechaHoy()" type="button" ng-class="{Activo: filtro.fecha == hoy}">Hoy</button>
+                           </div>
+                           
+                            <div class="btn-group">
+                                <button class="btn botonAgrupador" ng-click="AbrirCalendario()" type="button" ng-class="{Activo: filtro.fecha != '' && filtro.fecha != hoy}"><span class="fa fa-calendar-o"></span></button>
+                           </div>
+
+                        </div>
+                    </div>
+    
+                    
+                     <div class="col-xs-12 text-center" ng-show="filtro.fecha">
+                        
+                        <div class="input-group" style="color:black !important; overflow:visible; display:float">
+                         
+                          <span class="input-group-btn">
+                              <button class="btn btnChangeDate" ng-click="CambiarFechaBtn(-1, filtro.fecha)"><span class="fa fa-caret-left"></span></button>
+                          </span>
+                                                 
+                           <a class="btn inputChangeDate " style="padding: 2px" ng-click="AbrirCalendario()">
+                                <span style="white-space: normal; overflow: hidden;" >{{filtro.fechaFormato}}</span>
+                            </a>
+                            
+                           <span class="input-group-btn">
+                             <button class="btn btnChangeDate" ng-click="CambiarFechaBtn(1, filtro.fecha)"><span class="fa fa-caret-right"></span></button>
+                          </span>
+                           
+                           
+                            
+                        </div>
+        
+                     </div>
+
+                </div>
+                
+                <!-- Fitros -->
+                <div class="row verFitros" ng-show="(filtro.tema.length + filtro.frecuencia.length + filtro.etiqueta.length) > 0">
+
+                    <div class="col-xs-12">
+                        <button class="btn botonFalsoTitulo"><b>Filtro</b></button>
+                        
+                        <!-- Botones -->
+                       <div class="pull-right btn-group">
+                          
+                            <!-- Limpiar filtro -->
+                            <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="LimpiarFiltro()" >
+                               <span class="fa fa-ban"></span>
+                           </button>
+
+                           <!-- Ver Detalles -->
+                           <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()">
+                               <b class="fa fa-angle-double-right" ng-if="!verFiltro"></b>
+                               <b class="fa fa-angle-double-up" ng-if="verFiltro"></b>
+                           </button>
+
+                        </div>
+                        
+                    </div>
+                    <!-- Etiquetas -->
+                    <div class="col-xs-12" ng-show="filtro.etiqueta.length && verFiltro">
+                        <b> Etiquetas: </b><br>
+                        <span ng-repeat="etiqueta in filtro.etiqueta | orderBy:'Nombre' track by $index">
+                            <div class="btn-group" role="group" style="margin-bottom:8px">
+                                <a class="btn campoAgregado" ng-click="QuitaretiquetaFiltro(etiqueta)" style="font-size:10pt">{{etiqueta.Nombre}}</a>
+                                <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitaretiquetaFiltro(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                            </div>
+                        </span>
+                    </div>
+
+                    <!-- Temas -->
+                    <div class="col-xs-12" ng-show="filtro.tema.length > 0 && verFiltro">
+                        <b> Tema: </b><br>                        
+                        <span ng-repeat="tema in filtro.tema | orderBy:'Tema'" >
+                            <div class="btn-group" role="group" style="margin-bottom:8px">
+                                <a class="btn campoAgregado" ng-click="QuitarTemaFiltro(tema)" style="font-size:10pt">{{tema.Tema}}</a>
+                                <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitarTemaFiltro(tema)"><span class="fa fa-times-circle"></span></a>
+                            </div>
+                        </span>
+                    </div>
+                    
+                </div>
+                
+                <div ng-include=" 'html/Control/BotonTop.html' "></div>
+                
+            </div>
+       </div>
+       
+       <div style="margin-top: 10px"></div>
+       <div class="row">
+           <div class="col-xs-12" ng-repeat="p in pendiente | orderBy:['FechaRealizacion', 'Orden']" ng-show=" !filtro.pendiente  || (p.Hecho == '0')">
+               <div  class="eventoVista" style="position: relative; border-width: 0px">
+                 
+                    <div class="pendienteapp {{p.Clase}}" style="margin-top: -1px">
+                        
+                        <button class="btn btnEvento" ng-click="AccionPendiente(p)" style="z-index: 1 !important">
+                            <span ng-if="('1' == p.Hecho)" class="fa fa-check"></span> 
+                         </button>
+                         
+                        <di ng-show="p.FechaRealizacion == hoy" style="z-index: -1 !important">
+                            <div class="text-center labelHoy" ></div>
+                            <div class="text-center labelHoy2 {{p.Clase}}" ></div>
+                            <div class="text-center labelHoyTxt" >Hoy</div>
+                        </di>
+                         
+                        
+                         <div class="text-center tituloEstatusPendiente {{p.Clase}}" >{{p.EstatusTexto}} </div>
+
+                     </div> 
+                     
+                    <div style="position: relative; margin-left: 90px; padding: 10px; overflow-y: scroll; max-height: 90px; margin-right: 25px">
+                        <b style="font-size: 12pt;  color: black">{{p.Nombre}}</b><br>
+                        <span style="font-size: 11pt;"><b>Prioridad: </b>{{p.NombrePrioridad ? p.NombrePrioridad : 'Sin Prioridad'}}<br></span>
+                        <span style="font-size: 11pt;"><b>Intención: </b>{{p.FechaIntencionFormato}}<br></span>
+                        <span style="font-size: 11pt;"><b>Realización: </b>{{p.FechaRealizacionFormato}}<br></span>
+                    </div>
+                    
+                    <div  class="pull-right PendienteOpt" ng-show="verpen !=  p.PendienteId" id="optPen">
+                         
+                         <button class="btn PendienteOptBtn" ng-click="VerOptPendiente(p.PendienteId)" >
+                            <span class="fa fa-ellipsis-v"></span>
+                        </button>
+
+                     </div>
+                     
+                     <div  class="pull-right PendienteOpt animated " ng-class="{slideInRight : verpen == p.PendienteId, slideOutRight : verpen2 == p.PendienteId}" ng-show=" verpen ==  p.PendienteId || verpen2 ==  p.PendienteId" style="width: auto">
+                         
+                         <div class="btn-group">
+                            <button class="btn btnOptPendiente Copiar" ng-click="AbrirPendiente('Copiar', p)">
+                                <span class="fa fa-files-o"></span> <br>Copiar
+                            </button>
+                            
+                             <button class="btn btnOptPendiente Detalle" ng-click="VerPendiente(p)">
+                                <span class="fa fa-eye"></span> <br>Detalle
+                            </button>
+
+                            <button class="btn btnOptPendiente Editar" ng-click="AbrirPendiente('Editar', p)">
+                                 <span class="fa fa-pencil"></span> <br>Editar
+                            </button>
+
+                            <button class="btn btnOptPendiente Borrar" ng-click="BorrarPendiente(p)">
+                                 <span class="fa fa-trash"></span> <br>Borrar
+                            </button>
+                        </div>
+
+                     </div>
+                   
+               </div>
+               
+               <div style="margin-bottom: 10px;  height: 1px; background: #D9D9D9 "></div>
+               
+           </div>
+       </div>
+        
+    </div>
+    
+    <div class="container-fluid" ng-show="detalle">
+        
+        <div class="row">
+            <div class="col-xs-12">
+                <div style="height: 57px"></div>
+            </div>
+        </div>
+                
+        <!-- Regresar -->
+        <div class="row">
+            <div class="col-xs-12" style="background: #E6E6E6;">
+
+                <button class="btn botonTextoAzul" ng-click="detalle = null">
+                    <span class="fa fa-chevron-left"></span> <span>Atras</span>
+                </button>
+
+            </div>
+        </div>
+        <br>
+        
+        <div class="row">
+            <div class="col-xs-12">
+                <!-- Nombre -->
+                <span class="tituloModal">{{detalle.Nombre}}</span><br><br>
+                
+                <!-- Prioridad -->
+                <span>
+                    <b>Prioridad: </b> 
+                    <span ng-if="detalle.Prioridad.PriridadId">
+                        {{detalle.Prioridad.Nombre}}
+                    </span>
+                    <span ng-if="!detalle.Prioridad.PriridadId">
+                        Sin Prioridad
+                    </span>
+                    <br>
+                </span>
+                
+                <!-- Lugar -->
+                <span ng-if="detalle.Lugar.LugarId">
+                    <b>Lugar: </b> 
+                    <span >
+                        {{detalle.Lugar.Nombre}}
+                    </span>
+                    <br>
+                </span>
+                
+                <!-- Cantidad -->
+                <span ng-if="detalle.Unidad.UnidadId">
+                    <b>Cantidad: </b> 
+                    <span >
+                        {{detalle.Unidad.Cantidad}} {{detalle.Unidad.Unidad}}
+                    </span>
+                    <br>
+                </span>
+                
+                <!-- Costo -->
+                <span ng-if="detalle.Divisa.DivisaId">
+                    <b>Costo: </b> 
+                    <span >
+                       {{detalle.Divisa.Costo}}  {{detalle.Divisa.Divisa}}
+                    </span>
+                    <br>
+                </span>
+                <br>
+                   
+                <span style="color: #808080">
+                    <!-- Etiqueta -->
+                    <span ng-if="detalle.EtiquetaVisible.length > 0">
+                        <b>Etiquetas: </b> 
+                        <span ng-repeat="etiqueta in detalle.EtiquetaVisible">
+                            <span ng-if="!$last">{{etiqueta.Nombre}},</span>
+                            <span ng-if="$last">{{etiqueta.Nombre}}.</span>
+                        </span><br>
+                    </span>
+
+                    <!-- tema -->
+                    <span ng-if="detalle.Tema.length > 0">
+                        <b>Temas: </b> 
+                        <span ng-repeat="tema in detalle.Tema">
+                            <span ng-if="!$last">{{tema.Tema}},</span>
+                            <span ng-if="$last">{{tema.Tema}}.</span>
+                        </span><br>
+                    </span>
+
+                    <!-- Fecha Creación -->
+                    <span>
+                        <b>Fecha Creación: </b> 
+                        <span>
+                            {{detalle.FechaCreacionFormato}}
+                        </span><br>
+                    </span>
+
+                     <!-- Fecha Intención -->
+                    <span>
+                        <b>Fecha Intención: </b> 
+                        <span>
+                            {{detalle.FechaIntencionFormato}}
+                        </span><br>
+                    </span>
+
+                     <!-- Fecha Realización -->
+                    <span>
+                        <b>Fecha Realización: </b> 
+                        <span>
+                            {{detalle.FechaRealizacionFormato}}
+                        </span><br>
+                    </span>
+              </span>
+               <br>
+               
+               <!-- Notas -->
+                <span ng-if="detalle.Nota">
+                    <b>Nota: </b> <br>
+                    <span >
+                       <p style="font-size:12pt" ng-bind-html="detalle.NotaHTML"></p>
+                    </span>
+                    <br>
+                </span>
+                <br>
+                
+                
+                
+            </div>
+            <br>
+            
+            <div class="col-xs-12" style="padding-left: 12px; padding-right: 12px" ng-if="detalle.Imagen.length > 0">
+                 <div id="detalleImagen" class="carousel fdi-Carousel slide">
+                     <!-- Carousel items -->
+                     <div class="carousel fdi-Carousel slide" id="eventCarousel" data-interval="1000">
+                        <div class="carousel-inner onebyone-carosel">
+
+                            <!-- Imagenes -->
+                            <div class="item active" ng-repeat="i in detalle.iImg track by $index">
+                                <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
+                                   <div class="imgContainer" >
+                                        <div class="crop center-block">
+                                             <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{detalle.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, detalle.Imagen, null, i)"/>
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <!-- Navigation -->
+                            <a class="left carousel-control"  ng-click="CambiarIndiceDetalle(-1, detalle);" ng-if="carroselIntervalo < detalle.Imagen.length">
+                                <span class="glyphicon glyphicon-chevron-left"></span>
+                            </a>
+                            <a class="right carousel-control"  ng-click="CambiarIndiceDetalle(1, detalle);" ng-if="carroselIntervalo < detalle.Imagen.length">
+                                <span class="glyphicon glyphicon-chevron-right"></span>
+                            </a>
+                        </div>
+
+
+
+                    </div>
+                 </div>
+             </div>
+            
+        </div>
+                
+        
+    </div>
+    
+    
+    <!-- Agregar - Editar Pendiente -->
+    <div class="modal fade" id="modalApp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitosoEvento">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <br>
+            <div class="row">
+                <div class="col-xs-8 col-sm-10">
+                    <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
+                    <span  class="tituloModal">{{operacion}} Pendiente</span>
+                </div>
+                
+                <div class="col-xs-4 col-sm-2">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  ng-click="CerrarPendiente()"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" id="terminarEvento" ng-click="TerminarPendiente()"><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+                
+                
+            </div>
+            <br>
+            
+            <form name="eventoForma">
+               
+               <div class="row">
+                     <div class="col-xs-12">
+                         
+                         <div class="text-center">
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Datos'" ng-class="{active: tabModal == 'Datos'}"><div class="fa fa-calendar-times-o tabModal"></div><br>Datos</a>
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Imagenes'" ng-class="{active: tabModal == 'Imagenes'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
+                         </div>
+                                          
+                     </div>
+                 </div>
+                 <br>
+                
+                <div ng-show="tabModal == 'Datos'">
+                   
+                   
+                   <!-- Nombre  -->
+                    <div class="row">
+                        <div class="col-sm-12">
+
+                            <div class="input-group">
+                                <div class="entrada2">
+                                    <input type="text" required class="entrada form-control" name="actividad" ng-model="nuevoPendiente.Nombre" ng-maxlength="220" ng-blur="CrearEtiquetaSugerida()"/>
+                                    <label>Nombre</label>
+                                </div>
+                                
+                                <span class="input-group-btn">
+                                    <a class="btn  cleanTxtBtn"  ng-click="nuevoPendiente.Nombre = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
+                            </div>
+
+
+                       </div>             
+                    </div>
+                    <br><br>
+                   
+                    <!-- Fecha intencion -->
+                    <div class="row">
+
+                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                            <label class="">Fecha Intención</label><br>
+                            <div class="row" >
+                               <div class="col-xs-12" >
+                                <span class="botonFecha">{{nuevoPendiente.FechaIntencionFormato}}</span>
+                                </div>
+                            </div>
+
+                            <div class="row" >
+                                <div class="col-xs-12" >
+                                    <input type="text"  id="fechaIntencion" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaIntencion(this)"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <br>
+                    
+                    <!-- Fecha Realizacion -->
+                    <div class="row" ng-show="operacion == 'Editar' || nuevoPendiente.Hecho == '1'">
+
+                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                            <label class="">Fecha Realizacion</label><br>
+                            <div class="row" >
+                               <div class="col-xs-12" >
+                                <span class="botonFecha">{{nuevoPendiente.FechaRealizacionFormato}}</span>
+                                </div>
+                            </div>
+
+                            <div class="row" >
+                                <div class="col-xs-12" >
+                                    <input type="text"  id="fechaRealizacion" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarRealizacion(this)"/>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <br ng-show="operacion == 'Editar' || nuevoPendiente.Hecho == '1'">
+                    
+                    <!-- Hecho y Prioridad -->
+                    <div class="row">
+                        
+                        <!-- Hecho -->
+                        <div class=" col-sm-6" >
+                        
+                            <a class="btn btn-block btnEstatusEvento" style="margin-top: 5px" ng-class="{disabled : (nuevoPendiente.FechaIntencion > hoy), Hecho : nuevoPendiente.Hecho == '1'}" ng-click="nuevoPendiente.Hecho = nuevoPendiente.Hecho == '1' ?   '0' : '1'"> 
+                                <span class="fa {{nuevoPendiente.Hecho == '1' ? 'fa-check-circle-o' : 'fa-circle-o'}} Hecho" style="font-size: 14pt"></span>
+                                <spna>{{nuevoPendiente.Hecho == '1' ? 'Hecho' : 'No Hecho'}}</spna>
+                            </a>
+                        
+                        </div>
+                        
+                        <div class="hidden-sm hidden-md hidden-lg">
+                            <br><br>
+                        </div>
+
+                        <!-- Prioriodad -->
+                         <div class="col-sm-6 etiquetaDropdownList" id="prioridad">
+                             
+                            <label>Prioridad</label>
+                            <div class="input-group">
+                                <input type="text"  class="form-control entrada" ng-model="buscarprioridad" uib-typeahead="p as (p.Nombre) for p in prioridad | filter:{Nombre:$viewValue} | limitTo:5" typeahead-on-select="CambiarPrioridad()" typeahead-select-on-blur="true" typeahead-focus-first="true"> 
+                                <span class="input-group-addon entrada" ng-click="QuitarPrioridad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="AbrirAgregarLugar()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                            </div>
+                             
+                        </div>
+                    </div>
+
+                    <!-- Notas -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                             <div class="">
+                                <label class="etiquetaNormal">Notas</label>
+                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="nota" ng-model="nuevoPendiente.Nota" maxlength="20000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+
+                     <div class="row">
+                        <div class="col-sm-12">
+                            <div class="divisorGris2"></div>
+                        </div>
+                    </div>
+
+                     <br><br>
+
+
+                    <!-- lugar -->
+                    <div class="row">
+                        
+                         <div class="col-sm-6 etiquetaDropdownList">
+
+                            <label>Lugar</label>
+                            <div class="input-group">
+                                <input type="text"  class="form-control entrada" ng-model="busacarLugar" uib-typeahead="l as (l.Nombre) for l in lugar | filter:{Nombre:$viewValue} | limitTo:5" typeahead-on-select="CambiarLugar()" typeahead-select-on-blur="true" typeahead-focus-first="true" > 
+                                <span class="input-group-addon entrada" ng-click="QuitarLugar()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="AbrirAgregarLugar()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                            </div>
+
+                        </div>
+                        
+                    </div>
+                     <br>
+
+                     <!-- Cantidad -->
+                     <div class="row">
+                       
+                        <div class="col-sm-6">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="cantidad" ng-model="nuevoPendiente.Unidad.Cantidad" />
+                                <label style="z-index:10">Cantidad</label>
+                            </div>
+                        </div>
+                        
+                        <div class="hidden-sm hidden-md hidden-lg">
+                            <br><br>
+                        </div>
+                        
+                        <div class="col-sm-6 etiquetaDropdownList" >
+
+                            <label>Unidad</label>
+                            <div class="input-group" style="margin-top: -5px">
+                                <input  type="text"  class="form-control entrada" ng-model="buscarUnidad" uib-typeahead="u as (u.Unidad) for u in unidad | filter:{Unidad:$viewValue} | limitTo:5" typeahead-on-select="CambiarUnidad()" typeahead-select-on-blur="true" typeahead-focus-first="true" > 
+                                <span class="input-group-addon entrada" ng-click="QuitarUnidad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="AbrirAgregarUnidad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                            </div>
+
+                        </div>
+                    </div>
+                     <br>
+                     
+                     <!-- Costo -->
+                     <div class="row">
+                       
+                        <div class="col-sm-6">
+                            <div class="entrada2">
+                                <input type="text" required class="entrada form-control" name="costo" ng-model="nuevoPendiente.Divisa.Costo" />
+                                <label style="z-index:10">Costo</label>
+                            </div>
+                        </div>
+                        
+                        <div class="hidden-sm hidden-md hidden-lg">
+                            <br><br>
+                        </div>
+                        
+                        <div class="col-sm-6 etiquetaDropdownList" >
+
+                            <label>Divisa</label>
+                            <div class="input-group" style="margin-top: -5px">
+                                <input  type="text"  class="form-control entrada" ng-model="buscarDivisa" uib-typeahead="d as (d.Divisa) for d in divisa | filter:{Divisa:$viewValue} | limitTo:5" typeahead-on-select="CambiarDivisa()" typeahead-select-on-blur="true" typeahead-focus-first="true" > 
+                                <span class="input-group-addon entrada" ng-click="QuitarDivisa()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
+                                <span class="input-group-addon entrada" ng-click="AbrirAgregarDivisa()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
+                            </div>
+
+                        </div>
+                    </div>
+                    <br><br>
+                    
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="divisorGris2"></div>
+                        </div>
+                    </div>
+                     <br>
+                     
+                     <div class="row" >
+                    
+                         <div class="col-sm-12">
+
+                          <div ng-show="etiquetaSugerida.length > 0">
+                            <div>
+                               <b >Etiquetas Sugeridas</b>
+                                <span class="btn-group pull-right">
+                                     <a class="btn btnOptDiarioDetalles boton" ng-click="AgregarTodaEtiquetaSugerida()"> <span class="fa fa-check-circle-o"></span></a>
+                                     <a class="btn btnOptDiarioDetalles boton" ng-click="etiquetaSugerida = []"> <span class="fa fa-times-circle-o"></span></a>
+                                 </span>
+                            </div>
+                            <br>
+
+                             <span ng-repeat="etiqueta in etiquetaSugerida track by $index">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+                                  <a class="btn campoAgregado"  style="font-size:10pt" ng-click="AgregarEtiquetaSugerida(etiqueta, $index)">{{etiqueta}}</a>
+                                  <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="etiquetaSugerida.splice($index, 1)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br> 
+                         </div>
+
+                         <div ng-show="temaSugerido.length > 0">
+                             <div>                         
+                                 <b >Temas Sugeridos</b><br><br>   
+                             </div> 
+                             <span ng-repeat="tema in temaSugerido track by $index">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+                                  <a class="btn campoAgregado"  style="font-size:10pt" ng-click="AgregarTemaSugerido(tema, $index)">{{tema}}</a>
+                                  <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="temaSugerido.splice(index, 1)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br>
+
+                         </div>
+                         <br>
+
+
+
+                        </div>
+                    </div>
+
+                    <div  ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Pendiente')" ng-controller="ControlEtiquetaController as ac"></div>
+
+                </div>
+                   
+                <div ng-show="tabModal == 'Imagenes'">
+                    <!-- Imagenes -->
+                    <div class="row" >
+
+                        <div class="col-xs-12">
+                            <a ng-click="AbrirFototeca()" class="pull-right btn operacionEvento"> 
+                                <span class="fa fa-picture-o"></span> Mis Imágenes
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+
+                        <div class="col-sm-12">
+
+                           <div  method="post" enctype="multipart/form-data">
+
+                                <div class="form-group files">
+                                    <input id="cargarImagen" type="file" class="form-control" multiple accept="image/*" name="imagen" > <!-- onchange="angular.element(this).scope().CargarArchivo(this)" -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                
+                    <br>
+                
+
+                   <div class="row" >
+                       <div class="col-xs-12">
+                           <table  class="table table-responsive">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <tr   ng-repeat="img in nuevoPendiente.ImagenSrc" ng-if="nuevoPendiente.ImagenSrc.length > 0">
+                                      
+                                      <td class="text-center">
+                                          <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarImagen(img, 'prev')">
+                                            <span >
+                                             <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                             <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                            </span>
+                                         </a>
+                                      </td>
+                                     
+                                      <td style="width: 100px; max-width: 100px">
+                                          <div class="imgContainer" style="height:50px">
+                                              <a style="overflow: hidden !important; max-height: 50px">
+                                                <img class="img-responsive" style="width: 100%" src=" {{img.Src}}" ng-click="VerImganes(true, true, false, nuevoPendiente.Imagen, nuevoPendiente.ImagenSrc, $index, 0)"/>
+                                              </a>
+                                          </div>
+                                        </td>
+
+                                      <td class="hidden-xs"> <span class="infoCenterCell">{{img.name}}</span> </td>
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{(img.size/1000000).toFixed(2)}} MB</span> </td>
+                                      <td class="text-center">
+                                          <a class="btn btnQuitarImg" ng-click="nuevoPendiente.ImagenSrc.splice($index,1)">
+                                             <span class="fa fa-times-circle"></span>
+                                         </a>
+                                      </td>
+                                      
+                                                   
+                                    </tr>
+
+                                    <tr ng-repeat="img in nuevoPendiente.Imagen" style="background: #d2e4fb;" ng-if="img.Eliminada != true">
+                                     <td class="text-center">
+                                          <a class="btn operacionEvento infoCenterCell" ng-click="EtiquetarImagen(img, 'img')" style="font-size: 13pt;">
+                                            <span >
+                                             <span class="fa fa-tag"> </span> <span> ({{ContarEtiquetasVisibles(img.Etiqueta)}}) </span>
+                                             <span class="fa fa-comment-o"> </span> <span> ({{img.Tema.length}}) </span>
+                                            </span>
+                                         </a>
+                                      </td>
+                                      
+                                      <td style="width: 100px">
+                                        <div class="imgContainer" style="height:50px">
+                                             <a style="overflow: hidden !important; max-height: 50px">
+                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoPendiente.Imagen, nuevoPendiente.ImagenSrc, $index, 1)"/>
+                                             </a>
+                                        </div>
+                                      </td>
+                                      
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{img.Nombre}}</span> </td>
+                                        <td class="hidden-xs">  <span class="infoCenterCell">{{(img.Size/1000000).toFixed(2)}} MB </span></td>
+                                      <td class="text-center">  
+                                          <a class="btn btnQuitarImg" ng-click="img.Eliminada = true">
+                                             <span class="fa fa-times-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                       </div>
+                    </div>
+                                             
+                     <div class="row"  ng-if="(fotoEliminada = (nuevoPendiente.Imagen | filter:{Eliminada:'true'}  ).length) > 0">
+                       <div class="col-xs-12">
+
+                           <a class="btn botonDetallesActividad" ng-click="showEliminada = !showEliminada">
+                               <span>Fotos Eliminadas ({{fotoEliminada}})</span>
+                               <span ng-show="showEliminada" class="fa fa-angle-double-up"></span>
+                               <span ng-show="!showEliminada" class="fa fa-angle-double-right"></span>
+                           </a>
+                           <table  class="table table-responsive" ng-show="showEliminada">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <tr ng-repeat="img in nuevoPendiente.Imagen"  ng-if="img.Eliminada == true">
+                                      <td style="width: 100px">
+                                          <div class="imgContainer" style="height:50px">
+                                              <a style="overflow: hidden !important; max-height: 50px">
+                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoPendiente.Imagen, null, $index)"/>
+                                              </a>
+                                          </div>
+                                      </td>
+                                    
+                                      <td class="hidden-xs " > <span class="infoCenterCell">{{img.Nombre}}</span> </td>
+                                        <td class="hidden-xs"> <span class="infoCenterCell"> {{(img.Size/1000000).toFixed(2)}} MB </span></td>
+                                      <td class="text-center">  
+                                          <a class="btn btnAgregarImg" ng-click="img.Eliminada = false">
+                                             <span class="fa fa-check-circle"></span>
+                                         </a>
+                                      </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                       </div>
+                    </div>
+                </div>
+                   
+                <br><br>
+                <!---- botones de operación -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block" ng-click="CerrarPendiente()">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarPendiente()">TERMINAR</a>
+                    </div>
+                </div>
+                <br>
+                
+            </form> 
+            
+        </div>
+    </div>
+    
+    <!---------- fototeca ---------------->
+    <div class="modal fade sombraDivModal" id="fototeca" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-lg modalPrincipal">
+         
+            <div class="row">
+                
+                <div class="col-xs-12">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" ng-click="AgregarImagenes()" ><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+            </div>
+            <br>
+          
+            <div class="row">
+                 <div ng-repeat="img in fototeca">
+                    <!-- Imagenes -->
+                    <div style="padding-left: 12px;  padding-right: 12px">
+                         <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px;  padding-right: 3px">
+                           <div class="imgContainer" >
+                                <div class="crop center-block">
+
+                                    <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
+                                        <span class="fa fa-check-circle" ></span>
+                                    </a>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                 </div>
+                            </div>
+                            <div style="height: 15px"></div>
+                         </div>
+                     </div>
+                </div>     
+            </div>            
+            <br>
+            <!---- botones de operacion -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="AgregarImagenes()" >TERMINAR</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!---------- VerImagen ---------------->
+    <div class="modal fade sombraDivModal" id="verImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-md modalPrincipal">
+          
+          <div class="row">
+                <div class="col-xs-12">
+                    <a class="pull-right" data-dismiss="modal" aria-label="Close"> <span class="fa fa-times changeImage">    </span></a>
+                </div>
+            </div>
+            <br>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="myCarousel2" class="carousel  slide">
+  
+                      <!-- Items -->
+                      <div class="carousel-inner">
+                        <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
+                        </div>
+                      </div>
+                      <!-- Navigation -->
+                       <a class="left carousel-control"  ng-click="changeImageViewed(-1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-left"></span>
+                        </a>
+                        <a class="right carousel-control"  ng-click="changeImageViewed(1);" ng-if="detalleImagen.length > 1">
+                            <span class="glyphicon glyphicon-chevron-right"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerraPendiente">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarPendiente()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- Borrar -->
+    <div class="modal fade sombraDivModal" id="borrarPendiente">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeBorrar}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarBorrarPendiente()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- Opciones de evento -->
+    <div class="modal fade sombraDivModal" id="OperacionEvento">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+          
+           <div class="row">
+                <div class="col-xs-12">
+                    <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ng-click="CerrarPresupuestoModal()"><span aria-hidden="true">&times;</span></button>
+                    <span style="font-size:14pt">Selecciona una opción</span>
+                </div>
+            </div>
+            <br><br>
+           
+            <div class="row">
+               <!-- hecho -->
+                <div class="col-xs-12 col-sm-4">
+                    <button class="btn btn-block  botonFinModal" style="margin-bottom: 10px" data-dismiss="modal" aria-label="Close" ng-click="HechoPendiente()">
+                        <spna class="fa fa-check-circle-o fa-2x"></spna><br> Hecho
+                    </button>
+                </div>
+                
+                <!-- Reprogramar -->
+                <div class="col-xs-12 col-sm-4">
+                    <button class="btn btn-block  botonFinModal" style="margin-bottom: 10px" ng-click="AbrirPendiente('Editar', pendienteOpt)" data-dismiss="modal" aria-label="Close">
+                        <spna class="fa fa-clock-o fa-2x"></spna><br> Reprogramar
+                    </button>
+                </div>
+                
+                <!-- Borrar -->
+                <div class="col-xs-12 col-sm-4">
+                    <button class="btn btn-block  botonFinModal" style="margin-bottom: 10px" ng-click="BorrarPendiente(pendienteOpt)" data-dismiss="modal" aria-label="Close">
+                        <spna class="fa fa-trash fa-2x"></spna><br> Eliminar
+                    </button>
+                </div>
+                
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- Hecho Evento -->
+    <div class="modal fade sombraDivModal" id="CancelarEventoHecho">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal text-center">
+          
+            <div class="row">
+                <div class="col-xs-12">
+                    <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+            </div>
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeAdvertencia}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="HechoPendiente()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- Mensaje -->
+    <div ng-include=" 'html/Control/MensajeModal.html' "></div>
+    
+</div>
+  
+<!--------------- otros html -------------------->
+<div ng-if="CargarExterior" ng-include=" 'html/Actividades/Administrar/Lugar/AgregarLugar.html' "> </div>
+<div ng-if="CargarExterior" ng-include=" 'html/Actividades/Administrar/Unidades/AgregarUnidades.html' "> </div>
+<div ng-if="CargarExterior" ng-include=" 'html/Actividades/Administrar/Unidades/AgregarDivisas.html' "> </div>
+
+<div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
+   
+
+   
+    

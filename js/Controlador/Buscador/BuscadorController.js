@@ -31,7 +31,7 @@ app.controller("BucadorController", function($scope, $window, $http, $rootScope,
     $scope.buscarConcepto = "";
     $scope.campoBuscar = "Conceptos";
     
-    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Notas"];
+    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Notas", "Pendiente"];
     $scope.appFiltro = "Todo";
     $scope.verApp = {actividad:true, diario: true, nota:true};
     
@@ -105,6 +105,8 @@ app.controller("BucadorController", function($scope, $window, $http, $rootScope,
                 $scope.nota = data[1].Notas;
                 $scope.diario = data[2].Diario;
                 $scope.actividad = data[3].Actividad;
+                
+                $scope.pendiente = data[6].Pendiente;
             }
             else
             {

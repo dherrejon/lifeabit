@@ -46,6 +46,11 @@ function GetBuscador()
     $sqlEtiquetaBaseEvento1 = " SELECT e.EventoActividadId FROM EtiquetaEventoVista e WHERE EtiquetaId IN ";
     $sqlEtiquetaBaseEvento2 = " GROUP BY e.EventoActividadId";
     
+    //Pendiente
+    $sqlEtiquetaPendiente = "";
+    $sqlEtiquetaBasePendiente1 = " SELECT e.PendienteId FROM EtiquetaPendienteVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBasePendiente2 = " GROUP BY e.PendienteId";
+    
     if($numEtiqueta > 0)
     {
         //Equivalencias
@@ -98,6 +103,7 @@ function GetBuscador()
                 $sqlEtiquetaActividad .= $sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
                 $sqlEtiquetaImagen .= $sqlEtiquetaBaseImagen1.$whereEtiqueta.$sqlEtiquetaBaseImagen2;
                 $sqlEtiquetaEvento .= $sqlEtiquetaBaseEvento1.$whereEtiqueta.$sqlEtiquetaBaseEvento2;
+                $sqlEtiquetaPendiente .= $sqlEtiquetaBasePendiente1.$whereEtiqueta.$sqlEtiquetaBasePendiente2;
             }
             else
             {
@@ -106,6 +112,7 @@ function GetBuscador()
                 $sqlEtiquetaActividad .= " UNION ALL ".$sqlEtiquetaBaseActividad1.$whereEtiqueta.$sqlEtiquetaBaseActividad2;
                 $sqlEtiquetaImagen .= " UNION ALL ".$sqlEtiquetaBaseImagen1.$whereEtiqueta.$sqlEtiquetaBaseImagen2;
                 $sqlEtiquetaEvento .= " UNION ALL ".$sqlEtiquetaBaseEvento1.$whereEtiqueta.$sqlEtiquetaBaseEvento2;
+                $sqlEtiquetaPendiente .= " UNION ALL ".$sqlEtiquetaBasePendiente1.$whereEtiqueta.$sqlEtiquetaBasePendiente2;
             }
         }
     }
@@ -158,6 +165,15 @@ function GetBuscador()
                 
                     ") x ON x.EventoActividadId = e.EventoActividadId GROUP BY e.EventoActividadId HAVING count(*) = ".($numEtiqueta+1);
         
+            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+                    INNER JOIN ("
+                        .$sqlEtiquetaPendiente.
+                
+                    " UNION ALL SELECT t.PendienteId FROM TemaPendienteVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.PendienteId HAVING count(*) = ".$numTema.
+                
+                    ") x ON x.PendienteId = p.PendienteId GROUP BY p.PendienteId HAVING count(*) = ".($numEtiqueta+1);
+        
     }
     else if($numEtiqueta > 0 || $numTema > 0)
     {
@@ -187,6 +203,11 @@ function GetBuscador()
                     INNER JOIN ("
                         .$sqlEtiquetaEvento.
                     ") x ON x.EventoActividadId = e.EventoActividadId GROUP BY e.EventoActividadId HAVING count(*) = ".$numEtiqueta;
+            
+            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+                    INNER JOIN ("
+                        .$sqlEtiquetaPendiente.
+                    ") x ON x.PendienteId = p.PendienteId GROUP BY p.PendienteId HAVING count(*) = ".$numEtiqueta;
         }
         else if($numTema > 0)
         {
@@ -214,6 +235,11 @@ function GetBuscador()
                     INNER JOIN (
                         SELECT t.EventoActividadId FROM TemaEventoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.EventoActividadId HAVING count(*) = ".$numTema."
                     ) x ON x.EventoActividadId = e.EventoActividadId";
+            
+            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+                    INNER JOIN (
+                        SELECT t.PendienteId FROM TemaPendienteVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.PendienteId HAVING count(*) = ".$numTema."
+                    ) x ON x.PendienteId = p.PendienteId";
         }
     }
 
@@ -230,6 +256,8 @@ function GetBuscador()
                         WHERE UsuarioId = '".$filtro->usuarioId ."'";
         
         $sqlEvento = "SELECT e.EventoActividadId, e.Fecha, e.Actividad, e.ActividadId FROM EventoActividadVista e WHERE UsuarioId = '".$filtro->usuarioId ."' AND  Fecha = '". $filtro->fecha."'";
+    
+        $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p WHERE p.UsuarioId = '".$filtro->usuarioId ."' AND p.FechaRealizacion = '". $filtro->fecha."'";
     }
     
     //nota
@@ -302,6 +330,21 @@ function GetBuscador()
         $app->stop();
     }
     
+    //Pendiente
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sqlPendiente);
+        $pendiente = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": '.$e.' } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
     //Imagen
     if($filtro->fecha == "")
     {
@@ -312,7 +355,7 @@ function GetBuscador()
             $imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             $db = null;
-            echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}]';
+            echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}]';
 
         } 
         catch(PDOException $e) 
@@ -326,7 +369,7 @@ function GetBuscador()
     else
     {
         $db = null;
-        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'},  {"Imagen":[]}, {"Evento":'.json_encode($evento).'}]';
+        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'},  {"Imagen":[]}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}]';
     }
 }
 
