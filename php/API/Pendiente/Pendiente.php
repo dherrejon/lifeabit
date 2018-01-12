@@ -87,7 +87,7 @@ function GetPendiente()
     
     if($numEtiqueta > 0 && $numTema > 0)
     {
-         $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden  FROM PendienteVista p
+         $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia, p.HoraIntencion, p.HoraRealizacion FROM PendienteVista p
                     INNER JOIN ("
                         .$sqlEtiquetaPendiente.
              
@@ -107,14 +107,14 @@ function GetPendiente()
     {
         if($numEtiqueta > 0)
         {
-            $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p 
+            $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia, p.HoraIntencion, p.HoraRealizacion FROM PendienteVista p 
                     INNER JOIN ("
                         .$sqlEtiquetaPendiente.
                     ") x ON x.PendienteId = p.PendienteId";
         }
         else if($numTema > 0)
         {
-            $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+            $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia, p.HoraIntencion, p.HoraRealizacion FROM PendienteVista p
                     INNER JOIN (
                         SELECT t.PendienteId FROM TemaPendienteVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.PendienteId HAVING count(*) = ".$numTema."
                     ) x ON x.PendienteId = p.PendienteId";
@@ -131,7 +131,7 @@ function GetPendiente()
     }
     else
     {
-        $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden FROM PendienteVista p WHERE UsuarioId = ".$filtro->usuarioId;
+        $sql = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia, p.HoraIntencion, p.HoraRealizacion FROM PendienteVista p WHERE UsuarioId = ".$filtro->usuarioId;
         
         if($filtro->fecha != "")
         {
@@ -250,14 +250,8 @@ function AgregarPendiente()
     $pendiente = json_decode($_POST['datos']);
     global $app;
 
-    if($pendiente->Hecho == "1")
-    {
-        $sql = "INSERT INTO Pendiente (UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota) VALUES(:UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaRealizacion, :Hecho, :Nota)";
-    }
-    else
-    {
-        $sql = "INSERT INTO Pendiente (UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota) VALUES(:UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaIntencion, :Hecho, :Nota)";
-    }
+
+    $sql = "INSERT INTO Pendiente (UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, HoraIntencion, HoraRealizacion, Hecho, Nota) VALUES(:UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaIntencion, STR_TO_DATE( :HoraIntencion, '%h:%i %p' ), STR_TO_DATE( :HoraIntencion, '%h:%i %p' ), :Hecho, :Nota)";
     
     try 
     {
@@ -270,6 +264,8 @@ function AgregarPendiente()
         $stmt->bindParam("FechaCreacion", $pendiente->FechaCreacion);
         $stmt->bindParam("FechaIntencion", $pendiente->FechaIntencion);
         $stmt->bindParam("FechaRealizacion", $pendiente->FechaRealizacion);
+        $stmt->bindParam("HoraIntencion", $pendiente->HoraIntencion);
+        $stmt->bindParam("HoraRealizacion", $pendiente->HoraRealizacion);
         $stmt->bindParam("Hecho", $pendiente->Hecho);
         $stmt->bindParam("Nota", $pendiente->Nota);
 
@@ -826,8 +822,15 @@ function EditarPendiente()
         $db->rollBack();
         $app->status(409);
     }
-      
-    $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaRealizacion, :Hecho, :Nota)";
+    
+    if($pendiente->FechaMod == "FechaIntencion" && $pendiente->Hecho == "0" )
+    {
+        $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota, HoraIntencion, HoraRealizacion) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaRealizacion, :FechaRealizacion, :Hecho, :Nota,  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ),  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ))";
+    }
+    else
+    {
+        $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota, HoraIntencion, HoraRealizacion) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaRealizacion, :Hecho, :Nota,  STR_TO_DATE( :HoraIntencion, '%h:%i %p' ),  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ))";
+    }
     
     try 
     {
@@ -839,6 +842,8 @@ function EditarPendiente()
         $stmt->bindParam("FechaCreacion", $pendiente->FechaCreacion);
         $stmt->bindParam("FechaIntencion", $pendiente->FechaIntencion);
         $stmt->bindParam("FechaRealizacion", $pendiente->FechaRealizacion);
+        $stmt->bindParam("HoraIntencion", $pendiente->HoraIntencion);
+        $stmt->bindParam("HoraRealizacion", $pendiente->HoraRealizacion);
         $stmt->bindParam("Hecho", $pendiente->Hecho);
         $stmt->bindParam("Nota", $pendiente->Nota);
 

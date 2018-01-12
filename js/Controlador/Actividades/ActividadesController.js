@@ -87,6 +87,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             {
                 $scope.SetActividadEstatus($scope.actividad[k]);
             }
+            console.log($scope.actividad);
             
         }).catch(function(error)
         {
@@ -424,7 +425,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     };
     
     //------ Actividad -------
-    $scope.GetActividadPorId = function(id)
+    $scope.GetActividadPorId = function(id, opt)
     {
         var datos = {Id:id};
         
@@ -452,6 +453,11 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.eventoActividad = data[0].Evento;
                 //console.log($scope.eventoActividad);
             }
+           
+            if(opt)
+            {
+                $scope.AbrirActividad(opt, $scope.detalle);
+            }
             
             //console.log($scope.detalle);
            
@@ -462,11 +468,11 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     };
     
     //----------- Detalles -------------------
-    $scope.VerDetalles = function(actividad, editar)
+    $scope.VerDetalles = function(actividad, editar, opt)
     {
         if(actividad.ActividadId != $scope.detalle.ActividadId)
         {
-            $scope.GetActividadPorId(actividad.ActividadId);
+            $scope.GetActividadPorId(actividad.ActividadId, opt);
             //$scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible(actividad.Etiqueta);
             $scope.verDetalle = false;
 
@@ -483,6 +489,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             $scope.GetActividadPorId(actividad.ActividadId);
             //$scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible(actividad.Etiqueta);
+        }
+        else if(opt)
+        {
+            $scope.AbrirActividad(opt, $scope.detalle);
         }
         
     };
@@ -1813,7 +1823,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {   
             $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
             $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
-            if($scope.operacion == "Agregar")
+            if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
             {
                 $scope.AgregarEventoActividad();
             }
@@ -1847,11 +1857,15 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 //$scope.actividad.push($scope.nuevaActividad);
                 //$scope.VerDetalles($scope.actividad[$scope.actividad.length-1]);
                 
+                $scope.mensajeEvento = "¿Desas registrar un evento de " + $scope.nuevaActividad.Nombre  + " ?";
+                $('#registrarEventoPregunta').modal('toggle');
+                
                 
                 $scope.nuevaActividad = new Actividad();
                 $('#modalApp').modal('toggle');
                 $scope.LimpiarInterfaz();
-                $('#registrarEventoPregunta').modal('toggle');
+                
+                
             }
             else
             {
@@ -2003,9 +2017,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     };
     
     //------------------------  Borrar --------------------------------------
-    $scope.BorrarActividad = function(actividad)
+    $scope.BorrarActividad = function(actividad, num)
     {
-        if($scope.eventoActividad.length == 0)
+        if(num == 0)
         {
             $scope.borrarActividad = actividad;
 
@@ -2409,7 +2423,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
         }
-        else if($scope.operacion == "Editar")
+        else if($scope.operacion == "Editar" || $scope.operacion == "Copiar")
         {
             $scope.nuevoEvento = $scope.SetEvento(evento);
             
@@ -2710,6 +2724,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                         break;
                     }
                 }
+                
+                if(evento.hecho == "1")
+                {
+                    $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $('#registrarEventoPregunta').modal('toggle');
+                }
             }
             else
             {
@@ -2867,6 +2887,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.SetNuevoEvento($scope.nuevoEvento);
         
                 $('#modalEvento').modal('toggle');
+                
+                if( $scope.nuevoEvento.Hecho == "1")
+                {
+                    $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $('#registrarEventoPregunta').modal('toggle');
+                }
             }
             else
             {
@@ -2896,6 +2922,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.EnviarAlerta('Vista');
                 
                 $('#modalEvento').modal('toggle');
+                
+                if( $scope.nuevoEvento.Hecho == "1")
+                {
+                    $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $('#registrarEventoPregunta').modal('toggle');
+                }
             }
             else
             {
@@ -2962,7 +2994,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             }
         }
         
-        if($scope.operacion == "Agregar")
+        if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
         {
             var nuevoEvento = $scope.SetEvento(evento);
             $scope.eventoActividad.push(nuevoEvento);

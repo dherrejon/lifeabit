@@ -250,25 +250,26 @@
                                
                                <!-- "context menu" -->
                                 <div class="dropdown  ">
-                                    <button class=" btn itemBarraLateralbtn"  data-toggle="dropdown">
+                                    <button class=" btn itemBarraLateralbtn "  data-toggle="dropdown">
                                         <span class="fa fa-ellipsis-v"></span>
                                     </button>
 
                                     <ul class="dropdown-menu dropdown-menu-right dropdownRight">
+                                      
                                        <li>
                                            <a class=" dropdownOpcion2" ng-click="RegistrarEvento('Agregar', actividad, null)"> <span class="fa fa-calendar-plus-o "></span> Registrar</a>
                                        </li>
                                        
                                        <li>
-                                            <a class="  dropdownOpcion2" ng-click="AbrirActividad('Copiar', detalle)"> <span class="fa fa-files-o "></span> Copiar</a>
+                                            <a class="  dropdownOpcion2" ng-click="VerDetalles(actividad, false, 'Copiar')"> <span class="fa fa-files-o "></span> Copiar</a>
                                         </li>
                                         
                                         <li>
-                                            <a class="  dropdownOpcion2" ng-click="AbrirActividad('Editar', detalle)"> <span class="fa fa-pencil"></span> Editar</a>
+                                            <a class="  dropdownOpcion2" ng-click="VerDetalles(actividad, false, 'Editar')"> <span class="fa fa-pencil"></span> Editar</a>
                                         </li>
                                         
                                         <li>
-                                            <a class="  dropdownOpcion2" ng-click="BorrarActividad(actividad)"> <span class="fa fa-minus-circle "></span> Borrar</a>
+                                            <a class="  dropdownOpcion2" ng-click="BorrarActividad(actividad, actividad.EventoAux.length)"> <span class="fa fa-minus-circle "></span> Borrar</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -328,7 +329,7 @@
                                 <!--<button class="col-xs-12 btn botonCM" ng-click="RegistrarEvento('Agregar', detalle, null)"> <span class="fa fa-calendar-check-o "></span> Registrar</button>-->
                                 <button class="col-xs-12 btn botonCM" ng-click="AbrirActividad('Copiar', detalle)"> <span class="fa fa-files-o "></span> Copiar</button>
                                 <button class="col-xs-12 btn botonCM" ng-click="AbrirActividad('Editar', detalle)"> <span class="fa fa-pencil"></span> Editar</button><br>
-                                <button class="col-xs-12 btn botonCM" ng-click="BorrarActividad(detalle)"> <span class="fa fa-minus-circle "></span> Borrar</button>
+                                <button class="col-xs-12 btn botonCM" ng-click="BorrarActividad(detalle, detalle.Evento.length)"> <span class="fa fa-minus-circle "></span> Borrar</button>
                             </ul>
 
                            <!-- Ver Detalles -->
@@ -588,12 +589,19 @@
 
                              <!-- Opciones de evento evento -->
                              <span class="dropdown" style="position: relative">
-                                 <a class=" operacionEvento" data-toggle="dropdown" data-target="optEvento">
+                                 <a class=" operacionEvento text-center" data-toggle="dropdown" data-target="optEvento">
                                      <span class="fa fa-ellipsis-v"></span>
                                  </a>
 
                                 <ul class="dropdown-menu dropdown-menu-right dropdownRight" id="optEvento" style="margin-top: 10px;">
-
+                                      
+                                      <!-- Detalles -->
+                                      <li>
+                                        <a class=" dropdownOpcion2" ng-click="RegistrarEvento('Copiar', detalle, evento)">
+                                            <span class="fa fa-files-o"></span> Copiar
+                                        </a>
+                                       </li>
+                                       
                                       <!-- Detalles -->
                                       <li>
                                         <a class=" dropdownOpcion2" ng-click="VerDetallesEvento(evento)">
@@ -1191,7 +1199,7 @@
            
             <div class="row">
                 <div class="col-xs-12">
-                    <span style="font-size:14pt">¿Desas registrar un evento de {{detalle.Nombre}}?</span>
+                    <span style="font-size:14pt">{{mensajeEvento}}</span>
                 </div>
             </div>
             <br><br>
@@ -1943,6 +1951,7 @@
 <div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
 <div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
+<div ng-include=" 'html/Control/AgregarTema.html' "></div>
 
 
    

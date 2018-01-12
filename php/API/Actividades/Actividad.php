@@ -11,7 +11,7 @@ function GetActividad()
     
     if($numEtiqueta == 0 && $numTema == 0 && strlen($filtro->fecha->Fecha) == 0)
     {
-        $sql = "SELECT  ActividadId, Nombre FROM Actividad WHERE UsuarioId = ".$filtro->UsuarioId;
+        $sql = "SELECT  ActividadId, Nombre, DATE_FORMAT(Hora, '%h:%i %p') as Hora FROM Actividad WHERE UsuarioId = ".$filtro->UsuarioId;
     }
     else
     {
@@ -89,7 +89,7 @@ function GetActividad()
         
         if($numEtiqueta > 0 && $numTema > 0)
         {
-            $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a 
+            $sql = "SELECT a.ActividadId, a.Nombre, DATE_FORMAT(a.Hora, '%h:%i %p') as Hora FROM Actividad a 
                     INNER JOIN ("
                         .$sqlEtiquetaActividad.
                 
@@ -114,7 +114,7 @@ function GetActividad()
         {
             if($numEtiqueta > 0)
             {
-                $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a 
+                $sql = "SELECT a.ActividadId, a.Nombre, DATE_FORMAT(a.Hora, '%h:%i %p') as Hora FROM Actividad a 
                     INNER JOIN ("
                         .$sqlEtiquetaActividad.
                     ") x ON x.ActividadId = a.ActividadId ";
@@ -123,7 +123,7 @@ function GetActividad()
             else if($numTema > 0)
             {
 
-                $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a
+                $sql = "SELECT a.ActividadId, a.Nombre, DATE_FORMAT(a.Hora, '%h:%i %p') as Hora FROM Actividad a
                     INNER JOIN (
                         SELECT t.ActividadId FROM TemaActividadVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ActividadId HAVING count(*) = ".$numTema."
                     ) x ON x.ActividadId = a.ActividadId";
@@ -143,7 +143,7 @@ function GetActividad()
         }
         else if(strlen($filtro->fecha->Fecha) > 0)
         {
-            $sql = "SELECT a.ActividadId, a.Nombre FROM Actividad a
+            $sql = "SELECT a.ActividadId, a.Nombre, DATE_FORMAT(a.Hora, '%h:%i %p') as Hora FROM Actividad a
 
                             INNER JOIN (SELECT DISTINCT e.ActividadId FROM EventoActividad e WHERE  Fecha = '". $filtro->fecha->Fecha."') x
                             ON x.ActividadId = a.ActividadId

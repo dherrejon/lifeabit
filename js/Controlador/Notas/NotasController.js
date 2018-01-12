@@ -1231,20 +1231,14 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaNota, 'Nota');
         
         $('#modalApp').modal('toggle'); 
-        
-        
-        //document.getElementById('contenido').value = $scope.nuevaNota.Notas;
-        //autosize.update($scope.nuevaNota.Notas);
     };
     
     /*$('textarea').each(function(){
-        autosize(this);
-    }).on('autosize:resized', function(){
-      console.log('textarea height updated');
-        
-        
-    });*/
-    
+
+        }).on('autosize:resized', function(){
+          console.log('textarea height updated');
+        });*/
+
     $scope.IniciarNota = function(fecha)
     {
         $scope.nuevaNota.Fecha = GetDate();
@@ -2213,8 +2207,8 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             alert(error);
         });
     };
-    
-    autosize(('#contenido'));
+
+    autosize($('textarea'));
     
 });
 

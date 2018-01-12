@@ -261,13 +261,13 @@
                 <!-- Pendientes -->
                <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
                     <a  class="btn labelConcepto"  ng-click="verApp.pendiente = !verApp.pendiente">
-                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Pendiente ({{pendiente.length}})</b>
-                        <span class="fa fa-angle-double-right" ng-if="!verApp.nota "></span>
-                        <span class="fa fa-angle-double-up" ng-if="verApp.nota "></span>
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Objetivos ({{pendiente.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.pendiente "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.pendiente "></span>
                     </a>
                 </div>
 
-                <div class="row" ng-if="(verApp.pendiente && appFiltro == 'Todo') || appFiltro == 'Pendientes'" > <!-- ng-if="agrupar == 'Titulo'" -->
+                <div class="row" ng-if="(verApp.pendiente && appFiltro == 'Todo') || appFiltro == 'Objetivos'" > <!-- ng-if="agrupar == 'Titulo'" -->
                     <a ng-repeat="pendiente in pendiente | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(nota.Titulo)}}" ng-click="GetDatosPendiente(pendiente)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                         <!-- indicador -->
                         <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">

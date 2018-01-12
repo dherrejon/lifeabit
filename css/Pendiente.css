@@ -176,8 +176,8 @@
     border-style: solid;
     border-color: transparent;
     
-    border-top-color: #fa4915;
-    border-right-color: #fa4915; 
+    border-top-color: #1859b2;
+    border-right-color: #1859b2; 
 }
 
 .labelHoy2
@@ -207,12 +207,73 @@
 
 .labelHoy2.done
 {
-    border-top-color: #2076ed;
-    border-right-color: #2076ed; 
+    border-top-color: #088A08;
+    border-right-color: #088A08;
 }
 
-.labelHoy2.pendiente, .labelHoy2.hoyPendiente
+.labelHoy2.pendiente
 {
     border-top-color: #fabf15;
     border-right-color: #fabf15; 
+}
+
+.labelHoy2.hoyPendiente
+{
+    border-top-color: #79adf4;
+    border-right-color: #79adf4; 
+}
+
+/*---------- Entrada de Nombre Pendiente ------*/
+.btnMarco, .btnMarco:focus, .btnMarco:active
+{
+    color: #1859b2;
+    background: white;
+    border: 2px solid #1859b2;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnMarco:hover
+{
+    background: #1859b2;
+    color: white;
+}
+
+.btnWhite, .btnWhite:focus, .btnWhite:active
+{
+    color: #79adf4;
+    background: transparent;
+    border-width: 0px;
+    border-radius: 0px;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnWhite:hover
+{
+    color: #1859b2;
+}
+
+/*prioridad*/
+.txtPrioridad
+{
+    color:  #848484;
+}
+
+.txtPrioridad.Urgente
+{
+    color:  #fa4915;
+}
+
+.txtPrioridad.Importante
+{
+    color:  #bb8f10; 
+}
+
+.txtPrioridad.Nomal
+{
+    color: black;
 }

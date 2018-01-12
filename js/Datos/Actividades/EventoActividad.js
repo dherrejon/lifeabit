@@ -17,7 +17,7 @@ class EventoActividad
         this.Unidad = new Unidad();
         this.Divisa = new Divisa();
         
-        this.hecho = false;
+        this.Hecho = "0";
         this.FechaHecho = "";
         
         this.Tema = [];

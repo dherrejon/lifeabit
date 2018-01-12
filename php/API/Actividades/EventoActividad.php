@@ -92,7 +92,7 @@ function AgregarEventoActividad()
     global $app;
     
 
-    $sql = "INSERT INTO EventoActividad (ActividadId, Fecha, Notas, Cantidad, Costo, Hora) VALUES(:ActividadId, :Fecha, :Notas, :Cantidad, :Costo, STR_TO_DATE( :Hora, '%h:%i %p' ))";
+    $sql = "INSERT INTO EventoActividad (ActividadId, Fecha, Notas, Cantidad, Costo, Hora, Hecho) VALUES(:ActividadId, :Fecha, :Notas, :Cantidad, :Costo, STR_TO_DATE( :Hora, '%h:%i %p' ), :Hecho)";
     
     try 
     {
@@ -106,6 +106,7 @@ function AgregarEventoActividad()
         $stmt->bindParam("Cantidad", $evento->Cantidad);
         $stmt->bindParam("Costo", $evento->Costo);
         $stmt->bindParam("Hora", $evento->Hora);
+        $stmt->bindParam("Hecho", $evento->Hecho);
 
         $stmt->execute();
         
@@ -115,7 +116,7 @@ function AgregarEventoActividad()
 
     } catch(PDOException $e) 
     {
-        //echo $e;
+        echo $e;
         echo '[{"Estatus": "Fallo"}]';
         $db->rollBack();
         $app->status(409);

@@ -377,8 +377,8 @@
 
 .btnEstatusEvento.Hecho
 {
-    border-color: black;
-    background: black;
+    border-color: #088A08;
+    background: #088A08;
     color: white;
 }
 
@@ -433,14 +433,19 @@
 
 .pendienteapp.done
 {
-    background: #2076ed;
+    background: #088A08;
 }
 
-.pendienteapp.pendiente, .pendienteapp.hoyPendiente
+.pendienteapp.pendiente
 {
-    background: #fbcc44;
+    background: #fabf15; 
 }
 
+
+.pendienteapp.hoyPendiente
+{
+    background: #79adf4; 
+}
 .tituloEstatusPendiente.enEspera
 {
     background: #808080;
@@ -448,13 +453,18 @@
 
 .tituloEstatusPendiente.done
 {
-    background: #1859b2;
+    background: #0B610B;
 }
 
-.tituloEstatusPendiente.pendiente, .tituloEstatusPendiente.hoyPendiente
+.tituloEstatusPendiente.pendiente
 {
     color: black;
     background: #fabf15;
+}
+
+.tituloEstatusPendiente.hoyPendiente
+{
+    background: #1859b2;
 }
 
 

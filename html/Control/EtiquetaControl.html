@@ -84,7 +84,7 @@
                             </ul>
                         </span>
                         
-                          <a style="border-width: 0px; font-size:10pt" class="btn campoAgregadoQuitar contornoAzul" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                        <a style="border-width: 0px; font-size:10pt" class="btn campoAgregadoQuitar contornoAzul" ng-click="QuitarEtiqueta(etiqueta)"><span class="fa fa-times-circle"></span></a>
                         
                     </div>
                  </span>
@@ -95,10 +95,23 @@
             <div ng-if="elemento.Tema.length > 0">
                  <b>Temas</b><br>                            
                  <span ng-repeat="tema in elemento.Tema | orderBy:'Tema' track by $index">
-                     <div class="btn-group" role="group" style="margin-bottom:8px">
-                      <a class="btn campoAgregado" ng-click="EditarTema(tema)" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt">{{tema.Tema}}</a>
-                      <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
-                    </div>
+                    
+                    <span class="btn-group" style="border-width: 2px; margin-bottom: 8px">            
+                            
+                        <a class="btn campoAgregado" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" data-toggle="dropdown">{{tema.Tema}}</a>    
+                            
+                        <ul class="dropdown-menu dropdownOpt dropdown-menu-left" style="margin-top: 5px;">
+                            <!-- Editar -->
+                            <li><a class=" dropdownOpcion2" ng-click="EditarTema(tema)">
+                                 <span class="fa fa-pencil"> </span> Editar
+                            </a></li>
+                        </ul>
+                    
+                        <a class="btn campoAgregadoQuitar" ng-class="{contornoAzul:(tema.TemaActividadId != '-1')}" style="font-size:10pt" ng-click="QuitarTema(tema)"><span class="fa fa-times-circle"></span></a>
+                        
+                    </span>
+                    
+                     
                  </span>  
              </div>                     
          </div>

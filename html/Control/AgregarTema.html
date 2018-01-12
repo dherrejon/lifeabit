@@ -1,0 +1,130 @@
+<div ng-controller="TemaController as tema">
+    <!-- -----------------------Modales -------------------------- -->
+	<div class="modal fade sombraDivModal" id="modalTema" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+           
+           <div class="row">
+                <div class="col-xs-12">
+                    <!-- Alertas -->
+                    <div class="alertaMensaje" id="alertaExitoso">
+                        <div class="alert alertaExtito">
+                            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+                            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+                            <strong style="display: inline-block;">{{mensaje}}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+             <div class="row">
+                <div class="col-xs-8 col-sm-10">
+                    <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
+                    <span  class="tituloModal">{{operacion}} Tema</span>
+                </div>
+                
+                <div class="col-xs-4 col-sm-2">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"   data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" id="terminarEvento" ng-click="TerminarTema()"><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+                
+                
+            </div> 
+            
+            <form name="temaForma">
+                
+                <br><br>
+                
+                <div class="row">
+                    <div class="col-sm-12">
+                       <div class="entrada2">
+                            <input type="text" required class="entrada form-control" name="nombre" ng-model="nuevoTema.Tema" ng-maxlength="250"/>
+                            <label>Tema</label>
+                        </div>
+                   </div>             
+                </div>
+                <br>
+                
+                <br>
+                <!---- botones de operacion -->
+                <div class="row">
+                    <div class="col-xs-6">
+                        <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarTema()" >TERMINAR</a>
+                    </div>
+                </div>
+            
+            </form> 
+            
+        </div>
+    </div>
+    
+    <div class="modal fade sombraDivModal" id="cerrarTemaModal">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarTema()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <div class="modal fade sombraDivModal" id="mensajeTema">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Alertas -->
+    <div class="alertaMensaje" id="alertaEditarExitoso">
+        <div class="alert alertaExtito">
+            <!--<button type="button" class="close" data-dismiss="alert">x</button>-->
+            <span class="fa fa-check-circle-o fa-2x textIconoExito" style="font-size:16pt"></span>
+            <strong style="display: inline-block;">{{mensaje}}</strong>
+        </div>
+    </div>
+    
+</div>
+
+    

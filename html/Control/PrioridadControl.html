@@ -1,0 +1,198 @@
+<div ng-controller="PrioridadController">
+   
+   <div class="modal fade sombraDivModal" id="prioridadModal" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog  modalPrincipal">
+          
+          
+           <div class="row">
+                <div class="col-xs-8 col-sm-10">
+                    <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
+                    <span  class="tituloModal">Administrar Prioridad</span>
+                </div>
+                
+                <div class="col-xs-4 col-sm-2">
+                    <div class=" pull-right" > <!-- btn-group-vertical -->
+                        <a class="btn botonFinModal" data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <!--<a focus class="btn botonFinModal" id="terminarEvento" ng-click="TerminarPendiente()"><span class="fa fa-check"></span></a>-->
+                    </div>
+                </div>
+                
+                
+            </div>
+            <br><br><br>
+            
+            <!-- Contenido -->                
+            <div class="row">
+                <div class="col-xs-12">
+                   
+                    <div class="pull-right">
+                        <button class="btn btnMarco" ng-click="AbrirPrioridad('Agregar', null)" ng-disabled="prioridad.length >= 5">
+                            <span class="fa fa-plus"></span><span> Agregar</span>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+            <br>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    
+                    <div class="table-responsive">
+                        <table class="table">
+                            
+                            <tbody>
+                                <tr ng-repeat="pri in prioridad | orderBy:'Orden'" class="animated" ng-class=" {slideInUp :Subir == pri.PrioridadId,  slideInDown : Bajar == pri.PrioridadId, slideOutRight:Borrar == pri.PrioridadId}">
+                                   <td style="width: 25px">{{pri.Orden}}</td>
+                                    <td>{{pri.Nombre}}</td>
+                                    
+                                    
+                                    <td  style="width: 100px; ">
+                                        <div class="btn-group pull-right">
+                                           
+                                           <button class="btn btnWhite" style="height: auto; width: auto" ng-click="BajarOrdenPrioridad(pri)" ng-show="!$last">
+                                                <span class="fa fa-arrow-down"></span>
+                                            </button>
+                                            
+                                            <button class="btn btnWhite" style="height: auto; width: auto" ng-click="SubirOrdenPrioridad(pri)" ng-show="!$first">
+                                                <span class="fa fa-arrow-up"></span>
+                                            </button>
+                                            
+                                            <button class="btn btnWhite" style="height: auto; width: 40px" ng-show="$first">
+                                        
+                                            </button>
+                                        
+                                        </div>
+                                        
+                                    </td>
+                                    
+                                    <td  style="width: 100px; ">
+                                        <div class="btn-group pull-right">
+                                           
+                                           <button class="btn btnOptPendiente Editar" style="height: auto; width: auto" ng-click="AbrirPrioridad('Editar', pri)">
+                                                <span class="fa fa-pencil"></span>
+                                            </button>
+                                            
+                                            <button class="btn btnOptPendiente Borrar" style="height: auto; width: auto" ng-click="BorrarPrioridad(pri)">
+                                                <span class="fa fa-trash"></span>
+                                            </button>
+                                        
+                                        </div>
+                                        
+                                    </td>
+                                </tr>
+                            </tbody>
+                            
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+
+            
+            <br><br>
+            <!---- botones de operación -->
+            <!--<div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="TerminarPendiente()">TERMINAR</a>
+                </div>
+            </div>-->
+            <br>
+            
+    
+        </div>
+    </div>
+    
+    <div class="modal fade sombraDivModal" id="prioridadAdmModal" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+          
+          
+           <div class="row">
+                <div class="col-xs-8 col-sm-10">
+                    <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
+                    <span  class="tituloModal">{{operacion}} Prioridad</span>
+                </div>
+                
+                <div class="col-xs-4 col-sm-2">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal"  ng-click="TerminarPrioridad()"><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+                
+                
+            </div>
+            <br><br><br>
+            
+            <!-- Contenido -->                
+           <div class="row">
+               
+                <div class="col-sm-12">
+                    <div class="entrada2">
+                        <input type="text" required class="entrada form-control" name="nombre" ng-model="nuevaPrioridad.Nombre" maxlength="250" />
+                        <label>Nombre</label>
+                    </div>
+               </div>   
+               
+               <!--<div class="hidden-sm hidden-md hidden-lg">
+                    <br><br>
+               </div>-->
+               
+                <!--<div class="col-sm-6">
+                    <div class="entrada2">
+                        <input type="text" required class="entrada form-control" name="orden" ng-model="nuevaPrioridad.Orden" maxlength="1" />
+                        <label>Orden</label>
+                    </div>
+               </div> -->  
+                       
+            </div>
+            
+            
+            <br><br>
+            <!---- botones de operación -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block"  data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="TerminarPrioridad()">TERMINAR</a>
+                </div>
+            </div>
+            <br>
+            
+    
+        </div>
+    </div>
+    
+    
+    <!-- Borrar -->
+    <div class="modal fade sombraDivModal" id="borrarPrioridad">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeBorrar}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarBorrarPrioridad()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+</div>

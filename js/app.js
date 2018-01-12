@@ -126,7 +126,7 @@ app.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpPro
         }).
     
     //Pendiente
-        when('/Pendiente',{
+        when('/Objetivo',{
             templateUrl: 'html/Pendiente/Pendiente.html'
         }).
     

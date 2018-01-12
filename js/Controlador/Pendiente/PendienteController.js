@@ -1,7 +1,7 @@
 app.controller("PendienteController", function($scope, $window, $http, $rootScope, $q, CONFIG, LifeService, $location, $sce, LUGAR, UNIDAD, DIVISA, ETIQUETA, IMAGEN, datosUsuario)
 {   
     $scope.buscarConceptoBarra = "";
-    $scope.filtro = {etiqueta: [], tema: [], fecha:"", pendiente:true, fechaFormato:""};
+    $scope.filtro = {etiqueta: [], tema: [], fecha:"", pendiente:false, fechaFormato:"", futuro:false};
     $scope.verFiltro = true;
     $scope.pendiente = [];
     $scope.fototeca = [];
@@ -12,9 +12,9 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     
     // fecha
     $scope.hoy = GetDate();
-    /*$scope.filtro.fecha = $scope.hoy;
+    $scope.filtro.fecha = $scope.hoy;
     $scope.filtro.fechaFormato = TransformarFecha($scope.hoy);
-    document.getElementById('fechaFiltro').value = $scope.hoy;*/
+    document.getElementById('fechaFiltro').value = $scope.hoy;
     
     /*------- Catálogos Base ---------------*/
     $scope.GetPendiente = function()
@@ -32,6 +32,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
                     $scope.pendiente[k].FechaRealizacionFormato = TransformarFecha($scope.pendiente[k].FechaRealizacion);
                     $scope.GetClasePendiente($scope.pendiente[k]);
                 }
+            
                 
             } else 
             {
@@ -47,7 +48,16 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     
      $scope.GetDatosPendiente = function(pendiente, opt)
     {
-        (self.servicioObj = LifeService.Get('GetPendiente/Datos/' + pendiente.PendienteId)).then(function (dataResponse) 
+         
+        GetDatosPendiente($http, $q, CONFIG, pendiente.PendienteId).then(function(data)
+        {
+            $scope.OperacionPendiente(data, opt);
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+         
+        /*(self.servicioObj = LifeService.Get('GetPendiente/Datos/' + pendiente.PendienteId)).then(function (dataResponse) 
         {
             if (dataResponse.status == 200) 
             {
@@ -62,7 +72,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         function (error) 
         {
             $rootScope.$broadcast('Alerta', error, 'error');
-        });
+        });*/
     };
     
     $scope.OperacionPendiente = function(pendiente, opt)
@@ -81,7 +91,11 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             
             document.getElementById('fechaIntencion').value = $scope.nuevoPendiente.FechaIntencion;
             document.getElementById('fechaRealizacion').value = $scope.nuevoPendiente.FechaRealizacion;
+            document.getElementById('horaIntencion').value = $scope.nuevoPendiente.HoraIntencion;
+            document.getElementById('horaRealizacion').value = $scope.nuevoPendiente.HoraRealizacion;
             
+            $scope.nuevoPendiente.FechaMod = opt == "Copiar" ? "FechaIntencion" : $scope.nuevoPendiente.FechaIntencion > $scope.hoy ? "FechaIntencion" : "FechaRealizacion";
+           
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoPendiente, 'Pendiente');
             $scope.pendienteInicio = jQuery.extend({}, $scope.nuevoPendiente);
             
@@ -99,9 +113,9 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             $scope.GetCarroselIntervalo();
             $scope.CambiarIndiceDetalle(0, $scope.detalle);
             
-            
             $scope.GetEtiquetaVisible($scope.detalle);
-        
+            
+            $('#detallePendiente').modal('toggle');
         }
     };
     
@@ -192,14 +206,14 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         });
     };
     
-    $scope.GetPrioridad = function()
+    /*$scope.GetPrioridad = function()
     {
         (self.servicioObj = LifeService.Get('GetPrioridad/' + $rootScope.UsuarioId )).then(function (dataResponse) 
         {
             if (dataResponse.status == 200) 
             {
                 $scope.prioridad = dataResponse.data;
-                
+                            
             } else 
             {
                 $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
@@ -210,6 +224,11 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         {
             $rootScope.$broadcast('Alerta', error, 'error');
         });
+    };*/
+    
+    $scope.GetPrioridad = function()
+    {
+        $scope.prioridad = GetPrioridad();
     };
     
     $scope.GetGaleriaFotos = function()
@@ -348,6 +367,57 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     $scope.CambiarVerFiltro = function()
     {
         $scope.verFiltro = !$scope.verFiltro;
+    };
+    
+    
+    $scope.FiltroPendiente = function(pendiente)
+    {
+        if($scope.filtro.pendiente)
+        {
+            if(pendiente.Hecho == "0" && pendiente.FechaRealizacion <= $scope.hoy)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if($scope.filtro.futuro)
+        {
+            if(pendiente.FechaRealizacion > $scope.hoy)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    };
+    
+    
+    $scope.CambiarFiltroFuturo = function()
+    {
+        $scope.filtro.futuro = !$scope.filtro.futuro;
+      
+        if($scope.filtro.futuro)
+        {
+            if($scope.filtro.fecha)
+            {
+                $scope.GetPendiente();
+            }
+            
+            $scope.filtro.pendiente = false;
+            $scope.filtro.fecha = "";
+            $scope.filtro.fechaFormato = "";
+            
+            
+        }
     };
     
     //--funciones para manejo de filtro por fecha
@@ -614,7 +684,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         }
         else if(pendiente.FechaRealizacion < $scope.hoy)
         {
-            pendiente.EstatusTexto = "Pendiente";
+            pendiente.EstatusTexto = "Atrasado";
             pendiente.Clase = "pendiente";
             return;
         }
@@ -674,16 +744,19 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         $scope.operacion = operacion;
         $scope.tabModal = "Datos";
         
+        $('#fechaIntencion').data("DateTimePicker").clear();
+        $('#fechaRealizacion').data("DateTimePicker").clear();
+        $('#horaRealizacion').data("DateTimePicker").clear();
+        $('#horaIntencion').data("DateTimePicker").clear();
+        
+        $scope.nuevoPendiente = new Pendiente();
+        
         if(operacion == "Agregar")
         {
-            $scope.nuevoPendiente = new Pendiente();
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
             
-            $scope.pendienteInicio = jQuery.extend({}, $scope.nuevoPendiente);
-            
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoPendiente, 'Pendiente');
-            $('#fechaIntencion').data("DateTimePicker").clear();
         }
         else if(operacion == "Editar" || operacion == "Copiar")
         {
@@ -700,6 +773,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         }
         
         $scope.IniciarPendiente();
+        $scope.pendienteInicio = jQuery.extend({}, $scope.nuevoPendiente);
     };
     
     $scope.IniciarPendiente = function()
@@ -713,15 +787,18 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         if($scope.operacion == "Agregar")
         {   
             var fecha = new Date();
-            fecha.setDate(fecha.getDate() +1);
+            //fecha.setDate(fecha.getDate() +1);
             fecha = TransformarDateToFecha(fecha);
-            document.getElementById('fechaIntencion').value = fecha
-            ;
+            document.getElementById('fechaIntencion').value = fecha;
             $scope.nuevoPendiente.FechaIntencion = fecha;
             $scope.nuevoPendiente.FechaIntencionFormato = TransformarFecha(fecha);
             
             $scope.nuevoPendiente.FechaRealizacion = fecha;
             $scope.nuevoPendiente.FechaRealizacionFormato = TransformarFecha(fecha);
+            
+            $scope.nuevoPendiente.FechaMod = "FechaIntencion";
+            
+            $scope.nuevoPendiente.Prioridad = $scope.prioridad[0];
         }
         
     };
@@ -804,7 +881,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         format: 'YYYY-MM-DD',
     });
 
-    $scope.CambiarRealizacion = function(element) 
+    $scope.CambiarFechaRealizacion = function(element) 
     {
         $scope.$apply(function($scope) 
         {
@@ -1037,6 +1114,15 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     $scope.$on('TerminarEtiquetaOculta',function()
     {    
         $scope.nuevoPendiente.UsuarioId = $rootScope.UsuarioId;
+        
+        if(!$scope.nuevoPendiente.HoraIntencion)
+        {
+            $scope.nuevoPendiente.HoraIntencion = null;
+        }
+        if(!$scope.nuevoPendiente.HoraRealizacion)
+        {
+            $scope.nuevoPendiente.HoraRealizacion = null;
+        }
         
         if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
         {
@@ -1649,6 +1735,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     //Detalle 
     $scope.VerPendiente = function(pendiente)
     {
+        $scope.detalle = new Pendiente();
         $scope.GetDatosPendiente(pendiente, "Detalle");
     };
     
@@ -1766,10 +1853,70 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         });
     };
     
+    //----------- Hora -------------
+    $('#horaIntencion').datetimepicker(
+    {
+        format: 'hh:mm A',
+        showClear: true,
+        showClose: true,
+        toolbarPlacement: 'bottom'
+    });
+    
+    $scope.CambiarHoraIntencion = function(element) 
+    {
+        $scope.$apply(function($scope) 
+        {
+            $scope.nuevoPendiente.HoraIntencion = element.value;
+        });
+    };
+    
+    
+    $('#horaRealizacion').datetimepicker(
+    {
+        format: 'hh:mm A',
+        showClear: true,
+        showClose: true,
+        toolbarPlacement: 'bottom'
+    });
+    
+    $scope.CambiarHoraRealizacion = function(element) 
+    {
+        $scope.$apply(function($scope) 
+        {
+            $scope.nuevoPendiente.HoraRealizacion = element.value;
+        });
+    };
+    
+    //----------- Prioridad ------------------
+    $scope.AbrirAgregarPrioridad = function()
+    {
+        $rootScope.$broadcast('AdministrarPrioridad', $scope.prioridad);
+    };
+    
+    $scope.$on('TerminarPrioridad',function(evento)
+    {    
+        if($scope.nuevoPendiente.Prioridad.PrioridadId)
+        {
+            var id = $scope.nuevoPendiente.Prioridad.PrioridadId;
+            $scope.nuevoPendiente.Prioridad = new Prioridad();
+            $scope.buscarprioridad = "";
+            
+            for(var k=0; k<$scope.prioridad.length; k++)
+            {
+                if($scope.prioridad[k].PrioridadId == id)
+                {
+                    $scope.buscarprioridad = $scope.prioridad[k];
+                    $scope.CambiarPrioridad();
+                    break;
+                }
+            }
+        }
+    });
+    
     /*----------------------- Usuario logeado --------------------------*/
     $scope.InicializarControlador = function()
     {
-        if($scope.usuarioLogeado.Aplicacion != "Mis Pendientes")
+        if($scope.usuarioLogeado.Aplicacion != "Mis Objetivos")
         {
             $rootScope.IrPaginaPrincipal();
         }
@@ -1814,6 +1961,8 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             $scope.InicializarControlador();
         }
     });
+    
+    autosize($('textarea'));
     
 });
 

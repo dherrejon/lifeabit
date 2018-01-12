@@ -152,6 +152,7 @@
 		}
 
 		function update() {
+
 			resize();
 
 			var styleHeight = Math.round(parseFloat(ta.style.height));
@@ -247,7 +248,6 @@
 
 	function update(ta) {
 		var methods = map.get(ta);
-        
 		if (methods) {
 			methods.update();
 		}

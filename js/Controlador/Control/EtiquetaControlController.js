@@ -289,7 +289,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 
                 
                 $rootScope.mensaje = "Etiqueta Agregada.";
-                $rootScope.$broadcast('Alerta', 'Etiqueta Agregada', 'exito');
+                //$rootScope.$broadcast('Alerta', 'Etiqueta Agregada', 'exito');
                 
                 if($scope.verEtiqueta)
                 {   
@@ -397,7 +397,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 
                 $scope.mensaje = "Tema Agregado.";
 
-                $rootScope.$broadcast('Alerta', 'Tema Agregado', 'exito');
+                //$rootScope.$broadcast('Alerta', 'Tema Agregado', 'exito');
                 
                 ETIQUETA.TemaSet(data[2].Tema);
 
@@ -493,22 +493,29 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.EditarTema = function(tema)
     {
-        if(tema.TemaActividadId == "-1")
-        {
-            $scope.buscarConcepto = tema.Tema;
-            
-            for(var k=0; k<$scope.elemento.Tema.length; k++)
-            {
-                if($scope.elemento.Tema[k].Tema == tema.Tema)
-                {
-                    $scope.elemento.Tema.splice(k,1);
-                    break;
-                }
-            }
-            
-            $("#nuevoTema").focus();
-        }
+        $rootScope.$broadcast('EditarTema', tema, $scope.tema);
     };
+    
+    $scope.$on('TemaEditado', function(evento, tema)
+    {
+        for(var k=0; k<$scope.tema.length; k++)
+        {
+            if($scope.tema[k].TemaActividadId == tema.TemaActividadId)
+            {
+                $scope.tema[k].Tema = tema.Tema;
+                break;
+            }
+        }
+        
+        for(var k=0; k<$scope.elemento.Tema.length; k++)
+        {
+            if($scope.elemento.Tema[k].TemaActividadId == tema.TemaActividadId)
+            {
+                $scope.elemento.Tema[k].Tema = tema.Tema;
+                break;
+            }
+        }
+    });
     
     $scope.$on('SepararEtiqueta', function (evento, tema, modal) 
     {
@@ -563,7 +570,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     $scope.$on('TerminarEditarEtiqueta',function()
     {   
         $rootScope.mensaje = "Etiqueta Editada";
-        $rootScope.$broadcast('Alerta', 'Etiqueta Editada', 'exito');
+        //$rootScope.$broadcast('Alerta', 'Etiqueta Editada', 'exito');
         
         var nueva = ETIQUETA.GetEtiqueta();
         $scope.SetNuevaEtiqueta(nueva);
@@ -571,6 +578,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.SetNuevaEtiqueta = function(etiqueta)
     {
+        
         for(var k=0; k<$scope.etiqueta.length; k++)
         {
             if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)

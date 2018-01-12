@@ -325,6 +325,10 @@
 
     /*-----------------------  Prioridad ------------------------------------------*/
     $app->get('/GetPrioridad/:id', $seguridad, $ChecarSesion, 'GetPrioridad');
+    $app->post('/AgregarPrioridad', $seguridad, $ChecarSesion, 'AgregarPrioridad');
+    $app->put('/EditarPrioridad', $seguridad, $ChecarSesion, 'EditarPrioridad');
+    $app->put('/EditarOrdenPrioridad', $seguridad, $ChecarSesion, 'EditarOrdenPrioridad'); 
+    $app->delete('/BorrarPrioridad', $seguridad, $ChecarSesion, 'BorrarPrioridad');
 
     //---------------------------------------------------------------------------------------------------------------Buscador
 

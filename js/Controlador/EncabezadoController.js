@@ -32,17 +32,14 @@ app.controller("EncabezadoControlador", function($scope, $window, $http, $rootSc
                 $scope.barraNavegacion = EncabezadoNotas;
                 break;
                 
-            case "Mis Pendientes": 
-                $scope.barraNavegacion = EncabezadoPendiente;
+            case "Mis Objetivos": 
+                $scope.barraNavegacion = EncabezadoObjetivo;
                 break;
                 
             case "Home": 
                 $scope.barraNavegacion = EncabezadoAplicaciones;
                 break;
-                
-            case "Mis Pendientes": 
-                $scope.barraNavegacion = EncabezadoPendiente;
-                break;
+            
             
             default:
                 $scope.barraNavegacion = [];
@@ -403,11 +400,11 @@ var EncabezadoNotas =
               ]                       
 };
 
-var EncabezadoPendiente =
+var EncabezadoObjetivo =
 { 
-    titulo:"Mis Pendientes", 
+    titulo:"Mis Objetivos", 
     opcion: [ 
-                    { texto:"Inicio", tipo:"link", referencia:"#Pendiente", show: true},
+                    { texto:"Inicio", tipo:"link", referencia:"#Objetivo", show: true},
                     { texto:"Administrar", tipo:"dropdown", show: true,
                                                 elemento:
                                                 [

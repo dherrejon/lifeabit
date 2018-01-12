@@ -6,6 +6,8 @@ class Pendiente
         this.FechaCreacion = "";
         this.FechaIntencion = "";
         this.FechaRealizacion = "";
+        this.HoraIntencion = "";
+        this.HoraRealizacion = "";
         this.Nombre = "";
         this.Nota = "";
         this.Hecho = "0";
@@ -20,6 +22,24 @@ class Pendiente
         this.Imagen = [];
         this.ImagenSrc = [];
     }
+}
+
+function GetDatosPendiente($http, $q, CONFIG, id)     
+{
+    var q = $q.defer();
+
+    $http({      
+          method: 'GET',
+          url: CONFIG.APIURL + '/GetPendiente/Datos/' + id,
+
+      }).success(function(data)
+        {
+            q.resolve(data);
+             
+        }).error(function(data, status){
+            q.resolve(status);
+     }); 
+    return q.promise;
 }
 
 function SetPendiente(data)
@@ -37,6 +57,9 @@ function SetPendiente(data)
     pendiente.FechaIntencionFormato = TransformarFecha(data.FechaIntencion);
     pendiente.FechaRealizacion = data.FechaRealizacion;
     pendiente.FechaRealizacionFormato = TransformarFecha(data.FechaRealizacion);
+    
+    pendiente.HoraIntencion = data.HoraIntencion;
+    pendiente.HoraRealizacion = data.HoraRealizacion;
     
     pendiente.Prioridad.PrioridadId = data.PrioridadId;
     pendiente.Prioridad.Nombre = data.NombrePrioridad;
@@ -102,8 +125,34 @@ class Prioridad
         this.PrioridadId = "";
         this.Importancia = "";
         this.Nombre = "";
-
     }
+}
+
+function GetPrioridad()
+{
+    var prioridad = [];
+    
+    prioridad[0] = new Prioridad();
+    prioridad[0].PrioridadId = "1";
+    prioridad[0].Nombre = "Normal";
+    prioridad[0].Importancia = "1";
+    
+    prioridad[1] = new Prioridad();
+    prioridad[1].PrioridadId = "2";
+    prioridad[1].Nombre = "Importante";
+    prioridad[1].Importancia = "2";
+    
+    prioridad[2] = new Prioridad();
+    prioridad[2].PrioridadId = "3";
+    prioridad[2].Nombre = "Urgente";
+    prioridad[2].Importancia = "3";
+    
+    prioridad[3] = new Prioridad();
+    prioridad[3].PrioridadId = null;
+    prioridad[3].Nombre = "Sin Prioridad";
+    prioridad[3].Importancia = null;
+    
+    return prioridad;
 }
 
 
