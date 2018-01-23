@@ -1,4 +1,4 @@
-app.controller("ActividadesController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, FRECUENCIA, LUGAR, CIUDAD, UNIDAD, DIVISA, IMAGEN, ETIQUETA)
+app.controller("ActividadesController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, FRECUENCIA, LUGAR, CIUDAD, UNIDAD, DIVISA, IMAGEN, ETIQUETA, LifeService)
 {   
     $scope.titulo = "Actividades";
     
@@ -80,15 +80,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.filtro.UsuarioId = $rootScope.UsuarioId;
         GetActividad($http, $q, CONFIG, $scope.filtro).then(function(data)
         {
-            
             $scope.actividad = data;
             
             for(var k=0; k<$scope.actividad.length; k++)
             {
                 $scope.SetActividadEstatus($scope.actividad[k]);
             }
-            console.log($scope.actividad);
-            
         }).catch(function(error)
         {
             alert(error);
@@ -426,10 +423,53 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     //------ Actividad -------
     $scope.GetActividadPorId = function(id, opt)
-    {
+    {   
         var datos = {Id:id};
+        var actividad = [];
         
-        GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
+        $scope.filtro.usuarioId = $rootScope.UsuarioId;
+        (self.servicioObj = LifeService.Post('GetActividadPorIdDatos', datos )).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                
+                for(var k=0; k<data.length; k++)
+                {
+                    actividad[k] = SetActividad(data[k]);
+                    
+                    actividad[k].Evento = [];
+                    for(var i=0; i<data[k].Evento.length; i++)
+                    {
+                        actividad[k].Evento[i] = SetEventoActividad(data[k].Evento[i]);
+                        actividad[k].Evento[i].NotasHTML = $sce.trustAsHtml(actividad[k].Evento[i].NotasHTML);
+                    }
+                    
+                    actividad[k].NotasHTML = $sce.trustAsHtml(actividad[k].NotasHTML);
+                }
+
+                $scope.detalle = actividad[0];
+                $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible($scope.detalle.Etiqueta);
+                
+                $scope.eventoActividad = actividad[0].Evento;
+
+                if(opt)
+                {
+                    $scope.AbrirActividad(opt, $scope.detalle);
+                }
+            } 
+            else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+        
+        /*GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
         {
             for(var k=0; k<data.length; k++)
             {   
@@ -461,6 +501,73 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             
             //console.log($scope.detalle);
            
+        }).catch(function(error)
+        {
+            alert(error);
+        });*/
+    };
+    
+    $scope.GetEventoActividadPorId = function(id, opt)
+    {
+        $scope.tipoDetalle = "Evento";
+        
+        GetEventoActividadPorId($http, $q, CONFIG, id).then(function(data)
+        {
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
+                
+                
+                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
+            }
+             
+            if(opt == "Editar" || opt == "Copiar")
+            {
+                if($scope.operacion == "Copiar")
+                {
+                    data[0].Hecho = "0";
+                    data[0].Fecha = $scope.hoy;
+                    data[0].FechaFormato = TransformarFecha($scope.hoy);
+                }
+                
+                $scope.nuevoEvento = data[0];
+                
+                if($scope.nuevoEvento.Ciudad.CiudadId)
+                {
+                    $scope.buscarCiudad = SetCiudad($scope.nuevoEvento.Ciudad);
+                }
+                else
+                {
+                    $scope.buscarCiudad = "";
+                }
+
+                $scope.ActivarDesactivarTema($scope.nuevoEvento.Tema);
+                $scope.ActivarDesactivarEtiqueta($scope.nuevoEvento.Etiqueta);
+
+                for(var k=0; k<$scope.nuevoEvento.Imagen.length; k++)
+                {
+                    $scope.GetImagenEtiqueta($scope.nuevoEvento.Imagen[k], false);
+                }
+
+                $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
+                $scope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
+        
+                $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoEvento, 'Evento');
+            }
+            else if(opt == "Detalle")
+            { 
+                $scope.detalleEvento = data[0];
+                
+                for(var k=0; k<$scope.eventoActividad.length; k++)
+                {
+                    if($scope.eventoActividad[k].EventoActividadId == id)
+                    {
+                        $scope.eventoActividad[k] = data[0];
+                        break;
+                    }
+                }
+            }
+        
         }).catch(function(error)
         {
             alert(error);
@@ -1800,9 +1907,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
     };
     
-    $scope.$on('TerminarEtiquetaOculta',function()
+    $scope.$on('TerminarEtiquetaOculta',function(evento, modal)
     {           
-        if($scope.modulo == "Actividad")
+        if(modal == "Actividad")
         {
             $scope.nuevaActividad.Hora = $scope.SetNullHora($scope.nuevaActividad.Hora);
             $scope.nuevaActividad.UsuarioId = $rootScope.UsuarioId;
@@ -1819,18 +1926,23 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.EditarActividad();
             }
         }
-        else if($scope.modulo == "Evento")
+        else if(modal == "Evento")
         {   
-            $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
-            $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
-            if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
-            {
-                $scope.AgregarEventoActividad();
-            }
-            else if($scope.operacion == "Editar")
-            {
-                $scope.EditarEventoActividad();
-            }
+            $rootScope.$broadcast('EtiquetaOcultaArchivoIniciar', $scope.nuevoEvento); 
+        }
+    });
+    
+    $scope.$on('TerminarEtiquetaOcultaArchivo',function()
+    {   
+        $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
+        $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
+        if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
+        {
+            $scope.AgregarEventoActividad();
+        }
+        else if($scope.operacion == "Editar")
+        {
+            $scope.EditarEventoActividad();
         }
     });
     
@@ -2403,7 +2515,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.VerDetallesEvento = function(evento)
     {
-        $scope.detalleEvento = evento;
+        $scope.GetEventoActividadPorId(evento.EventoActividadId, "Detalle");
+        //$scope.detalleEvento = evento;
         $('#DetalleEvento').modal('toggle');
     };
     
@@ -2422,14 +2535,25 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
+            
+            $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
+            $scope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
+        
+            $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoEvento, 'Evento');
         }
         else if($scope.operacion == "Editar" || $scope.operacion == "Copiar")
         {
-            $scope.nuevoEvento = $scope.SetEvento(evento);
+            $scope.GetEventoActividadPorId(evento.EventoActividadId, operacion);
             
             $('#horaEvento').data("DateTimePicker").clear();
-            document.getElementById("fechaEvento").value = $scope.nuevoEvento.Fecha;
-            document.getElementById("horaEvento").value = $scope.nuevoEvento.Hora;
+            document.getElementById("fechaEvento").value = evento.Fecha;
+            document.getElementById("horaEvento").value = evento.Hora;
+            
+            $scope.hechoInicio = evento.Hecho;
+            
+            /*$scope.nuevoEvento = $scope.SetEvento(evento);
+            
+           
 
             if(evento.Ciudad.CiudadId !== null && evento.Ciudad.CiudadId !== undefined)
             {
@@ -2454,11 +2578,12 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             {
                 $scope.GetImagenEtiqueta(evento.Imagen[k], false);
             }
+            
+            if($scope.operacion == "Copiar")
+            {
+                $scope.nuevoEvento.Hecho = "0";
+            }*/
         }
-        
-        $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
-        
-        $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoEvento, 'Evento');
         
         $('#modalEvento').modal('toggle');
     };
@@ -2871,8 +2996,42 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     };
     
     $scope.AgregarEventoActividad = function()    
-    {
-        AgregarEventoActividad($http, CONFIG, $q, $scope.nuevoEvento).then(function(data)
+    {    
+        (self.servicioObj = LifeService.File('AgregarEventoActividad', $scope.nuevoEvento)).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                $scope.mensaje = "Evento agregado.";
+                $scope.EnviarAlerta('Vista');
+                
+                $scope.nuevoEvento.EventoActividadId = data[1].Id;
+                $scope.nuevoEvento.Etiqueta = data[2].Etiqueta;  
+                $scope.nuevoEvento.Tema = data[3].Tema;
+                $scope.nuevoEvento.Imagen = data[4].Imagen;  
+                
+                $scope.SetNuevoEvento($scope.nuevoEvento);
+        
+                $('#modalEvento').modal('toggle');
+                
+                if( $scope.nuevoEvento.Hecho == "1")
+                {
+                    $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $('#registrarEventoPregunta').modal('toggle');
+                }
+
+            } else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede realizar la operación, intentelo más tarde", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+        
+        /*AgregarEventoActividad($http, CONFIG, $q, $scope.nuevoEvento).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
             {
@@ -2903,12 +3062,45 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeError').modal('toggle');
-        });
+        });*/
     };
     
     $scope.EditarEventoActividad = function()    
     {
-        EditarEventoActividad($http, CONFIG, $q, $scope.nuevoEvento).then(function(data)
+        (self.servicioObj = LifeService.File('EditarEventoActividad', $scope.nuevoEvento)).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                $scope.mensaje = "Evento editado.";
+                
+                $scope.nuevoEvento.Etiqueta = data[1].Etiqueta;  
+                $scope.nuevoEvento.Tema = data[2].Tema;
+                $scope.nuevoEvento.Imagen = data[3].Imagen;  
+                
+                $scope.SetNuevoEvento($scope.nuevoEvento);
+                $scope.EnviarAlerta('Vista');
+                
+                $('#modalEvento').modal('toggle');
+                
+                if( $scope.nuevoEvento.Hecho == "1" && $scope.hechoInicio == "0")
+                {
+                    $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $('#registrarEventoPregunta').modal('toggle');
+                }
+                                
+            } else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede realizar la operación, intentelo más tarde", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+        
+        /*EditarEventoActividad($http, CONFIG, $q, $scope.nuevoEvento).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
             {   
@@ -2923,7 +3115,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 
                 $('#modalEvento').modal('toggle');
                 
-                if( $scope.nuevoEvento.Hecho == "1")
+                if( $scope.nuevoEvento.Hecho == "1" && $scope.hechoInicio == "0")
                 {
                     $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
                     $('#registrarEventoPregunta').modal('toggle');
@@ -2940,7 +3132,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeError').modal('toggle');
-        });
+        });*/
     };
     
     $scope.SetNuevoEvento = function(evento)
@@ -3667,7 +3859,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                     $scope.$apply();
                 };
                 
-                debugger;
             })(f);
             
             
@@ -3679,6 +3870,13 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     document.getElementById('cargarImagen').addEventListener('change', ImagenSeleccionada, false);
     
     autosize($('textarea'));
+    
+    //----------- Archivos --------
+    $(document).on('hide.bs.modal','#EtiquetaFile', function () 
+    {
+        $scope.ActivarDesactivarTema($scope.nuevoEvento.Tema);
+        $scope.ActivarDesactivarEtiqueta($scope.nuevoEvento.Etiqueta);
+    });
     
     
 });

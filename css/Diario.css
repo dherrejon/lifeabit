@@ -241,7 +241,7 @@
     flex-wrap: wrap;
 }
 
-.botonAgregarBusqueda
+.botonAgregarBusqueda, .botonAgregarBusqueda:focus, .botonAgregarBusqueda:active
 {
     border-right: 2px solid #1859b2;
     border-width: 0px 3px 0px 0px;
@@ -251,8 +251,8 @@
 
 .botonAgregarBusqueda:hover
 {
-    border-right: 2px solid #1859b2;
-    border-width: 0px 2px 0px 0px;
+    border-right: 2px solid #1859b2 !important;
+    border-width: 0px 2px 0px 0px !important;
     border-radius: 0px;
     
     background: #d2e4fb;
@@ -316,6 +316,19 @@
     
     outline: none !important;
     box-shadow: none;
+}
+
+.datebtn
+{
+    left: 130px;
+}
+
+@media (max-width: 767px)
+{
+    .datebtn
+    {
+        left: 65px;
+    }
 }
 
 

@@ -276,6 +276,25 @@
                     </a>
                 </div>
                 
+                <!-- Archivos -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+                    <a  class="btn labelConcepto"  ng-click="verApp.archivo = !verApp.archivo">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Archivos ({{archivo.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.archivo "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.archivo "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.archivo && appFiltro == 'Todo') || appFiltro == 'Archivos'" > <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="archivo in archivo | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(nota.Titulo)}}" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{archivo.Nombre}}" target="_blank"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <span class="fa fa-download"></span>
+                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                            {{archivo.Nombre}}
+                        </span>
+                    </a>
+                </div>
+                
                 
             </div>
         </div>

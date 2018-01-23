@@ -106,7 +106,7 @@
                            </div>
                            
                             <div class="btn-group">
-                                <button class="btn botonAgrupador" ng-click="AbrirCalendario(); filtro.futuro = false" type="button" ng-class="{Activo: filtro.fecha != '' && filtro.fecha != hoy}"><span class="fa fa-calendar-o"></span></button>
+                                <button class="btn botonAgrupador" ng-click="AbrirCalendario('fechaFiltro'); filtro.futuro = false" type="button" ng-class="{Activo: filtro.fecha != '' && filtro.fecha != hoy}"><span class="fa fa-calendar-o"></span></button>
                            </div>
 
                         </div>
@@ -121,7 +121,7 @@
                               <button class="btn btnChangeDate" ng-click="CambiarFechaBtn(-1, filtro.fecha)"><span class="fa fa-caret-left"></span></button>
                           </span>
                                                  
-                           <a class="btn inputChangeDate " style="padding: 2px" ng-click="AbrirCalendario()">
+                           <a class="btn inputChangeDate " style="padding: 2px" ng-click="AbrirCalendario('fechaFiltro')">
                                 <span style="white-space: normal; overflow: hidden;" >{{filtro.fechaFormato}}</span>
                             </a>
                             
@@ -213,7 +213,7 @@
                      
                     <div style="position: relative; margin-left: 90px; padding: 10px; overflow-y: scroll; max-height: 90px; margin-right: 25px">
                         <b style="font-size: 12pt;  color: black">{{p.Nombre}}</b><br>
-                        <span style="font-size: 11pt;" class="txtPrioridad {{p.NombrePrioridad}}"><b> {{p.NombrePrioridad ? p.NombrePrioridad : 'Sin Prioridad'}}<br></b></span>
+                        <span style="font-size: 11pt;" class="txtPrioridad {{p.NombrePrioridad}}"><b> {{ p.NombrePrioridad}}<br></b></span>
                         <span style="font-size: 11pt;"><b>Fecha: </b>{{p.FechaRealizacionFormato}}<br></span>
                         <span style="font-size: 11pt;" ng-show="p.HoraRealizacion"><b>Hora: </b>{{p.HoraRealizacion}}<br></span>
                     </div>
@@ -229,21 +229,23 @@
                      <div  class="pull-right PendienteOpt animated " ng-class="{slideInRight : verpen == p.PendienteId, slideOutRight : verpen2 == p.PendienteId}" ng-show=" verpen ==  p.PendienteId || verpen2 ==  p.PendienteId" style="width: auto">
                          
                          <div class="btn-group">
+                          
+                          <button class="btn btnOptPendiente Borrar" ng-click="BorrarPendiente(p)">
+                                 <span class="fa fa-trash"></span> <br>Borrar
+                            </button>
+                            
                             <button class="btn btnOptPendiente Copiar" ng-click="AbrirPendiente('Copiar', p)">
                                 <span class="fa fa-files-o"></span> <br>Copiar
                             </button>
                             
-                             <button class="btn btnOptPendiente Detalle" ng-click="VerPendiente(p)">
+                            <button class="btn btnOptPendiente Detalle" ng-click="VerPendiente(p)">
                                 <span class="fa fa-eye"></span> <br>Detalle
                             </button>
-
-                            <button class="btn btnOptPendiente Editar" ng-click="AbrirPendiente('Editar', p)">
+                           
+                           <button class="btn btnOptPendiente Editar" ng-click="AbrirPendiente('Editar', p)">
                                  <span class="fa fa-pencil"></span> <br>Editar
                             </button>
-
-                            <button class="btn btnOptPendiente Borrar" ng-click="BorrarPendiente(p)">
-                                 <span class="fa fa-trash"></span> <br>Borrar
-                            </button>
+                            
                         </div>
 
                      </div>
@@ -301,6 +303,7 @@
                          <div class="text-center">
                              <a class="btn btnTabModal" ng-click="tabModal = 'Datos'" ng-class="{active: tabModal == 'Datos'}"><div class="fa fa-calendar-times-o tabModal"></div><br>Datos</a>
                              <a class="btn btnTabModal" ng-click="tabModal = 'Imagenes'" ng-class="{active: tabModal == 'Imagenes'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Archivos'" ng-class="{active: tabModal == 'Archivos'}"><div class="fa fa-file  tabModal"></div><br>Archivos</a>
                          </div>
                                           
                      </div>
@@ -333,19 +336,22 @@
                     <!-- Fecha intencion -->
                     <div class="row" ng-show="operacion == 'Agregar' || operacion == 'Copiar'">
 
-                        <div class=" col-sm-6 etiquetaDropdownList" >
+                        <div class=" col-sm-6 etiquetaDropdownList">
                             <label class="">Fecha</label><br>
-                            <div class="row" >
-                               <div class="col-xs-12" >
-                                <span class="botonFecha">{{nuevoPendiente.FechaIntencionFormato}}</span>
-                                </div>
-                            </div>
-
+                            
+                            
                             <div class="row" >
                                 <div class="col-xs-12" >
-                                    <input type="text"  id="fechaIntencion" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaIntencion(this)"/>
+                                    <input ng-disabled="nuevoPendiente.Hecho == '1'" type="text"  id="fechaIntencion" class="form-control entrada" style=" cursor:pointer; color:transparent; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaIntencion(this)"/>
                                 </div>
                             </div>
+                            
+                            <div class="row" style="margin-top: -25px; position: absolute; cursor: pointer" ng-click="AbrirCalendario('fechaIntencion')">
+                               <div class="col-xs-12" >
+                                <span  class="botonFecha" >{{nuevoPendiente.FechaIntencionFormato}}</span>
+                                </div>
+                            </div>
+                            
                         </div>
                         
                         <br class="hidden-sm hidden-md hidden-lg">
@@ -355,9 +361,9 @@
                            
                            <label class="">Hora</label><br>
 
-                            <div class="row" style="margin-top: -3px">
+                            <div class="row">
                                 <div class="col-xs-12" >
-                                    <input type="text"  id="horaIntencion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraIntencion(this)"/>
+                                    <input ng-disabled="nuevoPendiente.Hecho == '1'" type="text"  id="horaIntencion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraIntencion(this)"/>
                                 </div>
                             </div>
                             
@@ -370,27 +376,28 @@
 
                         <div class="col-sm-6 etiquetaDropdownList" >
                             <label class="">Fecha</label><br>
-                            <div class="row" >
-                               <div class="col-xs-12" >
-                                <span class="botonFecha">{{nuevoPendiente.FechaRealizacionFormato}}</span>
-                                </div>
-                            </div>
-
+                        
                             <div class="row" >
                                 <div class="col-xs-12" >
-                                    <input type="text"  id="fechaRealizacion" class="form-control entrada" style=" cursor:pointer; color:transparent; margin-top:-25px; z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaRealizacion(this)"/>
+                                    <input  ng-disabled="nuevoPendiente.Hecho == '1'" type="text"  id="fechaRealizacion" class="form-control entrada" style=" cursor:pointer; color:transparent;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarFechaRealizacion(this)"/>
+                                </div>
+                            </div>
+                            
+                            <div class="row" style="margin-top: -25px; position: absolute; cursor: pointer" ng-click="AbrirCalendario('fechaRealizacion')">
+                               <div class="col-xs-12" >
+                                <span  class="botonFecha">{{nuevoPendiente.FechaRealizacionFormato}}</span>
                                 </div>
                             </div>
                         </div>
                         <br class="hidden-sm hidden-md hidden-lg">
                         
-                        <div class="6 col-sm-6 etiquetaDropdownList" style="margin-top: -3px">
+                        <div class="6 col-sm-6 etiquetaDropdownList" >
                            
                            <label class="">Hora</label><br>
 
                             <div class="row" >
                                 <div class="col-xs-12" >
-                                    <input type="text"  id="horaRealizacion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraRealizacion(this)"/>
+                                    <input ng-disabled="nuevoPendiente.Hecho == '1'" type="text"  id="horaRealizacion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraRealizacion(this)"/>
                                 </div>
                             </div>
                     
@@ -406,25 +413,27 @@
 
                             <div class="">
                                 <label class="etiquetaNormal">Objetivo</label>
-                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 75px" name="nota" ng-model="nuevoPendiente.Nombre" maxlength="220" ng-blur="CrearEtiquetaSugerida()"></textarea>
+                                <textarea ng-disabled="nuevoPendiente.Hecho == '1'" required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 75px" name="nota" ng-model="nuevoPendiente.Nombre" maxlength="220" ng-blur="CrearEtiquetaSugerida()"></textarea>
                             </div>
 
                        </div>             
                     </div>
                     <br>
-                    
-                    <!-- Notas -->
+                                   
+                    <!-- Recordatorio -->
                     <div class="row">
                         <div class="col-sm-12">
                              <div class="">
-                                <label class="etiquetaNormal">Notas</label>
-                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="nota" ng-model="nuevoPendiente.Nota" maxlength="20000"></textarea>
+                                <label class="etiquetaNormal" ng-click="verRecordatorio = !verRecordatorio" style="cursor: pointer">
+                                    Recordatorio 
+                                    <span class="fa {{verRecordatorio ? 'fa-angle-double-up' : 'fa-angle-double-right'}}"></span>
+                                </label>
+                                <textarea ng-show="verRecordatorio" required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="nota" ng-model="nuevoPendiente.Recordatorio" maxlength="10000"></textarea>
                             </div>
                         </div>
                     </div>
                     <br><br>
-                    
-                    
+                                    
                     
                     <!-- Hecho y Prioridad -->
                     <div class="row">
@@ -446,8 +455,8 @@
                             <label>Prioridad</label>
                             
                             <div class="dropdown">
-                                <button class="btn btn-block dropdownListModal" data-toggle="dropdown">
-                                    {{nuevoPendiente.Prioridad.PrioridadId ? nuevoPendiente.Prioridad.Nombre  : 'Sin Prioridad'}} 
+                                <button class="btn btn-block dropdownListModal" data-toggle="dropdown" ng-disabled="nuevoPendiente.Hecho == '1'">
+                                    {{nuevoPendiente.Prioridad.Nombre}} 
                                     <div class="pull-right">
                                         <span class="caret"></span>
                                     </div>
@@ -480,6 +489,17 @@
                         
                         </div>
                     </div><br class="hidden-md hidden-sm hidden-lg">
+                     
+                     <!-- Notas -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                             <div class="">
+                                <label class="etiquetaNormal">Notas</label>
+                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt" name="nota" ng-model="nuevoPendiente.Nota" maxlength="10000"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br><br>
 
                      <div class="row">
                         <div class="col-sm-12">
@@ -524,11 +544,32 @@
                         <div class="col-sm-6 etiquetaDropdownList" >
 
                             <label>Unidad</label>
-                            <div class="input-group" style="margin-top: -5px">
-                                <input  type="text"  class="form-control entrada" ng-model="buscarUnidad" uib-typeahead="u as (u.Unidad) for u in unidad | filter:{Unidad:$viewValue} | limitTo:5" typeahead-on-select="CambiarUnidad()" typeahead-select-on-blur="true" typeahead-focus-first="true" > 
-                                <span class="input-group-addon entrada" ng-click="QuitarUnidad()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
-                                <span class="input-group-addon entrada" ng-click="AbrirAgregarUnidad()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
-                            </div>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-block dropdownListModal" data-toggle="dropdown" style="margin-top: -9px">
+                                    {{nuevoPendiente.Unidad.Unidad}} 
+                                    <div class="pull-right">
+                                        <span class="caret"></span>
+                                    </div>
+                                </button>
+                                
+                                <ul class="dropdown-menu dropdown-menu-right " style="margin-top: 0px; width: 100%; border-radius: 0px">
+                                    
+                                    <li class="text-center">
+                                        <a class="dropdownOpcion2" ng-click="AbrirAgregarUnidad()">
+                                            <b><span class="fa fa-plus"></span> Agregar</b>
+                                        </a>
+                                    </li>
+                                    
+                                    <li ng-repeat="unidad in unidad | orderBy:'Unidad'">
+                                        <a class="dropdownOpcion2" ng-click="CambiarUnidad(unidad)">
+                                            {{unidad.Unidad}}
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            
+                             </div>
 
                         </div>
                     </div>
@@ -551,11 +592,32 @@
                         <div class="col-sm-6 etiquetaDropdownList" >
 
                             <label>Divisa</label>
-                            <div class="input-group" style="margin-top: -5px">
-                                <input  type="text"  class="form-control entrada" ng-model="buscarDivisa" uib-typeahead="d as (d.Divisa) for d in divisa | filter:{Divisa:$viewValue} | limitTo:5" typeahead-on-select="CambiarDivisa()" typeahead-select-on-blur="true" typeahead-focus-first="true" > 
-                                <span class="input-group-addon entrada" ng-click="QuitarDivisa()" style="cursor: pointer"> <span class="fa fa-times-circle"></span> </span> 
-                                <span class="input-group-addon entrada" ng-click="AbrirAgregarDivisa()" style="cursor: pointer"> <span class="fa fa-plus"></span> </span> 
-                            </div>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-block dropdownListModal" data-toggle="dropdown" style="margin-top: -9px">
+                                    {{nuevoPendiente.Divisa.Divisa}} 
+                                    <div class="pull-right">
+                                        <span class="caret"></span>
+                                    </div>
+                                </button>
+                                
+                                <ul class="dropdown-menu dropdown-menu-right " style="margin-top: 0px; width: 100%; border-radius: 0px">
+                                    
+                                    <li class="text-center">
+                                        <a class="dropdownOpcion2" ng-click="AbrirAgregarDivisa()">
+                                            <b><span class="fa fa-plus"></span> Agregar</b>
+                                        </a>
+                                    </li>
+                                    
+                                    <li ng-repeat="divisa in divisa | orderBy:'Divisa'">
+                                        <a class="dropdownOpcion2" ng-click="CambiarDivisa(divisa)">
+                                            {{divisa.Divisa}}
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            
+                             </div>
 
                         </div>
                     </div>
@@ -748,6 +810,12 @@
                        </div>
                     </div>
                 </div>
+                  
+                <div ng-show="tabModal == 'Archivos'">
+                
+                  <div ng-include=" 'html/Archivo/Archivo.html' " ></div>    
+                
+                </div>
                    
                 <br><br>
                 <!---- botones de operación -->
@@ -790,11 +858,8 @@
                     <!-- Prioridad -->
                     <span>
                         <b>Prioridad: </b> 
-                        <span ng-if="detalle.Prioridad.PriridadId">
+                        <span>
                             {{detalle.Prioridad.Nombre}}
-                        </span>
-                        <span ng-if="!detalle.Prioridad.PriridadId">
-                            Sin Prioridad
                         </span>
                         <br>
                     </span>
@@ -889,6 +954,16 @@
                         
                   </span>
                    <br>
+                   
+                   <!-- Notas -->
+                    <span ng-if="detalle.Recordatorio">
+                        <b>Recordatorio: </b> <br>
+                        <span >
+                           <p style="font-size:12pt" ng-bind-html="detalle.RecordatorioHTML"></p>
+                        </span>
+                        <br>
+                    </span>
+                    
 
                    <!-- Notas -->
                     <span ng-if="detalle.Nota">
@@ -936,6 +1011,42 @@
                         </div>
                      </div>
                  </div>
+                 
+                 <div class="col-xs-12">
+                     <br>
+                 </div>
+
+                 <div class="col-xs-12">
+                        <div class="table-responsive">
+                           <table  class="table table-responsive">
+
+                                <tbody  style="cursor: pointer">
+
+                                    <!-- Archivos agregados -->
+                                    <tr ng-repeat="file in detalle.Archivo" ng-if="detalle.Archivo.length > 0" >
+
+                                      <td >
+                                          <span class="infoCenterCell">
+                                              <span>{{file.Nombre}}</span>
+                                           </span> 
+                                      </td>
+
+                                      <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                      <td class="text-center">
+                                          <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                             <span class="fa fa-download"></span>
+                                         </a>
+                                      </td>
+
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                        </div>
+                   </div>
 
             </div>
     
@@ -1148,6 +1259,7 @@
     <div ng-include=" 'html/Control/PrioridadControl.html' "></div>
     <div ng-include=" 'html/Control/MensajeModal.html' "></div>
     
+    <div ng-include=" 'html/Archivo/EtiquetaArchivo.html' "></div>
     
 </div>
   

@@ -29,7 +29,7 @@
                     <div class="col-xs-4 col-sm-2">
                         <div class="btn-group-vertical pull-right" role="group" >
                             <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
-                            <a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarEtiquetar()"><span class="fa fa-check"></span></a>
+                            <!--<a focus class="btn botonFinModal" id="terminarEtiqueta" ng-click="TerminarEtiquetaArchivo()"><span class="fa fa-check"></span></a>-->
                         </div>
                     </div>
                 </div>
@@ -138,16 +138,91 @@
                 <!---- botones de operacion -->
                 <div class="row">
                     <div class="col-xs-6">
-                        <a class="btn botonFinModal btn-block"  data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                        <a class="btn botonFinModal btn-block"  data-dismiss="modal" aria-label="Close">Cerrar</a>
                     </div>
 
-                    <div class="col-xs-6">
-                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarEtiquetaImagen()">TERMINAR</a>
-                    </div>
+                    <!--<div class="col-xs-6">
+                        <a focus class="btn botonFinModal btn-block" ng-click="TerminarEtiquetaArchivo()">TERMINAR</a>
+                    </div>-->
                 </div>
             <br>
             </form> 
 
         </div>
     </div>
+    
+    <!---------- Driver ---------------->
+    <div class="modal fade sombraDivModal" id="driver" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-lg modalPrincipal">
+         
+            <div class="row">
+                
+                <div class="col-xs-12">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  data-dismiss="modal" aria-label="Close"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" ng-click="AgregarArchivos()" ><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+            </div>
+            <br>
+          
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="table-responsive">
+                       <table  class="table table-hover">
+
+                            <tbody  style="cursor: pointer">
+
+                                <!-- Archivos agregados -->
+                                <tr ng-repeat="file in archivo | orderBy:'Nombre'" ng-show="file.show">
+                                  
+                                  <td class="text-left">
+                                      <span class="checkbox" style="margin-top: 10px">
+                                        <label>
+                                            <input ng-model="file.Seleccionado" type="checkbox" value="" >
+                                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                                        </label>
+                                    </span>
+                                  </td>
+
+                                  <td >
+                                      <span class="infoCenterCell">
+                                          <span>{{file.Nombre}}</span>
+                                       </span> 
+                                  </td>
+
+                                  <td  style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                  <td class="text-center">
+                                      <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                         <span class="fa fa-download"></span>
+                                     </a>
+                                  </td>
+
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+                    </div>
+               </div>
+            </div>
+                              
+            <br>
+            <!---- botones de operacion -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" data-dismiss="modal" aria-label="Close">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="AgregarArchivos()" >TERMINAR</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
 </div>

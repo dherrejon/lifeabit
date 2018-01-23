@@ -11,6 +11,9 @@ class Diario
         this.Tema = [];
         this.Imagen = [];
         this.ImagenSrc = [];
+        
+        this.Archivo = [];
+        this.ArchivoSrc = [];
     }
 }
 
@@ -100,6 +103,7 @@ function SetDiario(data)
     diario.Hora = data.Hora;
     diario.Notas = data.Notas;
     diario.Imagen = data.Imagen;
+    diario.Archivo = data.Archivo;
     
     diario.FechaFormato = TransformarFecha(data.Fecha);
 
@@ -180,6 +184,7 @@ function SetFechaDiario(data)
 
 function AgregarDiario($http, CONFIG, $q, diario)
 {
+    
     var q = $q.defer();
     
     var fd = new FormData();

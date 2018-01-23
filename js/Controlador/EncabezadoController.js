@@ -36,6 +36,10 @@ app.controller("EncabezadoControlador", function($scope, $window, $http, $rootSc
                 $scope.barraNavegacion = EncabezadoObjetivo;
                 break;
                 
+            case "Mi Conocimiento": 
+                $scope.barraNavegacion = EncabezadoConocimiento;
+                break;
+                
             case "Home": 
                 $scope.barraNavegacion = EncabezadoAplicaciones;
                 break;
@@ -409,8 +413,7 @@ var EncabezadoObjetivo =
                                                 elemento:
                                                 [
                                                     {texto:"Etiquetas", referencia:"#Etiqueta", funcion:"", show:true},
-                                                    {texto:"Lugares", referencia:"#Lugar", funcion:"", show:true},
-                                                    {texto:"Unidades", referencia:"#Unidades", funcion:"", show:true},
+                                                    {texto:"Temas", referencia:"#TemaActividad", funcion:"", show:true},
                                                 ]},
               ]                       
 };
@@ -430,4 +433,18 @@ var EncabezadoAplicaciones =
                     
               ] 
                         
-} ;
+};
+
+var EncabezadoConocimiento =
+{ 
+    titulo:"Mi Conocimiento", 
+    opcion: [ 
+                    { texto:"Inicio", tipo:"link", referencia:"#Conocimiento", show: true},
+                    { texto:"Administrar", tipo:"dropdown", show: true,
+                                                elemento:
+                                                [
+                                                    {texto:"Etiquetas", referencia:"#Etiqueta", funcion:"", show:true},
+                                                    {texto:"Temas", referencia:"#TemaActividad", funcion:"", show:true},
+                                                ]},
+              ]                       
+};

@@ -32,6 +32,8 @@
     
     require 'Pendiente/Prioridad.php';  
 
+    require 'App/Archivo.php';
+
     /*-----Seguridad-----*/
     require 'PHP-JWT/Authentication/JWT.php';
     require 'PHP-JWT/Exceptions/SignatureInvalidException.php';
@@ -273,6 +275,8 @@
     $app->get('/GetTemaPorActividad/:id', $seguridad, $ChecarSesion, 'GetTemaPorActividad');
     $app->get('/GetFechaActividad/:id', $seguridad, $ChecarSesion, 'GetFechaActividad');
 
+    $app->post('/GetActividadPorIdDatos', $seguridad, $ChecarSesion, 'GetActividadPorIdDatos');
+
     /*-----------------------  Evento Actividad ------------------------------------------*/
     $app->get('/GetEventoActividad/:id', $seguridad, $ChecarSesion, 'GetEventoActividad');
     $app->post('/AgregarEventoActividad', $seguridad, $ChecarSesion, 'AgregarEventoActividad');
@@ -344,6 +348,19 @@
     $app->post('/GetGaleriaFotos', $seguridad, $ChecarSesion, 'GetGaleriaFotos');
     $app->post('/GetFototeca', $seguridad, $ChecarSesion, 'GetFototeca');
     $app->get('/GetImagenEtiqueta/:id', $seguridad, $ChecarSesion, 'GetImagenEtiqueta');
+
+    /*-----------------------  Archivo ------------------------------------------*/
+    $app->get('/GetArchivo/:id', $seguridad, $ChecarSesion, 'GetArchivo');
+    $app->get('/GetNumeroArchivo/:id', $seguridad, $ChecarSesion, 'GetNumeroArchivo');
+
+    //---------------------------------------------------------------------------------------------------------------Conocimiento
+
+    /*-----------------------  Conocimiento ------------------------------------------*/
+    $app->post('/GetConocimiento', $seguridad, $ChecarSesion, 'GetConocimiento');
+    $app->get('/GetConocimientoPorId/:id', $seguridad, $ChecarSesion, 'GetConocimientoPorId');
+    $app->post('/AgregarConocimiento', $seguridad, $ChecarSesion, 'AgregarConocimiento');
+    $app->post('/EditarConocimiento', $seguridad, $ChecarSesion, 'EditarConocimiento');
+    $app->delete('/BorrarConocimiento', $seguridad, $ChecarSesion, 'BorrarConocimiento');
 
 
     $app->run(); 

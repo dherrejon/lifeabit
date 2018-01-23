@@ -52,7 +52,7 @@ function SetActividad(data)
     
     actividad.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
     
-    if(data.Notas !== null)
+    if(data.Notas)
     {
          actividad.NotasHTML = data.Notas.replace(/\r?\n/g, "<br>");
     }

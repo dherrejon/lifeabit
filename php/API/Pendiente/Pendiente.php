@@ -236,6 +236,65 @@ function GetPendienteDatos($id)
             $app->stop();
         }
         
+        $sql = "SELECT ArchivoId, Nombre, Extension, Size FROM ArchivoPendienteVista WHERE PendienteId = ".$pendiente->PendienteId;
+
+        try 
+        {
+            $stmt = $db->query($sql);
+            $pendiente->Archivo = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            $archivo = count($pendiente->Archivo);
+
+            if($archivo > 0)
+            {
+                for($i=0; $i<$archivo; $i++)
+                {
+
+                    $sql =  $sql = "SELECT TemaActividadId, Tema FROM TemaArchivoVista WHERE ArchivoId = ".$pendiente->Archivo[$i]->ArchivoId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $pendiente->Archivo[$i]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                }
+
+                for($i=0; $i<$archivo; $i++)
+                {
+
+                    $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaArchivoVista WHERE ArchivoId = ".$pendiente->Archivo[$i]->ArchivoId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $pendiente->Archivo[$i]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                }
+            }
+        }
+        catch(PDOException $e) 
+        {
+            echo($sql);
+            echo '[ { "Estatus": "Fallo" } ]';
+            $app->status(409);
+            $app->stop();
+        }
     }
     
     $app->status(200);
@@ -251,7 +310,7 @@ function AgregarPendiente()
     global $app;
 
 
-    $sql = "INSERT INTO Pendiente (UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, HoraIntencion, HoraRealizacion, Hecho, Nota) VALUES(:UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaIntencion, STR_TO_DATE( :HoraIntencion, '%h:%i %p' ), STR_TO_DATE( :HoraIntencion, '%h:%i %p' ), :Hecho, :Nota)";
+    $sql = "INSERT INTO Pendiente (UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, HoraIntencion, HoraRealizacion, Hecho, Nota, Recordatorio) VALUES(:UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaIntencion, STR_TO_DATE( :HoraIntencion, '%h:%i %p' ), STR_TO_DATE( :HoraIntencion, '%h:%i %p' ), :Hecho, :Nota, :Recordatorio)";
     
     try 
     {
@@ -268,6 +327,7 @@ function AgregarPendiente()
         $stmt->bindParam("HoraRealizacion", $pendiente->HoraRealizacion);
         $stmt->bindParam("Hecho", $pendiente->Hecho);
         $stmt->bindParam("Nota", $pendiente->Nota);
+        $stmt->bindParam("Recordatorio", $pendiente->Recordatorio);
 
         $stmt->execute();
         
@@ -570,6 +630,310 @@ function AgregarPendiente()
     
     /*------------------Termina Imagenes --------------*/
     
+    //------------------------------ Archivos inicia --------------------------------------
+    $countFile = 0;
+    if($pendiente->AgregarArchivo > 0)
+    {
+        $countFile = count($_FILES['Archivo']['name']);
+    }
+        
+    $count= 0;
+    $archivoId = [];
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$pendiente->UsuarioId."/Archivo/";
+        if(!is_dir("ArchivosUsuario/".$pendiente->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$pendiente->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['Archivo']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['Archivo']['name'][$k];
+                $size = $_FILES['Archivo']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$pendiente->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $archivoId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //$uploadfile = $_FILES['file']['name'];
+                move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($pendiente->ArchivoSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($pendiente->ArchivoSrc[$k]->Etiqueta[$i]->Visible || $pendiente->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1")
+                        {
+                            $sql .= " (".$pendiente->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
+                        }
+                        else
+                        {
+                             $sql .= " (".$pendiente->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
+                        }
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($pendiente->ArchivoSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$pendiente->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $archivoId[$k] = 0;
+            }
+            
+        }
+        
+        
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ArchivoPorPendiente (PendienteId, ArchivoId) VALUES";
+            
+            //Imagen de la nota
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($archivoId[$k] != 0)
+                {
+                    $sql .= " (".$pendiente->PendienteId.", ".$archivoId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+     $countArch = count($pendiente->Archivo);
+    
+    if($countArch>0)  
+    {    
+        $sql = "INSERT INTO ArchivoPorPendiente (PendienteId, ArchivoId) VALUES";
+        
+        $count = 0;
+        for($k=0; $k<$countArch; $k++)
+        {
+            if(!$pendiente->Archivo[$k]->Eliminado)
+            {
+                $count++;
+                $sql .= " (".$pendiente->PendienteId.", ".$pendiente->Archivo[$k]->ArchivoId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+            
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countArch; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorArchivo WHERE ArchivoId =".$pendiente->Archivo[$k]->ArchivoId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($pendiente->Archivo[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($pendiente->Archivo[$k]->Etiqueta[$i]->Visible || $pendiente->Archivo[$k]->Etiqueta[$i]->Visible == "1")
+                        {
+                            $sql .= " (".$pendiente->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$pendiente->Archivo[$k]->ArchivoId.", 1),";
+                        }
+                        else
+                        {
+                            $sql .= " (".$pendiente->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$pendiente->Archivo[$k]->ArchivoId.", 0),";
+                        }
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorArchivo WHERE ArchivoId =".$pendiente->Archivo[$k]->ArchivoId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($pendiente->Archivo[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$pendiente->Archivo[$k]->Tema[$i]->TemaActividadId.", ".$pendiente->Archivo[$k]->ArchivoId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+        
+       
+    }
+    
+    //----------------------------- archvios  fin---------------------------------------
+    
+    
     if($pendiente->Lugar->LugarId) 
     {
         $sql = "INSERT INTO LugarPendiente (PendienteId, LugarId) VALUES(:PendienteId, :LugarId)";
@@ -641,7 +1005,7 @@ function AgregarPendiente()
         }
     }
     
-    if($pendiente->Divisa->DivisaId) 
+    if($pendiente->Divisa->Costo) 
     {
         $sql = "INSERT INTO CostoPendiente (PendienteId, DivisaId, Costo) VALUES(:PendienteId, :DivisaId, :Costo)";
 
@@ -652,6 +1016,44 @@ function AgregarPendiente()
             $stmt->bindParam("PendienteId", $pendiente->PendienteId);
             $stmt->bindParam("DivisaId", $pendiente->Divisa->DivisaId);
             $stmt->bindParam("Costo", $pendiente->Divisa->Costo);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+        
+        $sql = "UPDATE Divisa SET DivisaObjetivo = 0 WHERE DivisaObjetivo = 1 AND UsuarioId = :UsuarioId";
+    
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("UsuarioId", $pendiente->UsuarioId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+
+        $sql = "UPDATE Divisa SET DivisaObjetivo = 1 WHERE DivisaId = :DivisaId";
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("DivisaId", $pendiente->Divisa->DivisaId);
 
             $stmt->execute();
 
@@ -825,11 +1227,11 @@ function EditarPendiente()
     
     if($pendiente->FechaMod == "FechaIntencion" && $pendiente->Hecho == "0" )
     {
-        $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota, HoraIntencion, HoraRealizacion) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaRealizacion, :FechaRealizacion, :Hecho, :Nota,  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ),  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ))";
+        $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota, HoraIntencion, HoraRealizacion, Recordatorio) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaRealizacion, :FechaRealizacion, :Hecho, :Nota,  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ),  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ), :Recordatorio)";
     }
     else
     {
-        $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota, HoraIntencion, HoraRealizacion) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaRealizacion, :Hecho, :Nota,  STR_TO_DATE( :HoraIntencion, '%h:%i %p' ),  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ))";
+        $sql = "INSERT INTO Pendiente (PendienteId, UsuarioId, Nombre, FechaCreacion, FechaIntencion, FechaRealizacion, Hecho, Nota, HoraIntencion, HoraRealizacion, Recordatorio) VALUES(:PendienteId, :UsuarioId, :Nombre, :FechaCreacion, :FechaIntencion, :FechaRealizacion, :Hecho, :Nota,  STR_TO_DATE( :HoraIntencion, '%h:%i %p' ),  STR_TO_DATE( :HoraRealizacion, '%h:%i %p' ), :Recordatorio)";
     }
     
     try 
@@ -846,6 +1248,7 @@ function EditarPendiente()
         $stmt->bindParam("HoraRealizacion", $pendiente->HoraRealizacion);
         $stmt->bindParam("Hecho", $pendiente->Hecho);
         $stmt->bindParam("Nota", $pendiente->Nota);
+        $stmt->bindParam("Recordatorio", $pendiente->Recordatorio);
 
         $stmt->execute();
         
@@ -1148,6 +1551,325 @@ function EditarPendiente()
     
     /*------------------Termina Imagenes --------------*/
     
+    //------------------------------ Archivos inicia --------------------------------------
+        $sql = "DELETE FROM ArchivoPorPendiente WHERE PendienteId =".$pendiente->PendienteId;
+        try 
+        {
+            $stmt = $db->prepare($sql); 
+            $stmt->execute(); 
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[ { "Estatus": "Fallo" } ]';
+            echo $e;
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+        
+        $countFile = 0;
+        if($pendiente->AgregarArchivo > 0)
+        {
+            $countFile = count($_FILES['Archivo']['name']);
+        }
+
+        $count= 0;
+        $archivoId = [];
+        if($countFile > 0)
+        {
+            $dir = "ArchivosUsuario/".$pendiente->UsuarioId."/Archivo/";
+            if(!is_dir("ArchivosUsuario/".$pendiente->UsuarioId))
+            {
+                mkdir("ArchivosUsuario/".$pendiente->UsuarioId, 0777);
+            }
+
+            if(!is_dir($dir))
+            {
+                mkdir($dir, 0777);
+            }
+
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($_FILES['Archivo']['error'][$k] == 0)
+                {
+                    $count++;
+
+                    $name = $_FILES['Archivo']['name'][$k];
+                    $size = $_FILES['Archivo']['size'][$k];
+                    $ext = pathinfo($name, PATHINFO_EXTENSION);
+                    $archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
+
+                    $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$pendiente->UsuarioId.")";
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);                
+                        $stmt->execute();
+
+                        $archivoId[$k]  = $db->lastInsertId();
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    //Subir Imagen
+                    //$uploadfile = $_FILES['file']['name'];
+                    move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
+
+
+                    //----------------------- Etiquetas --------------------
+                    $countEtiqueta = count($pendiente->ArchivoSrc[$k]->Etiqueta);
+
+                    if($countEtiqueta > 0)
+                    {
+                        $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                        for($i=0; $i<$countEtiqueta; $i++)
+                        {
+                            if($pendiente->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1" || $pendiente->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
+                            {
+                                $sql .= " (".$pendiente->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
+                            }
+                            else
+                            {
+                                $sql .= " (".$pendiente->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
+                            }
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+
+
+                    //----------------------- Temas ---------------------------------
+                    $countTema = count($pendiente->ArchivoSrc[$k]->Tema);
+
+                    if($countTema > 0)
+                    {
+                        $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                        for($i=0; $i<$countTema; $i++)
+                        {
+                            $sql .= " (".$pendiente->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+                }
+                else
+                {
+                    $archivoId[$k] = 0;
+                }
+
+            }
+
+
+            if($count > 0)
+            {
+                $sql = "INSERT INTO ArchivoPorPendiente(PendienteId, ArchivoId) VALUES";
+
+                //Imagen del pendiente
+                for($k=0; $k<$countFile; $k++)
+                {
+                    if($archivoId[$k] != 0)
+                    {
+                        $sql .= " (".$pendiente->PendienteId.", ".$archivoId[$k]."),";
+                    }
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+        }
+
+         $countArch = count($pendiente->Archivo);
+
+        if($countArch>0)  
+        {    
+            $sql = "INSERT INTO ArchivoPorPendiente(PendienteId, ArchivoId) VALUES";
+
+            $count = 0;
+            for($k=0; $k<$countArch; $k++)
+            {
+                if(!$pendiente->Archivo[$k]->Eliminado)
+                {
+                    $count++;
+                    $sql .= " (".$pendiente->PendienteId.", ".$pendiente->Archivo[$k]->ArchivoId."),";
+                }
+            }
+            if($count > 0)
+            {
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                //----------------------- Etiquetas --------------------
+                for($k=0; $k<$countArch; $k++)
+                {
+                    $sql = "DELETE FROM EtiquetaPorArchivo WHERE ArchivoId =".$pendiente->Archivo[$k]->ArchivoId;
+                    try 
+                    {
+                        $stmt = $db->prepare($sql); 
+                        $stmt->execute(); 
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        echo $e;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $countEtiqueta = count($pendiente->Archivo[$k]->Etiqueta);
+                    if($countEtiqueta > 0)
+                    {
+                        $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                        for($i=0; $i<$countEtiqueta; $i++)
+                        {
+                            if($pendiente->Archivo[$k]->Etiqueta[$i]->Visible == "1" || $pendiente->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
+                            {
+                                $sql .= " (".$pendiente->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$pendiente->Archivo[$k]->ArchivoId.", 1),";
+                            }
+                            else
+                            {
+                                $sql .= " (".$pendiente->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$pendiente->Archivo[$k]->ArchivoId.", 0),";
+                            }
+
+
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+
+
+                    //----------------------- Temas ---------------------------------
+                    $sql = "DELETE FROM TemaPorArchivo WHERE ArchivoId =".$pendiente->Archivo[$k]->ArchivoId;
+                    try 
+                    {
+                        $stmt = $db->prepare($sql); 
+                        $stmt->execute(); 
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        echo $e;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $countTema = count($pendiente->Archivo[$k]->Tema);
+
+                    if($countTema > 0)
+                    {
+                        $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                        for($i=0; $i<$countTema; $i++)
+                        {
+                            $sql .= " (".$pendiente->Archivo[$k]->Tema[$i]->TemaActividadId.", ".$pendiente->Archivo[$k]->ArchivoId."),";
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+                }
+            }
+        }
+
+        //----------------------------- archvios  fin---------------------------------------
+    
     if($pendiente->Lugar->LugarId) 
     {
         $sql = "INSERT INTO LugarPendiente (PendienteId, LugarId) VALUES(:PendienteId, :LugarId)";
@@ -1219,7 +1941,7 @@ function EditarPendiente()
         }
     }
     
-    if($pendiente->Divisa->DivisaId) 
+    if($pendiente->Divisa->Costo) 
     {
         $sql = "INSERT INTO CostoPendiente (PendienteId, DivisaId, Costo) VALUES(:PendienteId, :DivisaId, :Costo)";
 
@@ -1230,6 +1952,44 @@ function EditarPendiente()
             $stmt->bindParam("PendienteId", $pendiente->PendienteId);
             $stmt->bindParam("DivisaId", $pendiente->Divisa->DivisaId);
             $stmt->bindParam("Costo", $pendiente->Divisa->Costo);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+        
+        $sql = "UPDATE Divisa SET DivisaObjetivo = 0 WHERE DivisaObjetivo = 1 AND UsuarioId = :UsuarioId";
+    
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("UsuarioId", $pendiente->UsuarioId);
+
+            $stmt->execute();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+
+        $sql = "UPDATE Divisa SET DivisaObjetivo = 1 WHERE DivisaId = :DivisaId";
+
+        try 
+        {
+            $stmt = $db->prepare($sql);
+
+            $stmt->bindParam("DivisaId", $pendiente->Divisa->DivisaId);
 
             $stmt->execute();
 

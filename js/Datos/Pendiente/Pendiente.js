@@ -11,6 +11,7 @@ class Pendiente
         this.Nombre = "";
         this.Nota = "";
         this.Hecho = "0";
+        this.Recordatorio = "";
         
         this.Prioridad = new Prioridad();
         this.Lugar = new Lugar();
@@ -21,6 +22,8 @@ class Pendiente
         this.Tema = [];
         this.Imagen = [];
         this.ImagenSrc = [];
+        this.Archivo = [];
+        this.ArchivoSrc = [];
     }
 }
 
@@ -50,6 +53,7 @@ function SetPendiente(data)
     pendiente.Nombre = data.Nombre;
     pendiente.Hecho = data.Hecho;
     pendiente.Nota = data.Nota;
+    pendiente.Recordatorio = data.Recordatorio;
     
     pendiente.FechaCreacion = data.FechaCreacion;
     pendiente.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
@@ -76,7 +80,8 @@ function SetPendiente(data)
     pendiente.Divisa.Costo = data.Costo;
     
     pendiente.Imagen = data.Imagen;
-    
+    pendiente.Archivo = data.Archivo;
+    pendiente.Archivo = data.Archivo;
     
     if(data.Nota)
     {
@@ -85,6 +90,15 @@ function SetPendiente(data)
     else
     {
          pendiente.NotaHTML = "";
+    }
+    
+    if(data.Recordatorio)
+    {
+         pendiente.RecordatorioHTML = data.Recordatorio.replace(/\r?\n/g, "<br>");
+    }
+    else
+    {
+         pendiente.RecordatorioHTML = "";
     }
     
     pendiente.EtiquetaVisible = [];
@@ -134,7 +148,7 @@ function GetPrioridad()
     
     prioridad[0] = new Prioridad();
     prioridad[0].PrioridadId = "1";
-    prioridad[0].Nombre = "Normal";
+    prioridad[0].Nombre = "Prioritario";
     prioridad[0].Importancia = "1";
     
     prioridad[1] = new Prioridad();
@@ -149,7 +163,7 @@ function GetPrioridad()
     
     prioridad[3] = new Prioridad();
     prioridad[3].PrioridadId = null;
-    prioridad[3].Nombre = "Sin Prioridad";
+    prioridad[3].Nombre = "Normal";
     prioridad[3].Importancia = null;
     
     return prioridad;

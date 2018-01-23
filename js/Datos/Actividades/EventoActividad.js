@@ -25,6 +25,9 @@ class EventoActividad
         
         this.Imagen = [];
         this.ImagenSrc = [];
+        
+        this.Archivo = [];
+        this.ArchivoSrc = [];
     }
 }
 
@@ -71,6 +74,7 @@ function SetEventoActividad(data)
     evento.Cantidad = data.Cantidad;
     evento.FechaFormato = TransformarFecha(data.Fecha);
     evento.Imagen = data.Imagen;
+    evento.Archivo = data.Archivo;
     
     evento.Hecho = data.Hecho;
     evento.FechaHecho = data.FechaHecho;
@@ -84,7 +88,7 @@ function SetEventoActividad(data)
         evento.HoraFormato  = null;
     }
     
-    if(data.Notas !== null)
+    if(data.Notas)
     {
          evento.Notas = data.Notas;
          evento.NotasHTML = data.Notas.replace(/\r?\n/g, "<br>");
@@ -462,7 +466,7 @@ function SetValNull(val)
 }
 
 var dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-    var meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiempre", "Octubre", "Noviembre", "Diciembre"];
+var meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiempre", "Octubre", "Noviembre", "Diciembre"];
 
 
   

@@ -1,6 +1,16 @@
 <div ng-controller="ArchivoController as archivo"> 
    
     <div id="fileseccion">
+      <div class="row" >
+
+            <div class="col-xs-12">
+                <a ng-click="AbrirDriver()" class="pull-right btn operacionEvento"> 
+                    <span class="fa fa-file"></span> Mis Archivos
+                </a>
+            </div>
+        </div>
+                    
+                    
        <div class="row">
 
             <div class="col-sm-12">
@@ -18,41 +28,107 @@
 
         <div class="row" >
            <div class="col-xs-12">
-               <table  class="table table-responsive">
+                <div class="table-responsive">
+                   <table  class="table table-responsive">
+
+                        <tbody  style="cursor: pointer">
+
+                            <!-- sin Guardar -->
+                            <tr ng-repeat="file in objeto.ArchivoSrc" ng-if="objeto.ArchivoSrc.length > 0">
+
+                              <td class="text-center">
+                                  <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarFile(file, file.name)">
+                                    <span >
+                                     <span class="fa fa-tag"> </span> <span> ({{(file.Etiqueta | filter:{Visible:true}).length}}) </span>
+                                     <span class="fa fa-comment-o"> </span> <span> ({{file.Tema.length}}) </span>
+                                    </span>
+                                 </a>
+                              </td>
+
+                              <td >
+                                  <span class="infoCenterCell">
+                                      <span>{{file.name}}</span>
+                                   </span> 
+                              </td>
+
+                              <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.size/1000000).toFixed(2)}} MB</span> </td>
+
+                              <td class="text-center">
+                                  <a class="btn btnOptDiarioDetalles boton" ng-click="DescargarArchivo(file.Src, file.name)">
+                                     <span class="fa fa-download"></span>
+                                 </a>
+                              </td>
+
+                              <td class="text-center">
+                                  <a class="btn btnQuitarImg" style="font-size: 14pt;" ng-click="objeto.ArchivoSrc.splice($index,1)">
+                                     <span class="fa fa-times-circle"></span>
+                                 </a>
+                              </td>
+
+                            </tr>
+
+                            <!-- Archivos agregados -->
+                            <tr ng-repeat="file in objeto.Archivo" ng-if="objeto.Archivo.length > 0" ng-show="file.Eliminado != true" style="background: #d2e4fb;">
+
+                              <td class="text-center">
+                                  <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarFile(file, file.name)">
+                                    <span >
+                                     <span class="fa fa-tag"> </span> <span> ({{GetNumeroVisible(file.Etiqueta)}}) </span>
+                                     <span class="fa fa-comment-o"> </span> <span> ({{file.Tema.length}}) </span>
+                                    </span>
+                                 </a>
+                              </td>
+
+                              <td >
+                                  <span class="infoCenterCell">
+                                      <span>{{file.Nombre}}</span>
+                                   </span> 
+                              </td>
+
+                              <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                              <td class="text-center">
+                                  <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                     <span class="fa fa-download"></span>
+                                 </a>
+                              </td>
+
+                              <td class="text-center">
+                                  <a class="btn btnQuitarImg" style="font-size: 14pt;" ng-click="file.Eliminado = true">
+                                     <span class="fa fa-times-circle"></span>
+                                 </a>
+                              </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+                </div>
+           </div>
+        </div>
+        
+        <div class="row"  ng-if="(fotoEliminada = (objeto.Archivo | filter:{Eliminado:'true'}  ).length) > 0">
+           <div class="col-xs-12">
+
+               <a class="btn botonDetallesActividad" ng-click="showEliminada = !showEliminada">
+                   <span>Archivos Eliminados ({{ (objeto.Archivo | filter:{Eliminado:'true'}  ).length }})</span>
+                   <span ng-show="showEliminada" class="fa fa-angle-double-up"></span>
+                   <span ng-show="!showEliminada" class="fa fa-angle-double-right"></span>
+               </a>
+               <table  class="table table-responsive" ng-show="showEliminada">
 
                     <tbody  style="cursor: pointer">
 
-                        <tr ng-repeat="file in archivo" ng-if="archivo.length > 0">
+                        <tr ng-repeat="file in objeto.Archivo"  ng-if="file.Eliminado == true">
 
-                          <td class="text-center">
-                              <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt;" ng-click="EtiquetarFile(file, file.name)">
-                                <span >
-                                 <span class="fa fa-tag"> </span> <span> ({{(file.Etiqueta | filter:{Visible:true}).length}}) </span>
-                                 <span class="fa fa-comment-o"> </span> <span> ({{file.Tema.length}}) </span>
-                                </span>
+                          <td> <span class="infoCenterCell">{{file.Nombre}}</span> </td>
+                            <td class="hidden-xs"> <span class="infoCenterCell"> {{(file.Size/1000000).toFixed(2)}} MB </span></td>
+                          <td class="text-center">  
+                              <a class="btn btnAgregarImg" ng-click="file.Eliminado = false">
+                                 <span class="fa fa-check-circle"></span>
                              </a>
                           </td>
-
-                          <td >
-                              <span class="infoCenterCell">
-                                  <span>{{file.name}}</span>
-                               </span> 
-                          </td>
-
-                          <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.size/1000000).toFixed(2)}} MB</span> </td>
-
-                          <td class="text-center">
-                              <a class="btn btnOptDiarioDetalles boton" ng-click="DescargarArchivo(file.Src, file.name)">
-                                 <span class="fa fa-download"></span>
-                             </a>
-                          </td>
-
-                          <td class="text-center">
-                              <a class="btn btnQuitarImg" style="font-size: 14pt;" ng-click="archivo.splice($index,1)">
-                                 <span class="fa fa-times-circle"></span>
-                             </a>
-                          </td>
-
                         </tr>
 
                     </tbody>
@@ -60,8 +136,8 @@
                 </table>
            </div>
         </div>
-    </div>
                     
+    </div>             
 </div>
     
 

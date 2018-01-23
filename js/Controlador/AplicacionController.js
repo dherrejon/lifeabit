@@ -37,9 +37,9 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.buscarConcepto = "";
     $scope.campoBuscar = "Conceptos";
     
-    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Eventos", "Imagenes", "Notas", "Objetivos"];
+    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Eventos", "Imagenes", "Notas", "Objetivos", "Archivos"];
     $scope.appFiltro = "Todo";
-    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true, pendiente:true};
+    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true, pendiente:true, archivo:true};
     
     //------------------- Catálogos (coneptos) -----------------------------------
     $scope.GetTemaActividad = function()              
@@ -111,6 +111,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 $scope.imagen = data[4].Imagen;
                 $scope.evento = data[5].Evento;
                 $scope.pendiente = data[6].Pendiente;
+                $scope.archivo = data[7].Archivo;
             }
             else
             {
@@ -642,6 +643,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
          $scope.imagen = [];
          $scope.evento = [];
          $scope.pendiente = [];
+         $scope.archivo = [];
      };
     
     $scope.CambiarAppFiltro = function(app)
@@ -804,6 +806,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
 
 var aplicaciones = [
                         {texto:"Mis Actividades", habilitada:true, paginaPrincipal:"/Actividades",   icono:"fa fa-calendar"},
+                        {texto:"Mi Conocimiento", habilitada:true, paginaPrincipal:"/Conocimiento", icono:"fa fa-book"},
                         {texto:"Mi Diario", habilitada:true, paginaPrincipal:"/Diario", icono:"fa fa-clock-o"},
                         {texto:"Mis Notas", habilitada:true, paginaPrincipal:"/Notas", icono:"fa fa-sticky-note"},
                         {texto:"Mis Objetivos", habilitada:true, paginaPrincipal:"/Objetivo", icono:"fa fa-calendar-times-o"},

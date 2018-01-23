@@ -45,6 +45,7 @@ function SetDivisa(data)
     divisa.DivisaId = data.DivisaId;
     divisa.Divisa = data.Divisa;
     divisa.PorDefecto = data.PorDefecto;
+    divisa.DivisaObjetivo = data.DivisaObjetivo;
     
     return divisa;
 }

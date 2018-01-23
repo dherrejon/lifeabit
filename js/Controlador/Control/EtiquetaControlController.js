@@ -34,8 +34,6 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             
             $scope.verEtiqueta  = true;
             $scope.AgregarNuevaEtiqueta(sugerida);
-            
-            
         }
     });
     
@@ -107,17 +105,19 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     //-------------------------- Etiqueta -------------------------------
     $scope.AgregarEtiqueta = function(etiqueta, ver)
     {
+        var label = SetEtiqueta(etiqueta);
+        label.Visible = ver;
+        
         etiqueta.Visible = ver;
-
         etiqueta.show = false;
 
         $scope.buscarConcepto = "";
         
-        $scope.elemento.Etiqueta.push(etiqueta);
+        $scope.elemento.Etiqueta.push(label);
         
         if(ver)
         {
-            ETIQUETA.EtiquetaSet(etiqueta);
+            ETIQUETA.EtiquetaSet(etiqueta, $scope.modal);
         }
     };
     
@@ -277,8 +277,11 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 data[2].Etiqueta.count = 0;
 
                 $scope.buscarConcepto = "";
+                
+                var label = SetEtiqueta(data[2].Etiqueta);
+                label.Visible = $scope.verEtiqueta;
 
-                $scope.elemento.Etiqueta.push(data[2].Etiqueta);
+                $scope.elemento.Etiqueta.push(label);
 
                 $scope.etiqueta.push(data[2].Etiqueta);
                 
@@ -295,6 +298,8 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
                 {   
                     $scope.SetEtiquetaTodasImagenes(data[2].Etiqueta);
                 }
+                
+                ETIQUETA.EtiquetaSet(data[2].Etiqueta, $scope.modal);
             }
             else
             {
@@ -320,11 +325,11 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.QuitarEtiqueta = function(etiqueta)
     {  
-        ETIQUETA.QuitarEtiqueta(etiqueta);
+        ETIQUETA.QuitarEtiqueta(etiqueta, $scope.modal);
         
         for(var k=0; k<$scope.elemento.Etiqueta.length; k++)
         {
-            if(etiqueta == $scope.elemento.Etiqueta[k])
+            if(etiqueta.EtiquetaId == $scope.elemento.Etiqueta[k].EtiquetaId)
             {
                 $scope.elemento.Etiqueta.splice(k,1);
                 break;
@@ -352,7 +357,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         tema.show = false;
         $scope.buscarConcepto = "";
         
-        ETIQUETA.TemaSet(tema);
+        ETIQUETA.TemaSet(tema, $scope.modal);
     };
     
     $scope.AgregarNuevoTema = function(nuevo)
@@ -399,7 +404,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
 
                 //$rootScope.$broadcast('Alerta', 'Tema Agregado', 'exito');
                 
-                ETIQUETA.TemaSet(data[2].Tema);
+                ETIQUETA.TemaSet(data[2].Tema, $scope.modal);
 
                 //$scope.$apply();
             }
@@ -468,7 +473,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.QuitarTema = function(tema)
     {
-        ETIQUETA.QuitarTema(tema);
+        ETIQUETA.QuitarTema(tema, $scope.modal);
         for(var k=0; k<$scope.elemento.Tema.length; k++)
         {
             if(tema == $scope.elemento.Tema[k])
@@ -498,27 +503,31 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.$on('TemaEditado', function(evento, tema)
     {
-        for(var k=0; k<$scope.tema.length; k++)
+        if($scope.modal != "Archivo")
         {
-            if($scope.tema[k].TemaActividadId == tema.TemaActividadId)
+            for(var k=0; k<$scope.tema.length; k++)
             {
-                $scope.tema[k].Tema = tema.Tema;
-                break;
+                if($scope.tema[k].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.tema[k].Tema = tema.Tema;
+                    break;
+                }
             }
-        }
-        
-        for(var k=0; k<$scope.elemento.Tema.length; k++)
-        {
-            if($scope.elemento.Tema[k].TemaActividadId == tema.TemaActividadId)
+
+            for(var k=0; k<$scope.elemento.Tema.length; k++)
             {
-                $scope.elemento.Tema[k].Tema = tema.Tema;
-                break;
+                if($scope.elemento.Tema[k].TemaActividadId == tema.TemaActividadId)
+                {
+                    $scope.elemento.Tema[k].Tema = tema.Tema;
+                    break;
+                }
             }
         }
     });
     
     $scope.$on('SepararEtiqueta', function (evento, tema, modal) 
     {
+       
         if($scope.modal == modal)
         {
             var promesas = [];
@@ -532,7 +541,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
             
             $q.all(promesas).then(function()
             {
-                ETIQUETA.TerminarEtiquetaOculta();
+                ETIQUETA.TerminarEtiquetaOculta($scope.modal);
             });
         }
     });
@@ -578,22 +587,24 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
     
     $scope.SetNuevaEtiqueta = function(etiqueta)
     {
-        
-        for(var k=0; k<$scope.etiqueta.length; k++)
+        if($scope.modal != "Archivo")
         {
-            if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+            for(var k=0; k<$scope.etiqueta.length; k++)
             {
-                $scope.etiqueta[k].Nombre = etiqueta.Nombre;
-                break;
+                if($scope.etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.etiqueta[k].Nombre = etiqueta.Nombre;
+                    break;
+                }
             }
-        }
-        
-        for(var k=0; k<$scope.elemento.Etiqueta.length; k++)
-        {
-            if($scope.elemento.Etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+
+            for(var k=0; k<$scope.elemento.Etiqueta.length; k++)
             {
-                $scope.elemento.Etiqueta[k].Nombre = etiqueta.Nombre;
-                break;
+                if($scope.elemento.Etiqueta[k].EtiquetaId == etiqueta.EtiquetaId)
+                {
+                    $scope.elemento.Etiqueta[k].Nombre = etiqueta.Nombre;
+                    break;
+                }
             }
         }
     };
@@ -632,11 +643,11 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         ETIQUETA.BorrarEtiqueta(etiqueta);
     };
     
-    $scope.$on('EtiquetaBorrada',function()
+    $scope.$on('EtiquetaBorrada',function(evento, etiqueta)
     {   
-        $scope.QuitarEtiqueta($scope.borrarEtiqueta);
+        $scope.QuitarEtiqueta(etiqueta);
         
-        $scope.QuitarEtiquetaEtiquetas($scope.borrarEtiqueta);
+        $scope.QuitarEtiquetaEtiquetas(etiqueta);
     });
     
     $scope.QuitarEtiquetaEtiquetas = function(etiqueta)

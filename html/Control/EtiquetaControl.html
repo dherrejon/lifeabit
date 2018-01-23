@@ -27,7 +27,7 @@
               <!--lista de etiquetas Seleccionados -->
               <div ng-if="elemento.Etiqueta.length > 0" >
                 <b>Etiquetas</b><br>
-                 <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible">
+                 <span ng-repeat="etiqueta in elemento.Etiqueta | orderBy:'Nombre' track by $index" ng-show="etiqueta.Visible == true || etiqueta.Visible == '1'">
                     
                      <div class="btn-group campoAgregado contornoAzul" role="group" style="border-width: 2px; margin-bottom: 8px">
                       

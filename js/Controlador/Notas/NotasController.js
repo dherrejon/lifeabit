@@ -1,4 +1,4 @@
-app.controller("NotasController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, ETIQUETA, IMAGEN)
+app.controller("NotasController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, datosUsuario, $location, $sce, ETIQUETA, IMAGEN, LifeService)
 {   
     $scope.titulo = "Notas";
     
@@ -1228,6 +1228,8 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             document.getElementById("fechaNota").value = $scope.nuevaNota.Fecha;
         }
         
+        $scope.$broadcast('IniciarArchivo', $scope.nuevaNota);
+        
         $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaNota, 'Nota');
         
         $('#modalApp').modal('toggle'); 
@@ -1486,10 +1488,24 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     $scope.AgregarEtiquetaOcultar = function()
     {
         $scope.$broadcast('SepararEtiqueta', $scope.nuevaNota.Tema, 'Nota');
+        
+        /*for(var k=0; k<$scope.nuevaNota.Tema.length; k++)
+        {
+            $scope.SepararEtiqueta($scope.nuevaNota.Tema[k].Tema);
+        }*/
     };
     
-    $scope.$on('TerminarEtiquetaOculta',function()
-    {           
+    $scope.$on('TerminarEtiquetaOculta',function(evento, modal)
+    {    
+        if(modal == "Nota")
+        {
+            $rootScope.$broadcast('EtiquetaOcultaArchivoIniciar', $scope.nuevaNota);
+        }
+        
+    });
+    
+    $scope.$on('TerminarEtiquetaOcultaArchivo',function()
+    {    
         $scope.nuevaNota.UsuarioId = $scope.usuarioLogeado.UsuarioId;
         if($scope.operacion == "Agregar")
         {
@@ -1503,7 +1519,37 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     $scope.AgregarNota = function()    
     {
-        AgregarNota($http, CONFIG, $q, $scope.nuevaNota).then(function(data)
+        (self.servicioObj = LifeService.File('AgregarNota', $scope.nuevaNota)).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                $scope.mensaje = "Nota agregada.";
+                $scope.EnviarAlerta('Vista');
+                
+                $('#modalApp').modal('toggle');
+                
+                $scope.nuevaNota.NotaId = data[1].NotaId;
+                $scope.nuevaNota.Etiqueta = data[2].Etiqueta;
+                $scope.nuevaNota.Tema = data[3].Tema;
+                 $scope.nuevaNota.FechaModificacion = data[4].FechaModificacion;
+                
+                $scope.SetNuevaNota($scope.nuevaNota);
+                
+                $scope.LimpiarInterfaz();
+                                
+            } else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede realizar la operación, intentelo más tarde", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+        
+        /*AgregarNota($http, CONFIG, $q, $scope.nuevaNota).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
             {
@@ -1533,13 +1579,40 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         {
             $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeNota').modal('toggle');
-        });
+        });*/
     };
     
     $scope.EditarNota = function()    
     {
+        (self.servicioObj = LifeService.File('EditarNota', $scope.nuevaNota)).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                $scope.mensaje = "Nota editada.";
+                $('#modalApp').modal('toggle');
+                
+                $scope.nuevaNota.Etiqueta = data[1].Etiqueta;
+                $scope.nuevaNota.Tema = data[2].Tema;
+                $scope.nuevaNota.FechaModificacion = data[3].FechaModificacion;
+                $scope.SetNuevaNota($scope.nuevaNota);
+                
+                $scope.LimpiarInterfaz();
+                $scope.EnviarAlerta('Vista');
+                                
+            } else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede realizar la operación, intentelo más tarde", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
         
-        EditarNota($http, CONFIG, $q, $scope.nuevaNota).then(function(data)
+        
+        /*EditarNota($http, CONFIG, $q, $scope.nuevaNota).then(function(data)
         {
             if(data[0].Estatus == "Exitoso")
             {
@@ -1564,7 +1637,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         {
             $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
             $('#mensajeNota').modal('toggle');
-        });
+        });*/
     };
     
     $scope.SetNuevaNota = function(data)
@@ -2209,6 +2282,14 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     };
 
     autosize($('textarea'));
+    
+    //----------- Archivos --------
+    $(document).on('hide.bs.modal','#EtiquetaFile', function () 
+    {
+        $scope.ActivarDesactivarTema($scope.nuevaNota.Tema);
+        $scope.ActivarDesactivarEtiqueta($scope.nuevaNota.Etiqueta);
+    });
+    
     
 });
 

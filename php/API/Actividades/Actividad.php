@@ -858,5 +858,141 @@ function GetFechaActividad($id)
         $app->stop();
     }
 }
+
+function GetActividadPorIdDatos()
+{
+    $request = \Slim\Slim::getInstance()->request();
+    $datos = json_decode($request->getBody());
+    global $app;
+    
+    $sql = "SELECT * FROM ActividadVista WHERE ActividadId = ".$datos->Id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $actividad = $stmt->fetchAll(PDO::FETCH_OBJ);
+ 
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $numActividad = count($actividad);
+    
+    if($numActividad > 0)
+    {
+        for($k=0; $k<$numActividad; $k++)
+        {
+            $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
+            
+            try 
+            {
+                $stmt = $db->query($sql);
+                $actividad[$k]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            $sql = "SELECT TemaActividadId, Tema FROM TemaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
+            
+            try 
+            {
+                $stmt = $db->query($sql);
+                $actividad[$k]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            $sql = "SELECT EventoActividadId, Fecha, Hora, Lugar, LugarId, Hecho FROM EventoActividadVista WHERE  ActividadId = ".$actividad[$k]->ActividadId;
+            
+            try 
+            {
+                $stmt = $db->query($sql);
+                $actividad[$k]->Evento = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            /*$countEvento = count($actividad[$k]->Evento);
+    
+            if($countEvento > 0)
+            {
+                for($j=0; $j<$countEvento; $j++)
+                {
+                    $sql = "SELECT EventoActividadId, EtiquetaId, Nombre, Visible, count FROM EtiquetaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $actividad[$k]->Evento[$j]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        //echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $sql = "SELECT EventoActividadId, TemaActividadId, Tema FROM TemaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $actividad[$k]->Evento[$j]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        //echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+
+                    try 
+                    {
+                        $stmt = $db->query($sql);
+                        $actividad[$k]->Evento[$j]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        //echo($e);
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }*/
+        }
+    }
+    
+    $app->status(200);
+    $db = null;
+    echo json_encode($actividad);
+    
+}
     
 ?>

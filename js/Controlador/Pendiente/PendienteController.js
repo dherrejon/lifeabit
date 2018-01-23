@@ -46,18 +46,18 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         });
     };
     
-     $scope.GetDatosPendiente = function(pendiente, opt)
+    $scope.GetDatosPendiente = function(pendiente, opt)
     {
          
-        GetDatosPendiente($http, $q, CONFIG, pendiente.PendienteId).then(function(data)
+        /*GetDatosPendiente($http, $q, CONFIG, pendiente.PendienteId).then(function(data)
         {
             $scope.OperacionPendiente(data, opt);
         }).catch(function(error)
         {
             alert(error);
-        });
+        });*/
          
-        /*(self.servicioObj = LifeService.Get('GetPendiente/Datos/' + pendiente.PendienteId)).then(function (dataResponse) 
+        (self.servicioObj = LifeService.Get('GetPendiente/Datos/' + pendiente.PendienteId)).then(function (dataResponse) 
         {
             if (dataResponse.status == 200) 
             {
@@ -72,13 +72,21 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         function (error) 
         {
             $rootScope.$broadcast('Alerta', error, 'error');
-        });*/
+        });
     };
     
     $scope.OperacionPendiente = function(pendiente, opt)
     {
         if(opt == "Editar" || opt == "Copiar")
         {
+            if($scope.operacion == "Copiar")
+            {
+                pendiente.Hecho = "0";
+                pendiente.FechaIntencion = $scope.hoy;
+                pendiente.FechaRealizacion = $scope.hoy;
+                pendiente.Nota = "";
+            }
+            
             $scope.nuevoPendiente = SetPendiente(pendiente);
             
             $scope.ActivarDesactivarTema(pendiente.Tema);
@@ -103,11 +111,14 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             {
                 $scope.GetImagenEtiqueta($scope.nuevoPendiente.Imagen[k], false);
             }
+            
+            $scope.$broadcast('IniciarArchivo', $scope.nuevoPendiente);
         }
         else if(opt == "Detalle")
         {
             $scope.detalle = SetPendiente(pendiente);
             $scope.detalle.NotaHTML = $sce.trustAsHtml($scope.detalle.NotaHTML);
+            $scope.detalle.RecordatorioHTML = $sce.trustAsHtml($scope.detalle.RecordatorioHTML);
             $scope.detalle.iActive = 0;
             
             $scope.GetCarroselIntervalo();
@@ -428,11 +439,6 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         format: 'YYYY-MM-DD',
     });
     
-    $scope.AbrirCalendario = function()
-    {        
-        document.getElementById("fechaFiltro").focus();
-    };
-    
     $scope.FiltroFechaHoy = function()
     {
         if($scope.filtro.fecha != $scope.hoy)
@@ -702,6 +708,12 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         }
     };
     
+     $scope.AbrirCalendario = function(id)
+    {        
+        document.getElementById(id).focus();
+    };
+    
+    
     $scope.VerOptPendiente = function(id)
     {
         if($scope.verpen != id)
@@ -715,8 +727,6 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
                 $scope.$apply();
             }, 700);
         }
-        
-        
     };
     
     document.getElementById('pendienteform').onclick = function(e) 
@@ -743,6 +753,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     {
         $scope.operacion = operacion;
         $scope.tabModal = "Datos";
+        $scope.verRecordatorio = true;
         
         $('#fechaIntencion').data("DateTimePicker").clear();
         $('#fechaRealizacion').data("DateTimePicker").clear();
@@ -755,6 +766,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         {
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
+            $scope.SetValoresDefecto();
             
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoPendiente, 'Pendiente');
         }
@@ -774,6 +786,18 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         
         $scope.IniciarPendiente();
         $scope.pendienteInicio = jQuery.extend({}, $scope.nuevoPendiente);
+    };
+    
+    $scope.SetValoresDefecto = function(actividad)
+    {
+        for(var k=0; k<$scope.divisa.length; k++)
+        {
+            if($scope.divisa[k].DivisaObjetivo == "1")
+            {
+                $scope.CambiarDivisa($scope.divisa[k]);
+                break;
+            }
+        }
     };
     
     $scope.IniciarPendiente = function()
@@ -799,6 +823,8 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             $scope.nuevoPendiente.FechaMod = "FechaIntencion";
             
             $scope.nuevoPendiente.Prioridad = $scope.prioridad[0];
+            
+            $scope.$broadcast('IniciarArchivo', $scope.nuevoPendiente);
         }
         
     };
@@ -807,7 +833,6 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     {
         $scope.GetPrioridad();
         $scope.GetLugar();
-        $scope.GetDivisa();
         $scope.GetUnidad();
     };
     
@@ -995,10 +1020,10 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     });
     
     //--Unidad
-    $scope.CambiarUnidad = function()
+    $scope.CambiarUnidad = function(unidad)
     {
-        $scope.nuevoPendiente.Unidad.UnidadId = $scope.buscarUnidad.UnidadId;
-        $scope.nuevoPendiente.Unidad.Unidad = $scope.buscarUnidad.Unidad;
+        $scope.nuevoPendiente.Unidad.UnidadId = unidad.UnidadId;
+        $scope.nuevoPendiente.Unidad.Unidad = unidad.Unidad;
     };
     
     $scope.QuitarUnidad = function()
@@ -1023,14 +1048,14 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         $scope.buscarUnidad = unidad;
         
         $scope.unidad.push(unidad);
-        $scope.CambiarUnidad();           
+        $scope.CambiarUnidad(unidad);           
     });
     
     //--Divisa
-    $scope.CambiarDivisa = function()
+    $scope.CambiarDivisa = function(divisa)
     {
-        $scope.nuevoPendiente.Divisa.DivisaId = $scope.buscarDivisa.DivisaId;
-        $scope.nuevoPendiente.Divisa.Divisa = $scope.buscarDivisa.Divisa;
+        $scope.nuevoPendiente.Divisa.DivisaId = divisa.DivisaId;
+        $scope.nuevoPendiente.Divisa.Divisa = divisa.Divisa;
     };
     
     $scope.QuitarDivisa = function()
@@ -1055,7 +1080,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             
         $scope.divisa.push(divisa);
         $scope.buscarDivisa = divisa;
-        $scope.CambiarDivisa();
+        $scope.CambiarDivisa(divisa);
 
         $rootScope.$broadcast('Alerta', 'Divisa Agregada', 'exito');
     });
@@ -1111,10 +1136,20 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         $scope.$broadcast('SepararEtiqueta', $scope.nuevoPendiente.Tema, 'Pendiente');
     };
     
-    $scope.$on('TerminarEtiquetaOculta',function()
+    
+    $scope.$on('TerminarEtiquetaOculta',function(evento, modal)
     {    
-        $scope.nuevoPendiente.UsuarioId = $rootScope.UsuarioId;
+        if(modal == "Pendiente")
+        {
+            $rootScope.$broadcast('EtiquetaOcultaArchivoIniciar', $scope.nuevoPendiente);
+        }
         
+    });
+    
+    $scope.$on('TerminarEtiquetaOcultaArchivo',function()
+    {   
+        $scope.nuevoPendiente.UsuarioId = $rootScope.UsuarioId;
+
         if(!$scope.nuevoPendiente.HoraIntencion)
         {
             $scope.nuevoPendiente.HoraIntencion = null;
@@ -1142,6 +1177,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             if (dataResponse.status == 200) 
             {
                 $scope.GetPendiente();
+                $scope.GetDivisa();
                 $('#modalApp').modal('toggle');
                 $rootScope.$broadcast('Alerta', 'El pendiente se agrego.','exito');
                                 
@@ -1164,6 +1200,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             if (dataResponse.status == 200) 
             {
                 $scope.GetPendiente();
+                $scope.GetDivisa();
                 $('#modalApp').modal('toggle');
                 $rootScope.$broadcast('Alerta', 'El pendiente se edito.','exito');
                                 
@@ -1926,6 +1963,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             $scope.GetTemaActividad();
             $scope.GetEtiqueta();
             $scope.GetPendiente();
+            $scope.GetDivisa();
             
             $rootScope.CargarExterior = true;
         }
@@ -1963,6 +2001,13 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     });
     
     autosize($('textarea'));
+    
+    //----------- Archivos --------
+    $(document).on('hide.bs.modal','#EtiquetaFile', function () 
+    {
+        $scope.ActivarDesactivarTema($scope.nuevoPendiente.Tema);
+        $scope.ActivarDesactivarEtiqueta($scope.nuevoPendiente.Etiqueta);
+    });
     
 });
 

@@ -474,9 +474,9 @@ app.controller("EtiquetaController", function($scope, $window, $http, $rootScope
         $scope.etiquetaInicial =  jQuery.extend({}, $scope.nuevaEtiqueta);
     });
     
-    $scope.$on('BorrarEtiqueta',function()
+    $scope.$on('BorrarEtiqueta',function(evento, etiqueta)
     {
-        $scope.BorrarEtiqueta(ETIQUETA.GetEtiqueta());
+        $scope.BorrarEtiqueta(etiqueta);
         $scope.exterior = true;
     });
     
@@ -529,39 +529,39 @@ app.factory('ETIQUETA',function($rootScope)
   service.BorrarEtiqueta = function(etiqueta)
   {
       this.etiqueta = etiqueta;
-      $rootScope.$broadcast('BorrarEtiqueta'); 
+      $rootScope.$broadcast('BorrarEtiqueta', etiqueta); 
   };
     
   service.EtiquetaBorrada = function()
   {
-      $rootScope.$broadcast('EtiquetaBorrada'); 
+      $rootScope.$broadcast('EtiquetaBorrada', this.etiqueta); 
   };
     
-  service.TerminarEtiquetaOculta = function()
+  service.TerminarEtiquetaOculta = function(modal)
   {
-      $rootScope.$broadcast('TerminarEtiquetaOculta'); 
+      $rootScope.$broadcast('TerminarEtiquetaOculta', modal); 
   };
     
-  service.EtiquetaSet = function(etiqueta)
-  {
-      this.etiqueta = etiqueta;
-      $rootScope.$broadcast('EtiquetaSet'); 
-  };
-    
-  service.TemaSet = function(etiqueta)
+  service.EtiquetaSet = function(etiqueta, modal)
   {
       this.etiqueta = etiqueta;
-      $rootScope.$broadcast('TemaSet'); 
+      $rootScope.$broadcast('EtiquetaSet', etiqueta, modal); 
   };
     
-  service.QuitarEtiqueta = function(etiqueta)
+  service.TemaSet = function(etiqueta, modal)
   {
-      $rootScope.$broadcast('QuitarEtiqueta',etiqueta); 
+      this.etiqueta = etiqueta;
+      $rootScope.$broadcast('TemaSet', etiqueta, modal); 
   };
     
-  service.QuitarTema = function(tema)
+  service.QuitarEtiqueta = function(etiqueta, modal)
   {
-      $rootScope.$broadcast('QuitarTema', tema); 
+      $rootScope.$broadcast('QuitarEtiqueta',etiqueta, modal); 
+  };
+    
+  service.QuitarTema = function(tema, modal)
+  {
+      $rootScope.$broadcast('QuitarTema', tema, modal); 
   };
     
 

@@ -416,6 +416,42 @@
                                              </div>
                                          </div>
                                     </div>
+                                    
+                                    <div class="col-xs-12">
+                                         <br>
+                                     </div>
+                                     
+                                     <div class="col-xs-12">
+                                            <div class="table-responsive">
+                                               <table  class="table table-responsive">
+
+                                                    <tbody  style="cursor: pointer">
+
+                                                        <!-- Archivos agregados -->
+                                                        <tr ng-repeat="file in nota.Archivo" ng-if="nota.Archivo.length > 0" >
+
+                                                          <td >
+                                                              <span class="infoCenterCell">
+                                                                  <span>{{file.Nombre}}</span>
+                                                               </span> 
+                                                          </td>
+
+                                                          <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                                          <td class="text-center">
+                                                              <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                                                 <span class="fa fa-download"></span>
+                                                             </a>
+                                                          </td>
+
+
+                                                        </tr>
+
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+                                       </div>
                                      
                                  </div>
                              </div>
@@ -709,7 +745,7 @@
                                              
                  <div class="row" ng-show="tabModal == 'Imagen'" ng-if="(fotoEliminada = (nuevaNota.Imagen | filter:{Eliminada:'true'}  ).length) > 0">
                    <div class="col-xs-12">
-                      
+
                        <a class="btn botonDetallesActividad" ng-click="showEliminada = !showEliminada">
                            <span>Fotos Eliminadas ({{fotoEliminada}})</span>
                            <span ng-show="showEliminada" class="fa fa-angle-double-up"></span>
@@ -718,9 +754,9 @@
                        <table  class="table table-responsive" ng-show="showEliminada">
 
                             <tbody  style="cursor: pointer">
-                                
+
                                 <tr ng-repeat="img in nuevaNota.Imagen"  ng-if="img.Eliminada == true">
-                                      
+
                                   <td style="width: 100px">
                                       <div class="imgContainer" style="height:50px">
                                           <a style="overflow: hidden !important; max-height: 50px">
@@ -741,6 +777,12 @@
 
                         </table>
                    </div>
+                </div>
+                                             
+                <div ng-show="tabModal == 'Archivos'">
+                
+                  <div ng-include=" 'html/Archivo/Archivo.html' " ></div>    
+                
                 </div>
                                               
                                         
@@ -970,7 +1012,13 @@
                      </div>
                  </div>
             </div>
-               
+            
+            <div class="row">
+                <div class="col-xs-12">
+                <br>
+                </div>
+            </div>
+            
             <!-- Datos notas -->
             <div class="row">
                 <div class="col-xs-12">
@@ -1286,6 +1334,8 @@
             <strong style="display: inline-block;">{{mensaje}}</strong>
         </div>
     </div>
+    
+     <div ng-include=" 'html/Archivo/EtiquetaArchivo.html' "></div>
     
 </div>
    

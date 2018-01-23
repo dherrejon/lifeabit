@@ -13,6 +13,8 @@ class Nota
         this.Tema = [];
         this.Imagen = [];
         this.ImagenSrc = [];
+        this.Archivo = [];
+        this.ArchivoSrc = [];
     }
 }
 
@@ -83,6 +85,7 @@ function SetNota(data)
     nota.FechaModificacion = data.FechaModificacion;
     nota.Notas = data.Notas;
     nota.Observacion = data.Observacion;
+    nota.Archivo = data.Archivo;
     
     if(nota.Fecha != null && nota.Fecha != undefined)
     {

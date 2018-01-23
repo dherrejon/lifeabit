@@ -223,6 +223,14 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
         {
             fd.append('file[]', data.ImagenSrc[k]);
         }
+        
+        if(data.ArchivoSrc)
+        {
+            for(var k=0; k<data.ArchivoSrc.length; k++)
+            {
+                fd.append('Archivo[]', data.ArchivoSrc[k]);
+            }
+        }
 
         if(data.Imagen.length > 0)
         {
@@ -234,10 +242,22 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
                 }
             }
         }
+        if(data.Archivo)
+        {
+            for(var k=0; k<data.Archivo.length; k++)
+            {
+                if(data.Archivo[k].Eliminado != true)
+                {
+                    data.Archivo[k].Eliminado = false;
+                }
+            }
+        }
 
         var Datos = jQuery.extend({}, data);
 
         Datos.AgregarImagen = data.ImagenSrc.length;
+        
+        Datos.AgregarArchivo = data.ArchivoSrc ? data.ArchivoSrc.length: 0;
 
         fd.append('datos', JSON.stringify(Datos));
         

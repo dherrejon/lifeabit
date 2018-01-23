@@ -51,6 +51,11 @@ function GetBuscador()
     $sqlEtiquetaBasePendiente1 = " SELECT e.PendienteId FROM EtiquetaPendienteVista e WHERE EtiquetaId IN ";
     $sqlEtiquetaBasePendiente2 = " GROUP BY e.PendienteId";
     
+     //Archivo
+    $sqlEtiquetaArchivo = "";
+    $sqlEtiquetaBaseArchivo1 = " SELECT e.ArchivoId FROM EtiquetaArchivoVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseArchivo2 = " GROUP BY e.ArchivoId";
+    
     if($numEtiqueta > 0)
     {
         //Equivalencias
@@ -104,6 +109,7 @@ function GetBuscador()
                 $sqlEtiquetaImagen .= $sqlEtiquetaBaseImagen1.$whereEtiqueta.$sqlEtiquetaBaseImagen2;
                 $sqlEtiquetaEvento .= $sqlEtiquetaBaseEvento1.$whereEtiqueta.$sqlEtiquetaBaseEvento2;
                 $sqlEtiquetaPendiente .= $sqlEtiquetaBasePendiente1.$whereEtiqueta.$sqlEtiquetaBasePendiente2;
+                $sqlEtiquetaArchivo .= $sqlEtiquetaBaseArchivo1.$whereEtiqueta.$sqlEtiquetaBaseArchivo2;
             }
             else
             {
@@ -113,6 +119,7 @@ function GetBuscador()
                 $sqlEtiquetaImagen .= " UNION ALL ".$sqlEtiquetaBaseImagen1.$whereEtiqueta.$sqlEtiquetaBaseImagen2;
                 $sqlEtiquetaEvento .= " UNION ALL ".$sqlEtiquetaBaseEvento1.$whereEtiqueta.$sqlEtiquetaBaseEvento2;
                 $sqlEtiquetaPendiente .= " UNION ALL ".$sqlEtiquetaBasePendiente1.$whereEtiqueta.$sqlEtiquetaBasePendiente2;
+                $sqlEtiquetaArchivo .= " UNION ALL ".$sqlEtiquetaBaseArchivo1.$whereEtiqueta.$sqlEtiquetaBaseArchivo2;
             }
         }
     }
@@ -165,7 +172,7 @@ function GetBuscador()
                 
                     ") x ON x.EventoActividadId = e.EventoActividadId GROUP BY e.EventoActividadId HAVING count(*) = ".($numEtiqueta+1);
         
-            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia   FROM PendienteVista p
                     INNER JOIN ("
                         .$sqlEtiquetaPendiente.
                 
@@ -173,6 +180,15 @@ function GetBuscador()
                     WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.PendienteId HAVING count(*) = ".$numTema.
                 
                     ") x ON x.PendienteId = p.PendienteId GROUP BY p.PendienteId HAVING count(*) = ".($numEtiqueta+1);
+        
+            $sqlArchivo = "SELECT i.ArchivoId, i.Nombre FROM Archivo i 
+                    INNER JOIN ("
+                        .$sqlEtiquetaArchivo.
+                
+                    " UNION ALL SELECT t.ArchivoId FROM TemaArchivoVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.ArchivoId HAVING count(*) = ".$numTema.
+                
+                    ") x ON x.ArchivoId = i.ArchivoId GROUP BY i.ArchivoId HAVING count(*) = ".($numEtiqueta+1);
         
     }
     else if($numEtiqueta > 0 || $numTema > 0)
@@ -204,10 +220,15 @@ function GetBuscador()
                         .$sqlEtiquetaEvento.
                     ") x ON x.EventoActividadId = e.EventoActividadId GROUP BY e.EventoActividadId HAVING count(*) = ".$numEtiqueta;
             
-            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia   FROM PendienteVista p
                     INNER JOIN ("
                         .$sqlEtiquetaPendiente.
                     ") x ON x.PendienteId = p.PendienteId GROUP BY p.PendienteId HAVING count(*) = ".$numEtiqueta;
+            
+            $sqlArchivo = "SELECT i.ArchivoId, i.Nombre FROM Archivo i 
+                    INNER JOIN ("
+                        .$sqlEtiquetaArchivo.
+                    ") x ON x.ArchivoId = i.ArchivoId GROUP BY i.ArchivoId HAVING count(*) = ".$numEtiqueta;
         }
         else if($numTema > 0)
         {
@@ -236,10 +257,15 @@ function GetBuscador()
                         SELECT t.EventoActividadId FROM TemaEventoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.EventoActividadId HAVING count(*) = ".$numTema."
                     ) x ON x.EventoActividadId = e.EventoActividadId";
             
-            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p
+            $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia   FROM PendienteVista p
                     INNER JOIN (
                         SELECT t.PendienteId FROM TemaPendienteVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.PendienteId HAVING count(*) = ".$numTema."
                     ) x ON x.PendienteId = p.PendienteId";
+            
+            $sqlArchivo = "SELECT i.ArchivoId, i.Nombre FROM Archivo i
+                    INNER JOIN (
+                        SELECT t.ArchivoId FROM TemaArchivoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ArchivoId HAVING count(*) = ".$numTema."
+                    ) x ON x.ArchivoId = i.ArchivoId";
         }
     }
 
@@ -257,7 +283,7 @@ function GetBuscador()
         
         $sqlEvento = "SELECT e.EventoActividadId, e.Fecha, e.Actividad, e.ActividadId FROM EventoActividadVista e WHERE UsuarioId = '".$filtro->usuarioId ."' AND  Fecha = '". $filtro->fecha."'";
     
-        $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Orden   FROM PendienteVista p WHERE p.UsuarioId = '".$filtro->usuarioId ."' AND p.FechaRealizacion = '". $filtro->fecha."'";
+        $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia   FROM PendienteVista p WHERE p.UsuarioId = '".$filtro->usuarioId ."' AND p.FechaRealizacion = '". $filtro->fecha."'";
     }
     
     //nota
@@ -351,11 +377,26 @@ function GetBuscador()
         try 
         {
             $db = getConnection();
+            $stmt = $db->query($sqlArchivo);
+            $archivo = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo($e);
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+        
+        try 
+        {
+            $db = getConnection();
             $stmt = $db->query($sqlImagen);
             $imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             $db = null;
-            echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}]';
+            echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}, {"Archivo":'.json_encode($archivo).'}]';
 
         } 
         catch(PDOException $e) 
@@ -369,7 +410,7 @@ function GetBuscador()
     else
     {
         $db = null;
-        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'},  {"Imagen":[]}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}]';
+        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'},  {"Imagen":[]}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'},  {"Archivo":[]}]';
     }
 }
 

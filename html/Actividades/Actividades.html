@@ -489,16 +489,15 @@
                              </span>  
                              
                              <!-- Lugar y cuydad -->
-                             <span ng-if="evento.Lugar.LugarId.length > 0 || evento.Ciudad.CiudadId.length > 0 ">
+                             <span ng-if="evento.Lugar.LugarId || evento.Ciudad.CiudadId.length > 0 ">
                                  <b class="fa fa-map-marker"></b>
                                  <span ng-if="evento.Lugar.LugarId.length > 0 ">
-                                     <span ng-if="evento.Ciudad.CiudadId.length > 0 ">{{evento.Lugar.Nombre}},</span>
-                                     <span ng-if="evento.Ciudad.CiudadId.length == 0 ">{{evento.Lugar.Nombre}}</span>
+                                     <span ng-if="evento.Lugar.LugarId ">{{evento.Lugar.Nombre}}.</span>
                                  </span>
                                  
-                                 <span ng-if="evento.Ciudad.CiudadId.length > 0 ">
+                                 <!--<span ng-if="evento.Ciudad.CiudadId.length > 0 ">
                                      {{evento.Ciudad.Ciudad}} ({{evento.Ciudad.AbreviacionPais}}).
-                                 </span>
+                                 </span>-->
                                  <br>
                              </span>
                              
@@ -1316,6 +1315,47 @@
                 </div>
             </div>
             
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <br>
+                 </div>
+            </div>
+            
+            <div class="row">
+                 <div class="col-xs-12">
+                    <div class="table-responsive">
+                       <table  class="table table-responsive">
+
+                            <tbody  style="cursor: pointer">
+
+                                <!-- Archivos agregados -->
+                                <tr ng-repeat="file in detalleEvento.Archivo" ng-if="detalleEvento.Archivo.length > 0" >
+
+                                  <td >
+                                      <span class="infoCenterCell">
+                                          <span>{{file.Nombre}}</span>
+                                       </span> 
+                                  </td>
+
+                                  <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                  <td class="text-center">
+                                      <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                         <span class="fa fa-download"></span>
+                                     </a>
+                                  </td>
+
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+                    </div>
+               </div>
+            </div>
+
             
         </div>
     </div>
@@ -1366,6 +1406,7 @@
                          <div class="text-center">
                              <a class="btn btnTabModal" ng-click="tabModal = 'Evento'" ng-class="{active: tabModal == 'Evento'}"><div class="fa fa-calendar-o tabModal"></div><br>Evento</a>
                              <a class="btn btnTabModal" ng-click="tabModal = 'Imagenes'" ng-class="{active: tabModal == 'Imagenes'}"><div class="fa fa-image  tabModal"></div><br>Imágenes</a>
+                             <a class="btn btnTabModal" ng-click="tabModal = 'Archivos'" ng-class="{active: tabModal == 'Archivos'}"><div class="fa fa-file  tabModal"></div><br>Archivos</a>
                          </div>
                                           
                      </div>
@@ -1738,6 +1779,18 @@
                        </div>
                     </div>
                 </div>
+                 
+                 <div class="row">
+                     <div class="col-xs-12">
+                         <br>
+                     </div>
+                 </div>
+                  
+                <div ng-show="tabModal == 'Archivos'">
+                
+                  <div ng-include=" 'html/Archivo/Archivo.html' " ></div>    
+                
+                </div>
                    
                 <br><br>
                 <!---- botones de operación -->
@@ -1938,6 +1991,7 @@
     
     <!-- Mensaje -->
     <div ng-include=" 'html/Control/MensajeModal.html' "></div>
+    <div ng-include=" 'html/Archivo/EtiquetaArchivo.html' "></div>
     
 </div>
 

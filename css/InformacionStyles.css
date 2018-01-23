@@ -49,6 +49,11 @@
     box-shadow: none;
 }
 
+.contenidoArea:disabled
+{
+    background: lightgray;
+}
+
 .contenidoError, .contenidoError:focus, .contenidoError:active, .contenidoError:hover
 {
     border-radius: 0px;

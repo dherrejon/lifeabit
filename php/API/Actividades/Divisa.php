@@ -7,7 +7,7 @@ function GetDivisa($id)
 
     $request = \Slim\Slim::getInstance()->request();
 
-    $sql = "SELECT DivisaId, Divisa, PorDefecto FROM Divisa WHERE UsuarioId = ".$id;
+    $sql = "SELECT DivisaId, Divisa, PorDefecto, DivisaObjetivo FROM Divisa WHERE UsuarioId = ".$id;
 
     try 
     {
