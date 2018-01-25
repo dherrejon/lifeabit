@@ -21,6 +21,16 @@ function GetBuscador()
         $whereTema .= ")";
     }
     
+    //aplicaciones 
+    $nota = [];
+    $diario = [];
+    $actividad = [];
+    $evento = [];
+    $pendiente = [];
+    $imagen = [];
+    $archivo = [];
+    $conocimiento = [];
+
     //Nota
     $sqlEtiquetaNota = "";
     $sqlEtiquetaBaseNota1 = " SELECT e.NotaId FROM EtiquetaNotaVista e WHERE EtiquetaId IN ";
@@ -51,10 +61,15 @@ function GetBuscador()
     $sqlEtiquetaBasePendiente1 = " SELECT e.PendienteId FROM EtiquetaPendienteVista e WHERE EtiquetaId IN ";
     $sqlEtiquetaBasePendiente2 = " GROUP BY e.PendienteId";
     
-     //Archivo
+    //Archivo
     $sqlEtiquetaArchivo = "";
     $sqlEtiquetaBaseArchivo1 = " SELECT e.ArchivoId FROM EtiquetaArchivoVista e WHERE EtiquetaId IN ";
     $sqlEtiquetaBaseArchivo2 = " GROUP BY e.ArchivoId";
+    
+    //Conocimiento
+    $sqlEtiquetaConocimiento = "";
+    $sqlEtiquetaBaseConocimiento1 = " SELECT e.ConocimientoId FROM EtiquetaConocimientoVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseConocimiento2 = " GROUP BY e.ConocimientoId";
     
     if($numEtiqueta > 0)
     {
@@ -110,6 +125,7 @@ function GetBuscador()
                 $sqlEtiquetaEvento .= $sqlEtiquetaBaseEvento1.$whereEtiqueta.$sqlEtiquetaBaseEvento2;
                 $sqlEtiquetaPendiente .= $sqlEtiquetaBasePendiente1.$whereEtiqueta.$sqlEtiquetaBasePendiente2;
                 $sqlEtiquetaArchivo .= $sqlEtiquetaBaseArchivo1.$whereEtiqueta.$sqlEtiquetaBaseArchivo2;
+                $sqlEtiquetaConocimiento .= $sqlEtiquetaBaseConocimiento1.$whereEtiqueta.$sqlEtiquetaBaseConocimiento2;
             }
             else
             {
@@ -120,6 +136,7 @@ function GetBuscador()
                 $sqlEtiquetaEvento .= " UNION ALL ".$sqlEtiquetaBaseEvento1.$whereEtiqueta.$sqlEtiquetaBaseEvento2;
                 $sqlEtiquetaPendiente .= " UNION ALL ".$sqlEtiquetaBasePendiente1.$whereEtiqueta.$sqlEtiquetaBasePendiente2;
                 $sqlEtiquetaArchivo .= " UNION ALL ".$sqlEtiquetaBaseArchivo1.$whereEtiqueta.$sqlEtiquetaBaseArchivo2;
+                $sqlEtiquetaConocimiento .= " UNION ALL ".$sqlEtiquetaBaseConocimiento1.$whereEtiqueta.$sqlEtiquetaBaseConocimiento2;
             }
         }
     }
@@ -190,6 +207,15 @@ function GetBuscador()
                 
                     ") x ON x.ArchivoId = i.ArchivoId GROUP BY i.ArchivoId HAVING count(*) = ".($numEtiqueta+1);
         
+            $sqlConocimiento = "SELECT c.ConocimientoId, c.Informacion, c.Titulo  FROM Conocimiento c 
+                    INNER JOIN ("
+                        .$sqlEtiquetaConocimiento.
+                
+                    " UNION ALL SELECT t.ConocimientoId FROM TemaConocimientoVista t
+                    WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.ConocimientoId HAVING count(*) = ".$numTema.
+                
+                    ") x ON x.ConocimientoId = c.ConocimientoId GROUP BY c.ConocimientoId HAVING count(*) = ".($numEtiqueta+1);
+        
     }
     else if($numEtiqueta > 0 || $numTema > 0)
     {
@@ -229,6 +255,11 @@ function GetBuscador()
                     INNER JOIN ("
                         .$sqlEtiquetaArchivo.
                     ") x ON x.ArchivoId = i.ArchivoId GROUP BY i.ArchivoId HAVING count(*) = ".$numEtiqueta;
+            
+             $sqlConocimiento = "SELECT c.ConocimientoId, c.Informacion, c.Titulo  FROM Conocimiento c
+                    INNER JOIN ("
+                        .$sqlEtiquetaConocimiento.
+                    ") x ON x.ConocimientoId = c.ConocimientoId GROUP BY c.ConocimientoId HAVING count(*) = ".$numEtiqueta;
         }
         else if($numTema > 0)
         {
@@ -266,6 +297,11 @@ function GetBuscador()
                     INNER JOIN (
                         SELECT t.ArchivoId FROM TemaArchivoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ArchivoId HAVING count(*) = ".$numTema."
                     ) x ON x.ArchivoId = i.ArchivoId";
+            
+             $sqlConocimiento = "SELECT c.ConocimientoId, c.Informacion, c.Titulo FROM Conocimiento c
+                    INNER JOIN (
+                        SELECT t.ConocimientoId FROM TemaConocimientoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ConocimientoId HAVING count(*) = ".$numTema."
+                    ) x ON x.ConocimientoId = c.ConocimientoId";
         }
     }
 
@@ -286,122 +322,90 @@ function GetBuscador()
         $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia   FROM PendienteVista p WHERE p.UsuarioId = '".$filtro->usuarioId ."' AND p.FechaRealizacion = '". $filtro->fecha."'";
     }
     
-    //nota
+    //aplicaciones
+    
+    $sql2 = "DELETE FROM AplicacionPorUsuario WHERE UsuarioId = ".$filtro->usuarioId;
+    
     try 
     {
         $db = getConnection();
-        $stmt = $db->query($sql);
-        $nota = $stmt->fetchAll(PDO::FETCH_OBJ);
-
+        $db->beginTransaction();
+        $stmt = $db->prepare($sql2);
+        $stmt->execute();
     } 
     catch(PDOException $e) 
     {
+        $db->rollBack();
         echo '[ { "Estatus": '.$e.' } ]';
         $app->status(409);
         $app->stop();
     }
     
-    //diario
-    try 
+    
+    $sql2 = "INSERT INTO AplicacionPorUsuario (UsuarioId, AplicacionId) VALUES ";
+    $count = 0;
+    
+    if($filtro->Aplicacion->nota)
     {
-        //$db = getConnection();
-        $stmt = $db->query($sqlDiario);
-        $diario = $stmt->fetchAll(PDO::FETCH_OBJ);
-
- 
-    } 
-    catch(PDOException $e) 
-    {
-        echo($e);
-        echo '[ { "Estatus": '.$e.' } ]';
-        $app->status(409);
-        $app->stop();
+        $sql2.= " (".$filtro->usuarioId.", 1),";
+        $count++;
     }
     
-    //actividad
-    try 
+    if($filtro->Aplicacion->actividad)
     {
-        //$db = getConnection();
-        $stmt = $db->query($sqlActividad);
-        $actividad = $stmt->fetchAll(PDO::FETCH_OBJ);
-        
-        //$db = null;
-        //echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}]';
- 
-    } 
-    catch(PDOException $e) 
-    {
-        echo($e);
-        echo '[ { "Estatus": '.$e.' } ]';
-        $app->status(409);
-        $app->stop();
+        $sql2.= " (".$filtro->usuarioId.", 2),";
+        $count++;
     }
     
-    //Evento
-    try 
+    if($filtro->Aplicacion->pendiente)
     {
-        //$db = getConnection();
-        $stmt = $db->query($sqlEvento);
-        $evento = $stmt->fetchAll(PDO::FETCH_OBJ);
-        
-        //$db = null;
-        //echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}]';
- 
-    } 
-    catch(PDOException $e) 
-    {
-        echo($e);
-        echo '[ { "Estatus": '.$e.' } ]';
-        $app->status(409);
-        $app->stop();
+        $sql2.= " (".$filtro->usuarioId.", 3),";
+        $count++;
     }
     
-    //Pendiente
-    try 
+    if($filtro->Aplicacion->diario)
     {
-        $db = getConnection();
-        $stmt = $db->query($sqlPendiente);
-        $pendiente = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-    } 
-    catch(PDOException $e) 
-    {
-        echo '[ { "Estatus": '.$e.' } ]';
-        $app->status(409);
-        $app->stop();
+        $sql2.= "( ".$filtro->usuarioId.", 5),";
+        $count++;
     }
     
-    //Imagen
-    if($filtro->fecha == "")
+    if($filtro->Aplicacion->evento)
     {
-        try 
-        {
-            $db = getConnection();
-            $stmt = $db->query($sqlArchivo);
-            $archivo = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-        } 
-        catch(PDOException $e) 
-        {
-            echo($e);
-            echo '[ { "Estatus": '.$e.' } ]';
-            $app->status(409);
-            $app->stop();
-        }
+        $sql2.= " (".$filtro->usuarioId.", 6),";
+        $count++;
+    }
+    
+    if($filtro->Aplicacion->conocimiento)
+    {
+        $sql2.= " (".$filtro->usuarioId.", 7),";
+        $count++;
+    }
+    
+    if($filtro->Aplicacion->imagen)
+    {
+        $sql2.= " (".$filtro->usuarioId.", 8),";
+        $count++;
+    }
+    
+    if($filtro->Aplicacion->archivo)
+    {
+        $sql2.= " (".$filtro->usuarioId.", 9),";
+        $count++;
+    }
+    
+    if($count > 0)
+    {
+        $sql2 = rtrim($sql2,",");
         
         try 
         {
-            $db = getConnection();
-            $stmt = $db->query($sqlImagen);
-            $imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-            $db = null;
-            echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}, {"Archivo":'.json_encode($archivo).'}]';
-
+            $stmt = $db->prepare($sql2);
+            $stmt->execute();
+            $db->commit();
         } 
         catch(PDOException $e) 
         {
-            echo($e);
+            $db->rollBack();
             echo '[ { "Estatus": '.$e.' } ]';
             $app->status(409);
             $app->stop();
@@ -409,9 +413,171 @@ function GetBuscador()
     }
     else
     {
-        $db = null;
-        echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'},  {"Imagen":[]}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'},  {"Archivo":[]}]';
+        $db->commit();
     }
+
+    
+    //nota
+    if($filtro->Aplicacion->todo || $filtro->Aplicacion->nota)
+    {
+        try 
+        {
+            $db = getConnection();
+            $stmt = $db->query($sql);
+            $nota = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    //diario
+    if($filtro->Aplicacion->todo || $filtro->Aplicacion->diario)
+    {
+        try 
+        {
+            //$db = getConnection();
+            $stmt = $db->query($sqlDiario);
+            $diario = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo($e);
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    //actividad
+    if($filtro->Aplicacion->todo || $filtro->Aplicacion->actividad)
+    {
+        try 
+        {
+            //$db = getConnection();
+            $stmt = $db->query($sqlActividad);
+            $actividad = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            //$db = null;
+            //echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}]';
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo($e);
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    //Evento
+    if($filtro->Aplicacion->todo || $filtro->Aplicacion->evento)
+    {
+        try 
+        {
+            //$db = getConnection();
+            $stmt = $db->query($sqlEvento);
+            $evento = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            //$db = null;
+            //echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}]';
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo($e);
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    //Pendiente
+    if($filtro->Aplicacion->todo || $filtro->Aplicacion->pendiente)
+    {
+        try 
+        {
+            $db = getConnection();
+            $stmt = $db->query($sqlPendiente);
+            $pendiente = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[ { "Estatus": '.$e.' } ]';
+            $app->status(409);
+            $app->stop();
+        }
+    }
+    
+    //Imagen
+    if($filtro->fecha == "")
+    {
+        if($filtro->Aplicacion->todo || $filtro->Aplicacion->conocimiento)
+        {
+            try 
+            {
+                $db = getConnection();
+                $stmt = $db->query($sqlConocimiento);
+                $conocimiento = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo($e);
+                echo '[ { "Estatus": '.$e.' } ]';
+                $app->status(409);
+                $app->stop();
+            }
+        }
+        
+        if($filtro->Aplicacion->todo || $filtro->Aplicacion->archivo)
+        {
+            try 
+            {
+                $db = getConnection();
+                $stmt = $db->query($sqlArchivo);
+                $archivo = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo($e);
+                echo '[ { "Estatus": '.$e.' } ]';
+                $app->status(409);
+                $app->stop();
+            }
+        }
+        
+        if($filtro->Aplicacion->todo || $filtro->Aplicacion->imagen)
+        {
+            try 
+            {
+                $db = getConnection();
+                $stmt = $db->query($sqlImagen);
+                $imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo($e);
+                echo '[ { "Estatus": '.$e.' } ]';
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+
+    $db = null;
+    echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}, {"Archivo":'.json_encode($archivo).'}, {"Conocimiento":'.json_encode($conocimiento).'}]';
+    
 }
 
 function GetDiarioPorId()

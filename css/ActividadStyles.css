@@ -164,7 +164,7 @@
     box-shadow: none;
 }
 
-.botonFiltrarBarraLateral, .botonFiltrarBarraLateral:hover, .botonFiltrarBarraLateral:active, .botonFiltrarBarraLateral:focus
+.botonFiltrarBarraLateral, .botonFiltrarBarraLateral:active, .botonFiltrarBarraLateral:focus
 {
     color: white;
     background: transparent;
@@ -173,6 +173,10 @@
     box-shadow: none;
 }
 
+.botonFiltrarBarraLateral:hover
+{
+    color:#1859b2;
+}
 
 .botonFiltroBarraLateral, .botonFiltroBarraLateral:hover, .botonFiltroBarraLateral:active, .botonFiltroBarraLateral:focus
 {

@@ -14,8 +14,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
     //------------------ Catálogos ----------------------------
     $scope.GetConocimiento = function()
     {
-        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) > 0 )
-        {
+        //if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) > 0 )
+        //{
              $scope.filtro.usuarioId = $rootScope.UsuarioId;
             (self.servicioObj = LifeService.Post('GetConocimiento', $scope.filtro )).then(function (dataResponse) 
             {
@@ -39,14 +39,13 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             {
                 $rootScope.$broadcast('Alerta', error, 'error');
             });
-        }
+        /*}
         else
         {
             $scope.conocimiento = [];
-        }
+        }*/
     };
-    
-    
+
     $scope.GetConocimientoPorId = function(conocimiento, opt)
     {
         (self.servicioObj = LifeService.Get('GetConocimientoPorId/' + conocimiento.ConocimientoId)).then(function (dataResponse) 
@@ -85,6 +84,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             
             $scope.$broadcast('IniciarArchivo', $scope.nuevoConocimiento);
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoConocimiento, 'Conocimiento');
+            
+            $scope.iniciarHecho = $scope.nuevoConocimiento.Hecho;
         }
         else if(opt == "Detalle")
         {
@@ -225,7 +226,7 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             {
                 $scope.etiqueta[k].filtro = false;
                 $scope.filtro.etiqueta.push($scope.etiqueta[k]);
-                $scope.GetConocimiento();
+                //$scope.GetConocimiento();
                 break;
             }
         }
@@ -239,7 +240,7 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             {
                 $scope.tema[k].filtro = false;
                 $scope.filtro.tema.push($scope.tema[k]);
-                $scope.GetConocimiento();
+                //$scope.GetConocimiento();
                 break;
             }
         }
@@ -410,7 +411,11 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             }
         }
         
-        $scope.GetConocimiento();
+        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
+        {
+             $scope.GetConocimiento();
+        }
+       
     };
     
     $scope.QuitaretiquetaFiltro = function(etiqueta)
@@ -433,7 +438,10 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             }
         }
         
-        $scope.GetConocimiento();
+        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
+        {
+            $scope.GetConocimiento();
+        }
         
     };
     
@@ -633,7 +641,7 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
     {
         if($scope.nuevoConocimiento.Titulo)
         {
-            $scope.etiquetaSugerida = $scope.nuevoConocimiento.Titulo.split(" ");
+            $scope.etiquetaSugerida = LimiparCaracteresLabel($scope.nuevoConocimiento.Titulo);
             $scope.temaSugerido = [];
 
             for(var k=0; k<$scope.etiquetaSugerida.length; k++)
@@ -1454,5 +1462,26 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
         $scope.ActivarDesactivarTema($scope.nuevoConocimiento.Tema);
         $scope.ActivarDesactivarEtiqueta($scope.nuevoConocimiento.Etiqueta);
     });
+    
+    
+    //------------ Cambiar hecho -------
+    $scope.CambiarHecho = function(hecho)
+    {
+        var done = hecho == '1' ?   '0' : '1';
+        
+        if($scope.operacion == "Editar" && $scope.iniciarHecho == "1" && done == "0") 
+        {
+            $('#cambiarHechoConocimiento').modal('toggle');
+        }
+        else
+        {
+            $scope.nuevoConocimiento.Hecho = done;
+        }
+    };
+    
+    $scope.ConfirmarCambiarHecho = function()
+    {
+        $scope.nuevoConocimiento.Hecho = $scope.nuevoConocimiento.Hecho == '1' ?   '0' : '1';
+    };
     
 });

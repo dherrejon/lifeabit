@@ -742,7 +742,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         $scope.buscarConceptoBarra = "";
         document.getElementById('buscarConcepto').focus();
         
-        $scope.GetFechaDiario($scope.filtro);
+        //$scope.GetFechaDiario($scope.filtro);
     };
     
     $scope.SetFiltroTema = function(tema)
@@ -753,7 +753,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         $scope.buscarConceptoBarra = "";
         document.getElementById('buscarConcepto').focus();
         
-        $scope.GetFechaDiario($scope.filtro);
+        //$scope.GetFechaDiario($scope.filtro);
     };
     
      $scope.QuitarTemaFiltro = function(tema)
@@ -776,7 +776,11 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             }
         }
         
-        $scope.GetFechaDiario($scope.filtro);
+        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
+        {
+            $scope.GetFechaDiario($scope.filtro);
+        }
+        
     };
     
     $scope.QuitaretiquetaFiltro = function(etiqueta)
@@ -799,7 +803,10 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             }
         }
         
-        $scope.GetFechaDiario($scope.filtro);
+        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
+        {
+            $scope.GetFechaDiario($scope.filtro);
+        }
         
     };
 

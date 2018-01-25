@@ -6,6 +6,7 @@ class Conocimiento
         this.Informacion = "";
         this.Observacion = "";
         this.Titulo = "";
+        this.Hecho = "1";
         
         this.Etiqueta = [];
         this.Tema = [];
@@ -27,6 +28,7 @@ function SetConocimiento(data)
     conocimiento.Observacion = data.Observacion;
     conocimiento.Imagen = data.Imagen;
     conocimiento.Archivo = data.Archivo;
+    conocimiento.Hecho = data.Hecho;
     
     if(data.Informacion)
     {

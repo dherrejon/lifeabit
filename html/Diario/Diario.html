@@ -81,8 +81,6 @@
                    </div>
                 </div>
                 
-                
-                
                 <div class="row">
                     <div class="col-xs-12" style="width: 100%">
 
@@ -100,26 +98,20 @@
 
 
                         <div class="row verFitros" >
-
-                            <div class="col-xs-12">
-
-                                <!-- Botones -->
-                               <div class="pull-right btn-group">
-
-                                    <!-- Limpiar filtro -->
-                                    <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="LimpiarFiltro()" >
-                                       <span class="fa fa-ban" style="font-size:14pt"></span>
-                                   </button>
-
-                                   <!-- Ver Detalles -->
-                                   <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()">
-                                       <b class="fa fa-angle-double-right" ng-if="!verFiltro" style="font-size:18pt"></b>
-                                       <b class="fa fa-angle-double-up" ng-if="verFiltro" style="font-size:18pt"></b>
-                                   </button>
-
-                                </div>
-
+                             
+                            <div class="btn-group pull-right">
+                                
+                                 <!-- Limpiar filtro -->
+                                 <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="GetFechaDiario(filtro)" >
+                                     <b ><span class="fa fa-search"></span> Buscar</b>
+                                 </button>
+                               
+                               <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()" >
+                                   <b class="fa fa-angle-double-right" ng-if="!verFiltro"></b>
+                                   <b class="fa fa-angle-double-up" ng-if="verFiltro"></b>
+                               </button>
                             </div>
+
 
 
                             <!-- Etiquetas -->
@@ -143,6 +135,15 @@
                                     </div>
                                 </span>
                             </div>
+                            
+                            <div class="col-xs-12" ng-show="(filtro.fecha.length > 0) && verFiltro">
+                                <div style="height: 6px"></div>
+                            </div>
+         
+                            <!-- Buscar  botón -->
+                            <button class="btn  botonFiltrarBarraLateral text-center  btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                                 <b ><span class="fa fa-ban"></span> Limpiar</b>
+                            </button>
 
                         </div>
 

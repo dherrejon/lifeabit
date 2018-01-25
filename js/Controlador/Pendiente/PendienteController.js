@@ -317,7 +317,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             {
                 $scope.etiqueta[k].filtro = false;
                 $scope.filtro.etiqueta.push($scope.etiqueta[k]);
-                $scope.GetPendiente();
+                //$scope.GetPendiente();
                 break;
             }
         }
@@ -331,7 +331,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             {
                 $scope.tema[k].filtro = false;
                 $scope.filtro.tema.push($scope.tema[k]);
-                $scope.GetPendiente();
+                //$scope.GetPendiente();
                 break;
             }
         }
@@ -626,7 +626,10 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             }
         }
         
-        $scope.GetPendiente();
+        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
+        {
+            $scope.GetPendiente();
+        }
     };
     
     $scope.QuitaretiquetaFiltro = function(etiqueta)
@@ -649,8 +652,10 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             }
         }
         
-        $scope.GetPendiente();
-        
+        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
+        {
+            $scope.GetPendiente();
+        }
     };
     
      $scope.LimpiarFiltro = function()
@@ -754,6 +759,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         $scope.operacion = operacion;
         $scope.tabModal = "Datos";
         $scope.verRecordatorio = true;
+        $scope.etiquetaSugerida = [];
         
         $('#fechaIntencion').data("DateTimePicker").clear();
         $('#fechaRealizacion').data("DateTimePicker").clear();
@@ -933,29 +939,32 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     //--Etiquetas Sugeridas
     $scope.CrearEtiquetaSugerida = function()
     {
-        $scope.etiquetaSugerida = $scope.nuevoPendiente.Nombre.split(" ");
-        $scope.temaSugerido = [];
-        
-        for(var k=0; k<$scope.etiquetaSugerida.length; k++)
+        if($scope.nuevoPendiente.Nombre)
         {
-            if($scope.etiquetaSugerida[k] === "")
+            $scope.etiquetaSugerida = LimiparCaracteresLabel($scope.nuevoPendiente.Nombre);
+            $scope.temaSugerido = [];
+
+            for(var k=0; k<$scope.etiquetaSugerida.length; k++)
             {
-                $scope.etiquetaSugerida.splice(k,1);
-                k--;
-                continue;
-            }
-            
-            for(var i=0; i<$scope.nuevoPendiente.Etiqueta.length; i++)
-            {
-                if($scope.nuevoPendiente.Etiqueta[i].Nombre.toLowerCase() == $scope.etiquetaSugerida[k].toLowerCase())
+                if($scope.etiquetaSugerida[k] === "")
                 {
-                    if($scope.nuevoPendiente.Etiqueta[i].Visible)
+                    $scope.etiquetaSugerida.splice(k,1);
+                    k--;
+                    continue;
+                }
+
+                for(var i=0; i<$scope.nuevoPendiente.Etiqueta.length; i++)
+                {
+                    if($scope.nuevoPendiente.Etiqueta[i].Nombre.toLowerCase() == $scope.etiquetaSugerida[k].toLowerCase())
                     {
-                        $scope.etiquetaSugerida.splice(k,1);
-                        k--;
+                        if($scope.nuevoPendiente.Etiqueta[i].Visible)
+                        {
+                            $scope.etiquetaSugerida.splice(k,1);
+                            k--;
+                        }
+
+                        break;
                     }
-                    
-                    break;
                 }
             }
         }

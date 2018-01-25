@@ -84,13 +84,21 @@
             </div>
         </div>
     
-        <div class="row" ng-show="(filtro.tema.length + filtro.etiqueta.length + filtro.fecha.length) > 0">
-            <div class="col-xs-12 barraApp" style="width: 100%">
-             
-               <div class="btn-group">
-                    <a href="" ng-repeat="app in appBuscar" class="btn botonBarraApp" ng-class="{Activo: app == appFiltro}" ng-click="CambiarAppFiltro(app)">
-                        {{app}} 
-                    </a>
+        <div class="row" >
+            <div class="col-xs-12 barraApp" style="width: 100%; min-height: 36px">
+                 <div style="position: relative">
+                   <div class="btn-group" ng-show="verAppPanel" style="padding-right: 25px">
+                        <a href="" ng-repeat="app in appBuscar" class="btn botonBarraApp" ng-class="{Activo: GetClaseApp(app)}" ng-click="CambiarAppFiltro(app)">
+                            {{app}} 
+                        </a>
+                    </div>
+
+                    <div  style="position: absolute; z-index: 999; right: 0px; top: 0" class="hidden-md hidden-lg">
+                        <button class="btn botonBarraApp" ng-click="verAppPanel = !verAppPanel" >
+                            <b class="fa fa-angle-double-right" ng-if="!verAppPanel"></b>
+                            <b class="fa fa-angle-double-up" ng-if="verAppPanel"></b>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -102,24 +110,17 @@
                 
                 <div class="row verFitros" >
 
-                    <div class="col-xs-12">
-                        
-                        <!-- Botones -->
-                       <div class="pull-right btn-group">
-                          
-                            <!-- Limpiar filtro -->
-                            <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="LimpiarFiltro()" >
-                               <span class="fa fa-ban" style="font-size:14pt"></span>
-                           </button>
-
-                           <!-- Ver Detalles -->
-                           <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()">
-                               <b class="fa fa-angle-double-right" ng-if="!verFiltro" style="font-size:18pt"></b>
-                               <b class="fa fa-angle-double-up" ng-if="verFiltro" style="font-size:18pt"></b>
-                           </button>
-
-                        </div>
-                        
+                    <div class="btn-group pull-right">
+                         
+                        <!-- Limpiar filtro -->
+                        <button class="btn  botonFiltrarBarraLateral text-center " style="color:black" ng-click="GetBuscador()" >
+                             <b ><span class="fa fa-search"></span> Buscar</b>
+                         </button>
+                       
+                       <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()" >
+                           <b class="fa fa-angle-double-right" ng-if="!verFiltro"></b>
+                           <b class="fa fa-angle-double-up" ng-if="verFiltro"></b>
+                       </button>
                     </div>
             
                     
@@ -145,6 +146,17 @@
                         </span>
                     </div>
                     
+                    <div class="col-xs-12" ng-show="(filtro.fecha.length > 0) && verFiltro">
+                        <div style="height: 6px"></div>
+                    </div>
+                    
+                    <!-- Buscar  botón -->
+                     
+                     
+                     <button class="btn  botonFiltrarBarraLateral text-center btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                       <b ><span class="fa fa-ban"></span> Limpiar</b>
+                    </button>
+                    
                 </div>
             
             </div>
@@ -152,11 +164,11 @@
         
         
         <!------------------------------ Información filtrada --------------------------->
-        <div class="row" >
+        <div class="row" ng-show="buscado">
             <div class="col-xs-12" ><!-- ng-show="anchoPantalla > 767 || detalle.length == 0" -->
                
                 <!-- Actividades -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.actividad)">
                     <a  class="btn labelConcepto"  ng-click="verApp.actividad = !verApp.actividad">
                         <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Actividades ({{actividad.length}})</b>
                         <span class="fa fa-angle-double-right" ng-if="!verApp.actividad "></span>
@@ -173,8 +185,49 @@
                     </a>
                 </div>
                 
+                 <!-- Archivos -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.archivo)">
+                    <a  class="btn labelConcepto"  ng-click="verApp.archivo = !verApp.archivo">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Archivos ({{archivo.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.archivo "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.archivo "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.archivo && appFiltro == 'Todo') || appFiltro == 'Archivos'" > <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="archivo in archivo | orderBy:'Nombre' "  class="btn appElemento " href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{archivo.Nombre}}" target="_blank"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <!-- indicador -->
+                        <span class="fa fa-download"></span>
+                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                            {{archivo.Nombre}}
+                        </span>
+                    </a>
+                </div>
+                
+                <!-- Conocimiento -->
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.conocimiento)">
+                    <a  class="btn labelConcepto"  ng-click="verApp.conocimiento = !verApp.conocimiento">
+                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Conocimiento ({{conocimiento.length}})</b>
+                        <span class="fa fa-angle-double-right" ng-if="!verApp.conocimiento "></span>
+                        <span class="fa fa-angle-double-up" ng-if="verApp.conocimiento "></span>
+                    </a>
+                </div>
+
+                <div class="row" ng-if="(verApp.conocimiento && appFiltro == 'Todo') || appFiltro == 'Conocimiento'" > <!-- ng-if="agrupar == 'Titulo'" -->
+                    <a ng-repeat="c in conocimiento | orderBy:'Nombre' "  class="btn appElemento"  ng-click="GetConocimientoPorId(c.ConocimientoId)"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                         <b class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                            {{c.Titulo}}
+                        </b>
+                        
+                        <div class="col-xs-12" ><!-- ng-if="campoBuscar == 'Fecha'" -->
+                            <p class="textoDetalleBarra"  >{{c.Informacion}}</p>
+                        </div>
+                    </a>
+                </div>
+                
+                
                 <!-- Diario -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.diario)">
                     <a  class="btn labelConcepto"  ng-click="verApp.diario = !verApp.diario">
                         <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Diario ({{diario.length}})</b>
                         <span class="fa fa-angle-double-right" ng-if="!verApp.diario "></span>
@@ -197,7 +250,7 @@
                 </div>
                 
                 <!-- Eventos -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.evento)">
                     <a  class="btn labelConcepto"  ng-click="verApp.evento = !verApp.evento">
                         <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Eventos ({{evento.length}})</b>
                         <span class="fa fa-angle-double-right" ng-if="!verApp.evento "></span>
@@ -215,7 +268,7 @@
                 </div>
                 
                 <!-- Imagenes -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.imagen)">
                     <a  class="btn labelConcepto"  ng-click="verApp.imagen = !verApp.imagen">
                         <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Imagenes ({{imagen.length}})</b>
                         <span class="fa fa-angle-double-right" ng-if="!verApp.imagen "></span>
@@ -241,7 +294,7 @@
                 
                 
                 <!-- Notas -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.nota)">
                     <a  class="btn labelConcepto"  ng-click="verApp.nota = !verApp.nota">
                         <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Notas ({{nota.length}})</b>
                         <span class="fa fa-angle-double-right" ng-if="!verApp.nota "></span>
@@ -259,7 +312,7 @@
                 </div>
                 
                 <!-- Pendientes -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
+               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (filtroApp.todo || filtroApp.pendiente)">
                     <a  class="btn labelConcepto"  ng-click="verApp.pendiente = !verApp.pendiente">
                         <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Objetivos ({{pendiente.length}})</b>
                         <span class="fa fa-angle-double-right" ng-if="!verApp.pendiente "></span>
@@ -275,27 +328,6 @@
                         </span>
                     </a>
                 </div>
-                
-                <!-- Archivos -->
-               <div class="row" ng-show="(filtro.etiqueta.length > 0 || filtro.tema.length > 0 || filtro.fecha.length > 0) && (appFiltro == 'Todo')">
-                    <a  class="btn labelConcepto"  ng-click="verApp.archivo = !verApp.archivo">
-                        <b class="col-xs-12  text-center"  style="white-space: normal; max-width: 90%; overflow: hidden;" >Archivos ({{archivo.length}})</b>
-                        <span class="fa fa-angle-double-right" ng-if="!verApp.archivo "></span>
-                        <span class="fa fa-angle-double-up" ng-if="verApp.archivo "></span>
-                    </a>
-                </div>
-
-                <div class="row" ng-if="(verApp.archivo && appFiltro == 'Todo') || appFiltro == 'Archivos'" > <!-- ng-if="agrupar == 'Titulo'" -->
-                    <a ng-repeat="archivo in archivo | orderBy:'Nombre' "  class="btn appElemento {{GetClaseDiario(nota.Titulo)}}" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{archivo.Nombre}}" target="_blank"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
-                        <!-- indicador -->
-                        <span class="fa fa-download"></span>
-                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
-                            {{archivo.Nombre}}
-                        </span>
-                    </a>
-                </div>
-                
-                
             </div>
         </div>
         
@@ -430,8 +462,59 @@
 
 
             </div>
+            
+            <div class="row" ng-show="tipoDetalle == 'Conocimiento' ">
+                <div class="col-xs-12">
+                    <!-- Nombre -->
+                    <span class="tituloModal">{{detalle.Titulo}}</span><br><br>
+
+                    <span style="color: #808080">
+                        <!-- Etiqueta -->
+                        <span ng-if="detalle.EtiquetaVisible.length > 0">
+                            <b>Etiquetas: </b> 
+                            <span ng-repeat="etiqueta in detalle.EtiquetaVisible">
+                                <span ng-if="!$last">{{etiqueta.Nombre}},</span>
+                                <span ng-if="$last">{{etiqueta.Nombre}}.</span>
+                            </span><br>
+                        </span>
+
+                        <!-- tema -->
+                        <span ng-if="detalle.Tema.length > 0">
+                            <b>Temas: </b> 
+                            <span ng-repeat="tema in detalle.Tema">
+                                <span ng-if="!$last">{{tema.Tema}},</span>
+                                <span ng-if="$last">{{tema.Tema}}.</span>
+                            </span><br>
+                        </span>
+                  </span>
+                   <br>
+
+                   <!-- Información -->
+                    <span ng-if="detalle.Informacion">
+                        <b>Información: </b> <br>
+                        <span >
+                           <p style="font-size:12pt" ng-bind-html="detalle.InformacionHTML"></p>
+                        </span>
+                        <br>
+                    </span>
+                    <br>
+                    <!-- Observación -->
+                    <span ng-if="detalle.Observacion">
+                        <b>Observaciones: </b> <br>
+                        <span >
+                           <p style="font-size:12pt" ng-bind-html="detalle.ObservacionHTML"></p>
+                        </span>
+                        <br>
+                    </span>
+                    <br>
+
+                </div>
+                <br>
+
+
+            </div>
            
-            <div class="row" ng-show="tipoDetalle != 'Evento' && tipoDetalle != 'Pendiente'">
+            <div class="row" ng-show="tipoDetalle != 'Evento' && tipoDetalle != 'Pendiente' && tipoDetalle != 'Conocimiento'">
                 <div class="col-xs-12">
                     <div >
                         
@@ -532,7 +615,7 @@
              </div>
              
              <!-- Divisor -->
-            <div class="row" ng-show="tipoDetalle != 'Evento' && tipoDetalle != 'Pendiente'">
+            <div class="row" ng-show="tipoDetalle != 'Evento' && tipoDetalle != 'Pendiente' && tipoDetalle != 'Conocimiento'">
                <div class="col-sm-12"> 
                    <div class="divisorAzul"></div>                      
                </div>
@@ -736,7 +819,7 @@
             </div>
             
             <!-- Imagenes -->
-            <div ng-repeat="img in detalle.Imagen" ng-if="tipoDetalle == 'Nota' || tipoDetalle == 'Diario' || tipoDetalle == 'Pendiente'">
+            <div ng-repeat="img in detalle.Imagen" ng-if="tipoDetalle == 'Nota' || tipoDetalle == 'Diario' || tipoDetalle == 'Pendiente' || tipoDetalle == 'Conocimiento'">
                 <div style="padding-left: 12px; padding-right: 12px">
                      <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                        <div class="imgContainer" >
@@ -747,6 +830,40 @@
                         <div style="height: 15px"></div>
                      </div>
                  </div>
+            </div>
+            
+            <div class="row" ng-if="tipoDetalle == 'Pendiente' || tipoDetalle == 'Conocimiento'">
+                <div class="col-xs-12">
+                    <div class="table-responsive">
+                       <table  class="table table-responsive">
+
+                            <tbody  style="cursor: pointer">
+
+                                <!-- Archivos agregados -->
+                                <tr ng-repeat="file in detalle.Archivo" ng-if="detalle.Archivo.length > 0" >
+
+                                  <td >
+                                      <span class="infoCenterCell">
+                                          <span>{{file.Nombre}}</span>
+                                       </span> 
+                                  </td>
+
+                                  <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                  <td class="text-center">
+                                      <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                         <span class="fa fa-download"></span>
+                                     </a>
+                                  </td>
+
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+                    </div>
+               </div>
             </div>
              
          </div>
@@ -825,6 +942,8 @@
             
         </div>
     </div>
+    
+    <div ng-include=" 'html/Control/BotonTop.html' "></div>
     
     <!---------- VerImagen ---------------->
     <div class="modal fade sombraDivModal" id="verImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

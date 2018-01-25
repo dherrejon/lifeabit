@@ -251,3 +251,5 @@ $(document).on('show.bs.modal', '.modal', function ()
         $('.modal:visible').length && $(document.body).addClass('modal-open');
     });
 });
+
+

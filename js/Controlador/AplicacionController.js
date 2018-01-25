@@ -26,20 +26,26 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.actividad = [];
     $scope.imagen = [];
     $scope.evento = [];
+    $scope.conocimiento = [];
+    $scope.archivo = [];
     $scope.detalle = [];
     $scope.tipoDetalle = "";
     $scope.verDetalle = false;
     $scope.hoy = GetDate();
     
+    $scope.buscado = false;
+    
     $scope.verFiltro = true;
+    $scope.verAppPanel = true;
     $scope.filtro = {etiqueta:[], tema:[], fecha: "", fechaFormato: ""};
     
     $scope.buscarConcepto = "";
     $scope.campoBuscar = "Conceptos";
     
-    $scope.appBuscar = ["Todo", "Actividades", "Diario", "Eventos", "Imagenes", "Notas", "Objetivos", "Archivos"];
+    $scope.appBuscar = ["Todo", "Actividades", "Archivos", "Conocimiento", "Diario", "Eventos", "Imagenes", "Notas", "Objetivos"];
     $scope.appFiltro = "Todo";
-    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true, pendiente:true, archivo:true};
+    $scope.verApp = {actividad:true, diario: true, nota:true, imagen:true, evento:true, pendiente:true, archivo:true, conocimiento:true};
+    $scope.filtroApp = {todo: true, actividad:false, diario: false, nota:false, imagen:false, evento:false, pendiente:false, archivo:false, conocimiento:false};
     
     //------------------- Catálogos (coneptos) -----------------------------------
     $scope.GetTemaActividad = function()              
@@ -80,6 +86,9 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     $scope.GetBuscador = function()
     {   
         $scope.filtro.usuarioId = $rootScope.UsuarioId;
+        $scope.buscado = true;
+    
+        $scope.filtro.Aplicacion = $scope.filtroApp;
         
         GetBuscador($http, $q, CONFIG, $scope.filtro).then(function(data)
         {
@@ -112,6 +121,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 $scope.evento = data[5].Evento;
                 $scope.pendiente = data[6].Pendiente;
                 $scope.archivo = data[7].Archivo;
+                $scope.conocimiento = data[8].Conocimiento;
             }
             else
             {
@@ -261,6 +271,58 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             alert(error);
         });
         
+    };
+    
+    $scope.GetConocimientoPorId = function(id)
+    {
+        (self.servicioObj = LifeService.Get('GetConocimientoPorId/' + id)).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var conocimiento = SetConocimiento(dataResponse.data);
+                conocimiento.InformacionHTML = $sce.trustAsHtml(conocimiento.InformacionHTML);
+                conocimiento.ObservacionHTML = $sce.trustAsHtml(conocimiento.ObservacionHTML);
+                
+                $scope.detalle = [];
+                $scope.detalle[0] = conocimiento;
+                $scope.tipoDetalle = "Conocimiento";
+            } 
+            else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+    };
+    
+    $scope.GetAplicacion = function()
+    {
+        (self.servicioObj = LifeService.Get('GetAplicacion/' + $rootScope.UsuarioId )).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                
+                for(var k=0; k<data.length; k++)
+                {
+                    $scope.CambiarAppFiltro(data[k].Nombre);
+                }
+                
+            } 
+            else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
     };
     
     //-------------------------- Detalles ------------------------
@@ -494,7 +556,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         $scope.buscarConcepto = "";
         document.getElementById('buscarConcepto').focus();
         
-        $scope.GetBuscador();
+        //$scope.GetBuscador();
     };
     
     $scope.SetFiltroTema = function(tema)
@@ -505,7 +567,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         $scope.buscarConcepto = "";
         document.getElementById('buscarConcepto').focus();
         
-        $scope.GetBuscador();
+        //$scope.GetBuscador();
     };
     
     $scope.AgregarTemaFiltro = function()
@@ -595,11 +657,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             }
         }
         
-        if($scope.filtro.etiqueta.length > 0 || $scope.filtro.tema.length > 0)
-        {
-            $scope.GetBuscador();
-        }
-        else
+        if(($scope.filtro.etiqueta.length + $scope.filtro.tema.length) == 0)
         {
             $scope.LimpiarBusqueda();
         }
@@ -625,11 +683,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             }
         }
         
-        if($scope.filtro.etiqueta.length > 0 || $scope.filtro.tema.length > 0)
-        {
-            $scope.GetBuscador();
-        }
-        else
+        if(($scope.filtro.etiqueta.length + $scope.filtro.tema.length) == 0)
         {
             $scope.LimpiarBusqueda();
         }
@@ -644,14 +698,97 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
          $scope.evento = [];
          $scope.pendiente = [];
          $scope.archivo = [];
+         $scope.conocimiento = [];
+         
+         $scope.buscado = false;
      };
     
     $scope.CambiarAppFiltro = function(app)
     {
-        if(app != $scope.appFiltro)
+        if(app == "Todo")
         {
-            $scope.appFiltro = app;
+            $scope.filtroApp = {todo: true, actividad:false, diario: false, nota:false, imagen:false, evento:false, pendiente:false, archivo:false, conocimiento:false};
         }
+        else
+        {
+            $scope.filtroApp.todo = false;
+
+            switch(app)
+            {
+                case "Actividades":
+                    $scope.filtroApp.actividad = !$scope.filtroApp.actividad;
+                    break;
+                case "Diario":
+                    $scope.filtroApp.diario = !$scope.filtroApp.diario;
+                    break;
+                case "Notas":
+                    $scope.filtroApp.nota = !$scope.filtroApp.nota;
+                    break;
+                case "Imagenes":
+                    $scope.filtroApp.imagen = !$scope.filtroApp.imagen;
+                    break;
+                case "Eventos":
+                    $scope.filtroApp.evento = !$scope.filtroApp.evento;
+                    break;
+                case "Objetivos":
+                    $scope.filtroApp.pendiente = !$scope.filtroApp.pendiente;
+                    break;
+                case "Archivos":
+                    $scope.filtroApp.archivo = !$scope.filtroApp.archivo;
+                    break;
+                case "Conocimiento":
+                    $scope.filtroApp.conocimiento = !$scope.filtroApp.conocimiento;
+                    break;
+
+                default:
+                    break;
+            }
+            
+            if(!$scope.filtroApp.actividad && !$scope.filtroApp.diario && !$scope.filtroApp.nota && !$scope.filtroApp.imagen  && !$scope.filtroApp.evento && !$scope.filtroApp.pendiente && !$scope.filtroApp.archivo && !$scope.filtroApp.conocimiento )
+            {
+                $scope.filtroApp.todo = true;
+            }
+        }
+    };
+    
+    $scope.GetClaseApp = function(app)
+    {
+        switch(app)
+        {
+            case "Todo":
+                if($scope.filtroApp.todo) return true;
+                break;
+            case "Actividades":
+                if($scope.filtroApp.actividad) return true;
+                break;
+            case "Diario":
+                if($scope.filtroApp.diario) return true;
+                break;
+            case "Notas":
+                if($scope.filtroApp.nota) return true;
+                break;
+            case "Imagenes":
+                if($scope.filtroApp.imagen) return true;
+                break;
+            case "Eventos":
+                if($scope.filtroApp.evento) return true;
+                break;
+            case "Objetivos":
+                if($scope.filtroApp.pendiente) return true;
+                break;
+            case "Archivos":
+                if($scope.filtroApp.archivo) return true;
+                break;
+            case "Conocimiento":
+                if($scope.filtroApp.conocimiento) return true;
+                break;
+
+            default:
+                return false;
+                break;
+        }
+        
+        return false;
     };
     
     //-- fecha filtro
@@ -766,6 +903,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             $rootScope.UsuarioId = $scope.usuarioLogeado.UsuarioId;
             $scope.GetEtiqueta();
             $scope.GetTemaActividad();
+            $scope.GetAplicacion();
         }
     };
     

@@ -33,6 +33,7 @@
     require 'Pendiente/Prioridad.php';  
 
     require 'App/Archivo.php';
+    require 'App/Aplicacion.php';
 
     /*-----Seguridad-----*/
     require 'PHP-JWT/Authentication/JWT.php';
@@ -361,6 +362,12 @@
     $app->post('/AgregarConocimiento', $seguridad, $ChecarSesion, 'AgregarConocimiento');
     $app->post('/EditarConocimiento', $seguridad, $ChecarSesion, 'EditarConocimiento');
     $app->delete('/BorrarConocimiento', $seguridad, $ChecarSesion, 'BorrarConocimiento');
+
+
+    //---------------------------------------------------------------------------------------------------------------Aplicacion
+
+    /*-----------------------  Aplicacion ------------------------------------------*/
+    $app->get('/GetAplicacion/:id', $seguridad, $ChecarSesion, 'GetAplicacion');
 
 
     $app->run(); 

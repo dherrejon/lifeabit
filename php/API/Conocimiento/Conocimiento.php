@@ -87,7 +87,7 @@ function GetConocimiento()
     
     if($numEtiqueta > 0 && $numTema > 0)
     {
-         $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion FROM Conocimiento c
+         $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion, c.Hecho FROM Conocimiento c
                     INNER JOIN ("
                         .$sqlEtiquetaConocimiento.
              
@@ -102,14 +102,14 @@ function GetConocimiento()
     {
         if($numEtiqueta > 0)
         {
-            $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion FROM Conocimiento c
+            $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion, c.Hecho FROM Conocimiento c
                     INNER JOIN ("
                         .$sqlEtiquetaConocimiento.
                     ") x ON x.ConocimientoId = c.ConocimientoId";
         }
         else if($numTema > 0)
         {
-            $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion FROM Conocimiento c
+            $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion, c.Hecho FROM Conocimiento c
                     INNER JOIN (
                         SELECT t.ConocimientoId FROM TemaConocimientoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.ConocimientoId HAVING count(*) = ".$numTema."
                     ) x ON x.ConocimientoId = c.ConocimientoId";
@@ -118,6 +118,10 @@ function GetConocimiento()
         {
             $sql .= " GROUP BY c.ConocimientoId  HAVING count(*) = ".$numEtiqueta;
         }
+    }
+    else
+    {
+        $sql = "SELECT c.ConocimientoId, c.Titulo, c.Informacion,  c.Hecho FROM Conocimiento c WHERE UsuarioId = ".$filtro->usuarioId;
     }
     
     try 
@@ -320,7 +324,7 @@ function AgregarConocimiento()
     global $app;
 
 
-    $sql = "INSERT INTO Conocimiento (UsuarioId, Titulo, Informacion, Observacion) VALUES(:UsuarioId, :Titulo, :Informacion, :Observacion)";
+    $sql = "INSERT INTO Conocimiento (UsuarioId, Titulo, Informacion, Observacion, Hecho) VALUES(:UsuarioId, :Titulo, :Informacion, :Observacion, :Hecho)";
     
     try 
     {
@@ -332,6 +336,7 @@ function AgregarConocimiento()
         $stmt->bindParam("Titulo", $conocimiento->Titulo);
         $stmt->bindParam("Informacion", $conocimiento->Informacion);
         $stmt->bindParam("Observacion", $conocimiento->Observacion);
+        $stmt->bindParam("Hecho", $conocimiento->Hecho);
 
         $stmt->execute();
         
@@ -1093,7 +1098,7 @@ function EditarConocimiento()
         $app->status(409);
     }
     
-    $sql = "INSERT INTO Conocimiento (ConocimientoId, UsuarioId, Titulo, Informacion, Observacion) VALUES(:ConocimientoId, :UsuarioId, :Titulo, :Informacion, :Observacion)";
+    $sql = "INSERT INTO Conocimiento (ConocimientoId, UsuarioId, Titulo, Informacion, Observacion, Hecho) VALUES(:ConocimientoId, :UsuarioId, :Titulo, :Informacion, :Observacion, :Hecho)";
     
     try 
     {
@@ -1104,6 +1109,7 @@ function EditarConocimiento()
         $stmt->bindParam("Titulo", $conocimiento->Titulo);
         $stmt->bindParam("Informacion", $conocimiento->Informacion);
         $stmt->bindParam("Observacion", $conocimiento->Observacion);
+        $stmt->bindParam("Hecho", $conocimiento->Hecho);
 
         $stmt->execute();
 
