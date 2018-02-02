@@ -15,6 +15,9 @@ class Nota
         this.ImagenSrc = [];
         this.Archivo = [];
         this.ArchivoSrc = [];
+        
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
     }
 }
 
@@ -92,6 +95,11 @@ function SetNota(data)
         nota.FechaFormato = TransformarFecha(data.Fecha);
     }
 
+    if(nota.FechaModificacion)
+    {
+        nota.FechaModificacionFormato = TransformarFecha(data.FechaModificacion);
+    }
+    
     if(data.Notas !== null && data.Notas !== undefined)
     {
          nota.NotasHTML = data.Notas.replace(/\r?\n/g, "<br>");

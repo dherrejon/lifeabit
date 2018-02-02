@@ -40,6 +40,14 @@ app.controller("EncabezadoControlador", function($scope, $window, $http, $rootSc
                 $scope.barraNavegacion = EncabezadoConocimiento;
                 break;
                 
+            case "Mis Imágenes": 
+                $scope.barraNavegacion = EncabezadoImagen;
+                break;
+                
+            case "Mis Archivos": 
+                $scope.barraNavegacion = EncabezadoArchivo;
+                break;
+                
             case "Home": 
                 $scope.barraNavegacion = EncabezadoAplicaciones;
                 break;
@@ -448,3 +456,32 @@ var EncabezadoConocimiento =
                                                 ]},
               ]                       
 };
+
+var EncabezadoImagen =
+{ 
+    titulo:"Mis Imágenes", 
+    opcion: [ 
+                    { texto:"Inicio", tipo:"link", referencia:"#Imagen", show: true},
+                    { texto:"Administrar", tipo:"dropdown", show: true,
+                                                elemento:
+                                                [
+                                                    {texto:"Etiquetas", referencia:"#Etiqueta", funcion:"", show:true},
+                                                    {texto:"Temas", referencia:"#TemaActividad", funcion:"", show:true},
+                                                ]},
+              ]                       
+};
+
+var EncabezadoArchivo =
+{ 
+    titulo:"Mis Archivos", 
+    opcion: [ 
+                    { texto:"Inicio", tipo:"link", referencia:"#Archivo", show: true},
+                    { texto:"Administrar", tipo:"dropdown", show: true,
+                                                elemento:
+                                                [
+                                                    {texto:"Etiquetas", referencia:"#Etiqueta", funcion:"", show:true},
+                                                    {texto:"Temas", referencia:"#TemaActividad", funcion:"", show:true},
+                                                ]},
+              ]                       
+};
+

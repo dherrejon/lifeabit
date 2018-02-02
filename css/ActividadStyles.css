@@ -1,11 +1,14 @@
 .barraLateralActividad
 {
     position: fixed;
-    width: 25%;
+    width: 270px;
     height: 100%;
     display: block;
     background: #E6E6E6;
     overflow: scroll;
+    
+    padding-right: 15px;
+    padding-left: 15px;
 }
 
 .panelOperacionBotonLateral, .panelOperacionBotonLateral:focus, .panelOperacionBotonLateral:active, .panelOperacionBotonLateral:hover
@@ -128,6 +131,14 @@
     {
          min-height: 45px;
          font-size: 14pt;
+    }
+}
+
+@media (min-width: 767px) 
+{
+    .eventoForm
+    {
+        margin-left: 270px !important;
     }
 }
 
@@ -299,22 +310,22 @@
 
 .actividad.hoyPendiente
 {
-    background:  #FFC000;
+    background:  #79adf4;
 }
 
 .actividad.enEspera
 {
-    background: gray;
+    background: #b3b3b3;
 }
 
 .actividad.done
 {
-    background: #00B050;
+    background: #088A08;
 }
 
 .actividad.pendiente
 {
-    background: #FFC000;
+    background: #fabf15;
 }
 
 .btnEvento, .btnEvento:focus, .btnEvento:hover, .btnEvento:active
@@ -336,6 +347,11 @@
     box-shadow: none;
 }
 
+.btnEvento.SinFecha
+{
+    border-color:  #808080 !important;
+}
+
 .btnEvento:disabled
 {
     cursor: default;
@@ -355,16 +371,6 @@
     color: white;
     
     border-top: 1px solid white;
-}
-
-.tituloEstatusActividad.Hoy
-{
-    background: #1859b2 !important;
-}
-
-.tituloEstatusActividad.Pendiente
-{
-    color: black !important;
 }
 
 .btnEstatusEvento, .btnEstatusEvento:hover, .btnEstatusEvento:active, .btnEstatusEvento:focus
@@ -406,20 +412,20 @@
 
 .estatusActividad.Hecho
 {
-    border: 1px solid #00B050;
-    background: #00B050;
+    border: 1px solid #088A08;
+    background: #088A08;
 }
 
 .estatusActividad.Pendiente
 {
-    border: 1px solid #FFC000;
+    border: 1px solid #fabf15;
     background: #FFC000;
 }
 
 .estatusActividad.Hoy
 {
-    border: 1px solid #1859b2;
-    background: #1859b2;
+    border: 1px solid #79adf4;
+    background: #79adf4;
 }
 
 .estatusActividad.Futuro
@@ -450,25 +456,62 @@
 {
     background: #79adf4; 
 }
-.tituloEstatusPendiente.enEspera
+
+.pendienteapp.sinFecha
+{
+    border: 2px solid #808080;
+}
+
+.tituloEstatusPendiente.enEspera, .tituloEstatusActividad.enEspera
 {
     background: #808080;
 }
 
-.tituloEstatusPendiente.done
+.tituloEstatusPendiente.done, .tituloEstatusActividad.done
 {
     background: #0B610B;
 }
 
-.tituloEstatusPendiente.pendiente
+.tituloEstatusPendiente.pendiente, .tituloEstatusActividad.pendiente
 {
     color: black;
     background: #fabf15;
 }
 
-.tituloEstatusPendiente.hoyPendiente
+.tituloEstatusPendiente.hoyPendiente, .tituloEstatusActividad.hoyPendiente
 {
     background: #1859b2;
 }
 
+.tituloEstatusPendiente.sinFecha
+{
+    background: #b3b3b3;
+    border-radius: 8px;
+
+}
+
+.eventoForm
+{
+    margin-left: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.btnOptAutoHeight, .btnOptAutoHeight:hover, .btnOptAutoHeight:focus, .btnOptAutoHeight:active
+{
+    display: table-cell; 
+    position: relative; 
+    white-space: nowrap; 
+    vertical-align: middle; 
+    width: 1%;
+}
+
+.actividadOpt
+{
+    right: 0; 
+    top: 0; 
+    position: absolute;
+    width: auto;
+    z-index: 5 !important;
+}
 

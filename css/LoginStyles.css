@@ -101,6 +101,7 @@
 }
 
 .entrada2 input[type=text],.entrada2 input[type=password],.entrada2 input[type=email]
+.entrada2 textarea[type=text],.entrada2 textarea[type=password],.entrada2 textarea[type=email]
 {
     font-weight:400;
     font-size:18px;
@@ -114,6 +115,8 @@
 
 .entrada2 input[type=text]:disabled~label, .entrada2 input[type=text]:focus~label,.entrada2 input[type=text]:valid~label,.entrada2 input[type=password]:focus~label,.entrada2 input[type=password]:valid~label, .entrada2 input[type=email]:focus~label,.entrada2 input[type=email]:valid~label,
 .entrada2 input[type=text]:focus~label,.entrada2 input[type=text]:valid~label,.entrada2 input[type=password]:focus~label,.entrada2 input[type=password]:valid~label, .entrada2 input[type=email]:focus~label,.entrada2 input[type=email]:valid~label
+.entrada2 textarea[type=text]:disabled~label, .entrada2 textarea[type=text]:focus~label,.entrada2 textarea[type=text]:valid~label,.entrada2 textarea[type=password]:focus~label,.entrada2 textarea[type=password]:valid~label, .entrada2 textarea[type=email]:focus~label,.entrada2 textarea[type=email]:valid~label,
+.entrada2 textarea[type=text]:focus~label,.entrada2 textarea[type=text]:valid~label,.entrada2 textarea[type=password]:focus~label,.entrada2 textarea[type=password]:valid~label, .entrada2 textarea[type=email]:focus~label,.entrada2 textarea[type=email]:valid~label
 {
     top:-20px;
     color: #1859b2;
@@ -124,6 +127,7 @@
 }
 
 .entrada2 input[type=text]:focus:not([readonly])~label,.entrada2 input[type=password]:focus:not([readonly])~label,.entrada2 input[type=email]:focus:not([readonly])~label
+.entrada2 textarea[type=text]:focus:not([readonly])~label,.entrada2 textarea[type=password]:focus:not([readonly])~label,.entrada2 textarea[type=email]:focus:not([readonly])~label
 {
     color: #262626 !important;
     font-weight:400;

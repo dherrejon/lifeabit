@@ -36,3 +36,25 @@
 {
     color:  #088A08;
 }
+
+.areainput, .areainput:focus, .areainput:active, .areainput:hover
+{
+    border-radius: 0px;
+    border-width: 0px;
+    border-bottom: 3px solid #262626;
+    max-width: 100%;
+    background: transparent;
+    height: auto;
+    text-align: left;
+    font-size: 14pt;
+    resize: none;
+    box-sizing: border-box;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.areainput:disabled
+{
+    background: lightgray;
+}

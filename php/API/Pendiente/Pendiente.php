@@ -353,7 +353,10 @@ function AgregarPendiente()
     $imagenId = [];
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$pendiente->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$pendiente->UsuarioId,0777);
@@ -364,18 +367,33 @@ function AgregarPendiente()
             mkdir($dir,0777);
         }
         
+        if(!is_dir("ArchivosUsuario/".$pendiente->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$pendiente->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
-                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES ('".$imagen."', '".$name."', '".$ext."', ".$size.", ".$pendiente->UsuarioId.")";
+                $sql = "INSERT INTO Imagen ( Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', ".$size.", ".$pendiente->UsuarioId.")";
                 
                 try 
                 {
@@ -387,15 +405,16 @@ function AgregarPendiente()
                 catch(PDOException $e) 
                 {
                     echo '[{"Estatus": "Fallo"}]';
-                    echo $e;
+                    echo $sql;
                     $db->rollBack();
                     $app->status(409);
                     $app->stop();
                 }
                 
                 //Subir Imagen
-                //$uploadfile = $_FILES['file']['name'];
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
                 
                 
                 //----------------------- Etiquetas --------------------
@@ -1274,7 +1293,10 @@ function EditarPendiente()
     $imagenId = [];
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$pendiente->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$pendiente->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$pendiente->UsuarioId,0777);
@@ -1285,14 +1307,29 @@ function EditarPendiente()
             mkdir($dir,0777);
         }
         
+        if(!is_dir("ArchivosUsuario/".$pendiente->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$pendiente->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
@@ -1315,9 +1352,9 @@ function EditarPendiente()
                 }
                 
                 //Subir Imagen
-                //$uploadfile = $_FILES['file']['name'];
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
-                
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
                 
                 //----------------------- Etiquetas --------------------
                 $countEtiqueta = count($pendiente->ImagenSrc[$k]->Etiqueta);
@@ -1385,7 +1422,6 @@ function EditarPendiente()
                 $imagenId[$k] = 0;
             }
         }
-        
         
         if($count > 0)
         {
@@ -1545,8 +1581,6 @@ function EditarPendiente()
                 }
             }
         }
-        
-       
     }
     
     /*------------------Termina Imagenes --------------*/

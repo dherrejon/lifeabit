@@ -24,6 +24,9 @@ class Pendiente
         this.ImagenSrc = [];
         this.Archivo = [];
         this.ArchivoSrc = [];
+        
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
     }
 }
 
@@ -56,11 +59,19 @@ function SetPendiente(data)
     pendiente.Recordatorio = data.Recordatorio;
     
     pendiente.FechaCreacion = data.FechaCreacion;
-    pendiente.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
     pendiente.FechaIntencion = data.FechaIntencion;
-    pendiente.FechaIntencionFormato = TransformarFecha(data.FechaIntencion);
     pendiente.FechaRealizacion = data.FechaRealizacion;
-    pendiente.FechaRealizacionFormato = TransformarFecha(data.FechaRealizacion);
+    pendiente.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
+    
+    if(pendiente.FechaRealizacion)
+    {
+        pendiente.FechaRealizacionFormato = TransformarFecha(data.FechaRealizacion);
+    }
+    
+     if(pendiente.FechaIntencion)
+    {
+        pendiente.FechaIntencionFormato = TransformarFecha(data.FechaIntencion);
+    }
     
     pendiente.HoraIntencion = data.HoraIntencion;
     pendiente.HoraRealizacion = data.HoraRealizacion;

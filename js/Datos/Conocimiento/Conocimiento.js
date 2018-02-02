@@ -13,6 +13,8 @@ class Conocimiento
         
         this.Imagen = [];
         this.ImagenSrc = [];
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
         this.Archivo = [];
         this.ArchivoSrc = [];
     }

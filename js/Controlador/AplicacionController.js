@@ -387,11 +387,10 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         return visible;
     };
     
-    $scope.VerImganes = function(imagen)
+    $scope.VerImganes = function(imagen, i)
     {
-        console.log($rootScope.UsuarioId);
         $scope.img = imagen;
-        $scope.iImg = 0;
+        $scope.iImg = i;
         $('#verImagen').modal('toggle');
     };
     
@@ -705,9 +704,15 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     
     $scope.CambiarAppFiltro = function(app)
     {
+        var buscar = false;
+        
         if(app == "Todo")
         {
-            $scope.filtroApp = {todo: true, actividad:false, diario: false, nota:false, imagen:false, evento:false, pendiente:false, archivo:false, conocimiento:false};
+            if(!$scope.filtroApp.todo)
+            {
+                $scope.filtroApp = {todo: true, actividad:false, diario: false, nota:false, imagen:false, evento:false, pendiente:false, archivo:false, conocimiento:false};
+                buscar = true;
+            }
         }
         else
         {
@@ -717,27 +722,35 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             {
                 case "Actividades":
                     $scope.filtroApp.actividad = !$scope.filtroApp.actividad;
+                    $scope.filtroApp.actividad ? buscar = true : $scope.actividad = [];
                     break;
                 case "Diario":
                     $scope.filtroApp.diario = !$scope.filtroApp.diario;
+                    $scope.filtroApp.diario ? buscar = true : $scope.diario = [];
                     break;
                 case "Notas":
                     $scope.filtroApp.nota = !$scope.filtroApp.nota;
+                    $scope.filtroApp.nota ? buscar = true : $scope.nota = [];
                     break;
                 case "Imagenes":
                     $scope.filtroApp.imagen = !$scope.filtroApp.imagen;
+                    $scope.filtroApp.imagen ? buscar = true : $scope.imagen = [];
                     break;
                 case "Eventos":
                     $scope.filtroApp.evento = !$scope.filtroApp.evento;
+                    $scope.filtroApp.evento ? buscar = true : $scope.evento = [];
                     break;
                 case "Objetivos":
                     $scope.filtroApp.pendiente = !$scope.filtroApp.pendiente;
+                    $scope.filtroApp.pendiente ? buscar = true : $scope.pendiente = [];
                     break;
                 case "Archivos":
                     $scope.filtroApp.archivo = !$scope.filtroApp.archivo;
+                    $scope.filtroApp.archivo ? buscar = true : $scope.archivo = [];
                     break;
                 case "Conocimiento":
                     $scope.filtroApp.conocimiento = !$scope.filtroApp.conocimiento;
+                    $scope.filtroApp.conocimiento ? buscar = true : $scope.conocimiento = [];
                     break;
 
                 default:
@@ -747,7 +760,13 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             if(!$scope.filtroApp.actividad && !$scope.filtroApp.diario && !$scope.filtroApp.nota && !$scope.filtroApp.imagen  && !$scope.filtroApp.evento && !$scope.filtroApp.pendiente && !$scope.filtroApp.archivo && !$scope.filtroApp.conocimiento )
             {
                 $scope.filtroApp.todo = true;
+                buscar = true;
             }
+        }
+        
+        if(buscar && ($scope.filtro.etiqueta.length > 0 || $scope.filtro.tema.length > 0 || $scope.filtro.fecha))
+        {
+            $scope.GetBuscador();
         }
     };
     
@@ -944,9 +963,12 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
 
 var aplicaciones = [
                         {texto:"Mis Actividades", habilitada:true, paginaPrincipal:"/Actividades",   icono:"fa fa-calendar"},
+                        {texto:"Mis Archivos", habilitada:true, paginaPrincipal:"/Archivo",   icono:"fa fa-file-o"},
                         {texto:"Mi Conocimiento", habilitada:true, paginaPrincipal:"/Conocimiento", icono:"fa fa-book"},
                         {texto:"Mi Diario", habilitada:true, paginaPrincipal:"/Diario", icono:"fa fa-clock-o"},
+                        {texto:"Mis Imágenes", habilitada:true, paginaPrincipal:"/Imagen", icono:"fa fa-picture-o"},
                         {texto:"Mis Notas", habilitada:true, paginaPrincipal:"/Notas", icono:"fa fa-sticky-note"},
                         {texto:"Mis Objetivos", habilitada:true, paginaPrincipal:"/Objetivo", icono:"fa fa-calendar-times-o"},
+                        
                     ];
 

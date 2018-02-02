@@ -102,11 +102,11 @@
                     </div>
                     
                     <!-- Buscar  botón -->
-                     
-                     
-                     <button class="btn  botonFiltrarBarraLateral text-center btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                    <div style="margin-right: 37px">
+                       <button class="btn  botonFiltrarBarraLateral text-center pull-right" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
                            <b ><span class="fa fa-ban"></span> Limpiar</b>
                        </button>
+                    </div>
                     
                 </div>
                 
@@ -240,20 +240,33 @@
                                 <spna>{{nuevoConocimiento.Hecho == '1' ? 'Hecho' : 'No Hecho'}}</spna>
                              </a>
                          </div>
+                         
+                         <div class="col-xs-12 ">
+                             <div style="height: 30px"></div>
+                         </div>
                      </div>
                      
-                     <br>
+                     <div class="row">
+                         
+                     </div>
                  
                      <div class="row">
                          <div class="col-xs-12">
-                            
-                             <div class="entrada2">
-                                <input type="text" required class="entrada form-control" name="titulo" ng-model="nuevoConocimiento.Titulo"  ng-maxlength="300" autocomplete="off" ng-blur="CrearEtiquetaSugerida()"/>
-                                <label class="">Título</label><br>
+                             
+                            <div class="input-group">
+                                 <div class="entrada2">
+                                    <textarea required type="text"  class="form-control entrada areainput" style="font-size:12pt" name="titulo" ng-model="nuevoConocimiento.Titulo" maxlength="300" autocomplete="off" ng-blur="CrearEtiquetaSugerida()" rows="1"></textarea>
+                                    <label class="">Título</label>
+                                 </div>
+                                 
+                                 <span class="input-group-btn">
+                                    <a class="btn close cerrarModal"  ng-click="nuevoConocimiento.Titulo = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
                              </div>
                              
                          </div>
                      </div>
+                     <br>
                      
                      <div class="row">
                          <div class="col-xs-12">
@@ -353,7 +366,35 @@
                     </div>
                 
                     <br>
-                
+                    
+                    <!--<div class="row" ng-show="nuevoConocimiento.ImagenSrc.length > 0">
+                        <div class="col-xs-12 col-sm-6 pull-right">
+                            <!-- Resolución --
+                             <div class="etiquetaDropdownList " id="lugarEventoPanel" style="margin-top: 0px">
+                                <div class="dropdown">
+                                    <button class="btn btn-block dropdownListModal" data-toggle="dropdown" ng-disabled="nuevoPendiente.Hecho == '1'">
+                                        Resolución: {{nuevoConocimiento.Resolucion}} 
+                                        <div class="pull-right">
+                                            <span class="caret"></span>
+                                        </div>
+                                    </button>
+
+                                    <ul class="dropdown-menu dropdown-menu-right " style="margin-top: 0px; width: 100%; border-radius: 0px">
+
+                                        <li ng-repeat="r in resolucion ">
+                                            <a class="dropdownOpcion2" ng-click="nuevoConocimiento.Resolucion = r">
+                                                {{r}}
+                                            </a>
+                                        </li>
+
+                                    </ul>
+
+                                 </div>
+                            </div> 
+                        </div>
+                    </div>
+                    <br ng-show="nuevoConocimiento.ImagenSrc.length > 0">-->
+                    
 
                    <div class="row" >
                        <div class="col-xs-12">
@@ -383,7 +424,7 @@
                                       <td class="hidden-xs"> <span class="infoCenterCell">{{img.name}}</span> </td>
                                         <td class="hidden-xs">  <span class="infoCenterCell">{{(img.size/1000000).toFixed(2)}} MB</span> </td>
                                       <td class="text-center">
-                                          <a class="btn btnQuitarImg" ng-click="nuevoConocimiento.ImagenSrc.splice($index,1)">
+                                          <a class="btn btnQuitarImg" ng-click="nuevoConocimiento.ImagenSrc.splice($index,1); nuevoConocimiento.ImagenTh.splice($index,1); nuevoConocimiento.ImagenWeb.splice($index,1);">
                                              <span class="fa fa-times-circle"></span>
                                          </a>
                                       </td>
@@ -404,7 +445,7 @@
                                       <td style="width: 100px">
                                         <div class="imgContainer" style="height:50px">
                                              <a style="overflow: hidden !important; max-height: 50px">
-                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoConocimiento.Imagen, nuevoConocimiento.ImagenSrc, $index, 1)"/>
+                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoConocimiento.Imagen, nuevoConocimiento.ImagenSrc, $index, 1)"/>
                                              </a>
                                         </div>
                                       </td>
@@ -440,7 +481,7 @@
                                       <td style="width: 100px">
                                           <div class="imgContainer" style="height:50px">
                                               <a style="overflow: hidden !important; max-height: 50px">
-                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoConocimiento.Imagen, null, $index)"/>
+                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoConocimiento.Imagen, null, $index)"/>
                                               </a>
                                           </div>
                                       </td>
@@ -565,7 +606,7 @@
                                     <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                                        <div class="imgContainer" >
                                             <div class="crop center-block">
-                                                 <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{detalle.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, detalle.Imagen, null, i)"/>
+                                                 <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{detalle.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, detalle.Imagen, null, i)"/>
                                              </div>
                                         </div>
                                     </div>
@@ -654,7 +695,7 @@
                                     <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                         <span class="fa fa-check-circle" ></span>
                                     </a>
-                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
                                  </div>
                             </div>
                             <div style="height: 15px"></div>
@@ -696,7 +737,7 @@
                       <!-- Items -->
                       <div class="carousel-inner">
                         <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
-                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Web/{{img.Nombre}}"/>
                             <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
                         </div>
                       </div>

@@ -996,6 +996,8 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             $scope.inicioDiario = jQuery.extend({}, $scope.nuevoDiario);
         }
         
+         
+        
         $('#modalApp').modal('toggle');
         $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoDiario, 'Diario');
     };
@@ -2623,6 +2625,34 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
             {
                 return function(e) 
                 {
+                    var compressor = new Compress();
+                    
+                    compressor.compress([theFile], {
+                        size: 10,
+                        quality: 1,
+                        maxWidth: 250,
+                        maxHeight: 150,
+                        resize: true
+                    }).then((result) => {
+
+                        $scope.nuevoDiario.ImagenTh.push((Compress.convertBase64ToFile(result[0].data, result[0].ext)));
+
+                    });
+                    
+                    var compressor2 = new Compress();
+                    
+                    compressor2.compress([theFile], {
+                        size: 10,
+                        quality: 0.4,
+                        maxWidth: 1000,
+                        maxHeight: 1000,
+                        resize: false
+                    }).then((result) => {
+
+                        $scope.nuevoDiario.ImagenWeb.push(Compress.convertBase64ToFile(result[0].data, result[0].ext));
+
+                    });
+                    
                     $scope.nuevoDiario.ImagenSrc.push(theFile);
                     $scope.nuevoDiario.ImagenSrc[$scope.nuevoDiario.ImagenSrc.length-1].Src= (e.target.result);
                     $scope.nuevoDiario.ImagenSrc[$scope.nuevoDiario.ImagenSrc.length-1].Etiqueta = [];

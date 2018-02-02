@@ -14,6 +14,9 @@ class Diario
         
         this.Archivo = [];
         this.ArchivoSrc = [];
+        
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
     }
 }
 

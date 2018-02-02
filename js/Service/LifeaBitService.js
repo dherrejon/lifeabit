@@ -224,6 +224,16 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
             fd.append('file[]', data.ImagenSrc[k]);
         }
         
+        for(var k=0; k<data.ImagenTh.length; k++)
+        {
+            fd.append('imgth[]', data.ImagenTh[k]);
+        }
+        
+        for(var k=0; k<data.ImagenWeb.length; k++)
+        {
+            fd.append('imgweb[]', data.ImagenWeb[k]);
+        }
+        
         if(data.ArchivoSrc)
         {
             for(var k=0; k<data.ArchivoSrc.length; k++)
@@ -242,6 +252,7 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
                 }
             }
         }
+        
         if(data.Archivo)
         {
             for(var k=0; k<data.Archivo.length; k++)
@@ -252,12 +263,32 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
                 }
             }
         }
-
+        
         var Datos = jQuery.extend({}, data);
 
         Datos.AgregarImagen = data.ImagenSrc.length;
         
         Datos.AgregarArchivo = data.ArchivoSrc ? data.ArchivoSrc.length: 0;
+        
+        
+        Datos.ImagenWeb = null;
+        Datos.ImagenTh = null;
+        Datos.ImagenSrc = [];
+        Datos.ArchivoSrc = [];
+        
+        for(var k=0; k<data.ImagenSrc.length; k++)
+        {
+            Datos.ImagenSrc[k] =  new Object();
+            Datos.ImagenSrc[k].Etiqueta = data.ImagenSrc[k].Etiqueta;
+            Datos.ImagenSrc[k].Tema = data.ImagenSrc[k].Tema;
+        }
+        
+        for(var k=0; k<data.ArchivoSrc.length; k++)
+        {
+            Datos.ArchivoSrc[k] =  new Object();
+            Datos.ArchivoSrc[k].Etiqueta = data.ArchivoSrc[k].Etiqueta;
+            Datos.ArchivoSrc[k].Tema = data.ArchivoSrc[k].Tema;
+        }
 
         fd.append('datos', JSON.stringify(Datos));
         

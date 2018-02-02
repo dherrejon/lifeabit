@@ -392,7 +392,10 @@ function AgregarDiario()
     $imagenId = [];
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$diario->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$diario->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$diario->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$diario->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$diario->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$diario->UsuarioId,0777);
@@ -403,14 +406,30 @@ function AgregarDiario()
             mkdir($dir,0777);
         }
         
+        if(!is_dir("ArchivosUsuario/".$diario->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$diario->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
+        
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
@@ -433,8 +452,10 @@ function AgregarDiario()
                 }
                 
                 //Subir Imagen
-                //$uploadfile = $_FILES['file']['name'];
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
+                
                 
                 
                 //----------------------- Etiquetas --------------------
@@ -1352,7 +1373,10 @@ function EditarDiario()
     $imagenId = [];
     if($countFile > 0)
     {
-         $dir = "ArchivosUsuario/".$diario->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$diario->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$diario->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$diario->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$diario->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$diario->UsuarioId,0777);
@@ -1362,17 +1386,32 @@ function EditarDiario()
         {
             mkdir($dir,0777);
         }
+        
+        if(!is_dir("ArchivosUsuario/".$diario->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$diario->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
             
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
-                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                //imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
                 $sql = "INSERT INTO Imagen (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', ".$size.", ".$diario->UsuarioId.")";
                 
@@ -1393,6 +1432,8 @@ function EditarDiario()
                 }
                 
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
             
                 //----------------------- Etiquetas --------------------
                 $countEtiqueta = count($diario->ImagenSrc[$k]->Etiqueta);

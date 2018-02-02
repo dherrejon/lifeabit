@@ -34,24 +34,37 @@
     width: 70px;
 }
 
-.btnOptPendiente.Editar
+.btnOptPendiente.Editar, .btnOptActividad.Editar
 {
     background: #088A08;
 }
 
-.btnOptPendiente.Borrar
+.btnOptPendiente.Borrar, .btnOptActividad.Borrar
 {
     background: #970000;
 }
 
-.btnOptPendiente.Detalle
+.btnOptPendiente.Detalle, .btnOptActividad.Detalle
 {
     background: #1859b2;
 }
 
-.btnOptPendiente.Copiar
+.btnOptPendiente.Copiar, .btnOptActividad.Copiar
 {
     background: #808080;
+}
+
+.btnOptActividad, .btnOptActividad:active, .btnOptActividad:hover, .btnOptActividad:focus
+{
+    height: 100%;
+    border-radius: 0px;
+    color: white;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+        
+    outline: none !important;
+    box-shadow: none;
+    width: 65px;
 }
 
 

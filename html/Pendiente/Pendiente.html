@@ -180,10 +180,11 @@
                     </div>
                     
                     <!-- Buscar  botón -->
-                    <button class="btn  botonFiltrarBarraLateral text-center  btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
-                        <b ><span class="fa fa-ban"></span> Limpiar</b>
-                    </button>
-                     
+                    <div style="margin-right: 37px">
+                        <button class="btn  botonFiltrarBarraLateral text-center pull-right" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                            <b ><span class="fa fa-ban"></span> Limpiar</b>
+                        </button>
+                    </div>
 
                     
                 </div>
@@ -196,12 +197,12 @@
        
        <div style="margin-top: 10px"></div>
        <div class="row">
-           <div class="col-xs-12" ng-repeat="p in pendiente | orderBy:['Hecho', 'FechaRealizacion', '-Importancia'] | filter:FiltroPendiente">
+           <div class="col-xs-12" ng-repeat="p in pendiente |  orderBy:['Hecho', OrdenarPorFecha, '-Importancia'] | filter:FiltroPendiente">
                <div  class="eventoVista" style="position: relative; border-width: 0px">
                  
                     <div class="pendienteapp {{p.Clase}}" style="margin-top: -1px">
                         
-                        <button class="btn btnEvento" ng-click="AccionPendiente(p)" style="z-index: 1 !important">
+                        <button class="btn btnEvento" ng-class="{SinFecha : !p.FechaRealizacion}" ng-click="AccionPendiente(p)" style="z-index: 1 !important">
                             <span ng-if="('1' == p.Hecho)" class="fa fa-check"></span> 
                          </button>
                          
@@ -219,7 +220,10 @@
                     <div style="position: relative; margin-left: 90px; padding: 10px; overflow-y: scroll; max-height: 90px; margin-right: 25px">
                         <b style="font-size: 12pt;  color: black">{{p.Nombre}}</b><br>
                         <span style="font-size: 11pt;" class="txtPrioridad {{p.NombrePrioridad}}"><b> {{ p.NombrePrioridad}}<br></b></span>
-                        <span style="font-size: 11pt;"><b>Fecha: </b>{{p.FechaRealizacionFormato}}<br></span>
+                        <span style="font-size: 11pt;">
+                            <b>Fecha: </b>
+                            {{p.FechaRealizacionFormato ? p.FechaRealizacionFormato : 'Sin Definir'}}<br>
+                        </span>
                         <span style="font-size: 11pt;" ng-show="p.HoraRealizacion"><b>Hora: </b>{{p.HoraRealizacion}}<br></span>
                     </div>
                     
@@ -286,7 +290,8 @@
             <div class="row">
                 <div class="col-xs-8 col-sm-10">
                     <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
-                    <span  class="tituloModal">{{operacion}} Objetivo</span>
+                    <span  class="tituloModal">{{tituloModal}}</span><br>
+                    <span  style="font-size: 13pt">{{operacion}} Objetivo</span>
                 </div>
                 
                 <div class="col-xs-4 col-sm-2">
@@ -368,7 +373,7 @@
 
                             <div class="row">
                                 <div class="col-xs-12" >
-                                    <input ng-disabled="nuevoPendiente.Hecho == '1'" type="text"  id="horaIntencion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraIntencion(this)"/>
+                                    <input  type="text"  id="horaIntencion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraIntencion(this)"/>
                                 </div>
                             </div>
                             
@@ -402,7 +407,7 @@
 
                             <div class="row" >
                                 <div class="col-xs-12" >
-                                    <input ng-disabled="nuevoPendiente.Hecho == '1'" type="text"  id="horaRealizacion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraRealizacion(this)"/>
+                                    <input  type="text"  id="horaRealizacion" class="form-control entrada" style=" cursor:pointer;  z-index: 5 !important;" onblur="angular.element(this).scope().CambiarHoraRealizacion(this)"/>
                                 </div>
                             </div>
                     
@@ -415,10 +420,17 @@
                     <!-- Nombre  -->
                     <div class="row">
                         <div class="col-sm-12">
-
-                            <div class="">
-                                <label class="etiquetaNormal">Objetivo</label>
-                                <textarea ng-disabled="nuevoPendiente.Hecho == '1'" required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 75px" name="nota" ng-model="nuevoPendiente.Nombre" maxlength="220" ng-blur="CrearEtiquetaSugerida()"></textarea>
+                            
+                            <div class="input-group">
+                                <div class="entrada2">
+                                    <textarea ng-disabled="nuevoPendiente.Hecho == '1'" required type="text"  class="form-control entrada areainput" style="font-size:12pt; " name="nota" ng-model="nuevoPendiente.Nombre" maxlength="220" ng-blur="CrearEtiquetaSugerida(); tituloModal = nuevoPendiente.Nombre" rows="1"></textarea>
+                                    <label class="">Objetivo</label>
+                                </div>
+                                
+                                <span class="input-group-btn">
+                                    <a class="btn close cerrarModal"  ng-click="nuevoPendiente.Nombre = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
+                                
                             </div>
 
                        </div>             
@@ -738,7 +750,7 @@
                                       <td class="hidden-xs"> <span class="infoCenterCell">{{img.name}}</span> </td>
                                         <td class="hidden-xs">  <span class="infoCenterCell">{{(img.size/1000000).toFixed(2)}} MB</span> </td>
                                       <td class="text-center">
-                                          <a class="btn btnQuitarImg" ng-click="nuevoPendiente.ImagenSrc.splice($index,1)">
+                                          <a class="btn btnQuitarImg" ng-click="nuevoPendiente.ImagenSrc.splice($index,1); nuevoPendiente.ImagenWeb.splice($index,1); nuevoPendiente.ImagenTh.splice($index,1);">
                                              <span class="fa fa-times-circle"></span>
                                          </a>
                                       </td>
@@ -759,7 +771,7 @@
                                       <td style="width: 100px">
                                         <div class="imgContainer" style="height:50px">
                                              <a style="overflow: hidden !important; max-height: 50px">
-                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoPendiente.Imagen, nuevoPendiente.ImagenSrc, $index, 1)"/>
+                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoPendiente.Imagen, nuevoPendiente.ImagenSrc, $index, 1)"/>
                                              </a>
                                         </div>
                                       </td>
@@ -795,7 +807,7 @@
                                       <td style="width: 100px">
                                           <div class="imgContainer" style="height:50px">
                                               <a style="overflow: hidden !important; max-height: 50px">
-                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoPendiente.Imagen, null, $index)"/>
+                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoPendiente.Imagen, null, $index)"/>
                                               </a>
                                           </div>
                                       </td>
@@ -925,15 +937,15 @@
                         </span>
 
                          <!-- Fecha Intención -->
-                        <span>
+                        <span >
                             <b>Fecha Intención: </b> 
                             <span>
-                                {{detalle.FechaIntencionFormato}}
+                                {{detalle.FechaIntencion ? detalle.FechaIntencionFormato : 'Sin Definir'}}
                             </span><br>
                         </span>
                         
                          <!-- Hora Intención -->
-                        <span>
+                        <span ng-if="detalle.HoraIntencion">
                             <b>Hora Intención: </b> 
                             <span>
                                 {{detalle.HoraIntencion}}
@@ -941,16 +953,16 @@
                         </span>
 
                          <!-- Fecha Realización -->
-                        <span>
+                        <span >
                             <b>Fecha Realización: </b> 
                             <span>
-                                {{detalle.FechaRealizacionFormato}}
+                                {{detalle.FechaRealizacion ? detalle.FechaRealizacionFormato : 'Sin Definir'}}
                             </span><br>
                         </span>
                         
                         <!-- Hora Realización -->
-                        <span>
-                            <b>Hira Realización: </b> 
+                        <span ng-if="detalle.HoraRealizacion">
+                            <b>Hora Realización: </b> 
                             <span>
                                 {{detalle.HoraRealizacion}}
                             </span><br>
@@ -996,7 +1008,7 @@
                                     <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                                        <div class="imgContainer" >
                                             <div class="crop center-block">
-                                                 <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{detalle.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, detalle.Imagen, null, i)"/>
+                                                 <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{detalle.Imagen[i].Nombre}}" ng-click="VerImganes(true, false, false, detalle.Imagen, null, i)"/>
                                              </div>
                                         </div>
                                     </div>
@@ -1085,7 +1097,7 @@
                                     <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                         <span class="fa fa-check-circle" ></span>
                                     </a>
-                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
                                  </div>
                             </div>
                             <div style="height: 15px"></div>
@@ -1127,7 +1139,7 @@
                       <!-- Items -->
                       <div class="carousel-inner">
                         <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
-                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Web/{{img.Nombre}}"/>
                             <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
                         </div>
                       </div>

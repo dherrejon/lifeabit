@@ -1,4 +1,4 @@
-<div ng-controller="ActividadesController as actividades" >
+<div ng-controller="ActividadesController as actividades" id="actividadFroma">
    
     <div class="container-fluid">
        
@@ -88,7 +88,7 @@
         
         <div class="row">
 
-            <div class="col-sm-3 col-xs-12 barraLateralActividad" ng-show="anchoPantalla > 767 || detalle.ActividadId.length == 0">
+            <div class=" barraLateralActividad" ng-show="anchoPantalla > 767 || detalle.ActividadId.length == 0">
                 
                 
                 <!-- Separador -->
@@ -226,9 +226,11 @@
                     </div>
                     
                     <!-- Buscar  botón --> 
-                     <button class="btn  botonFiltrarBarraLateral text-center btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
-                        <b ><span class="fa fa-ban"></span> Limpiar</b>
-                     </button>
+                    <div style="margin-right: 37px">
+                         <button class="btn  botonFiltrarBarraLateral text-center pull-right" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                            <b ><span class="fa fa-ban"></span> Limpiar</b>
+                         </button>
+                    </div>
                     
                 </div>
                 
@@ -236,61 +238,58 @@
                 <div class="row">
                    
                    <div ng-repeat="actividad in actividad  | filter:FiltrarBuscarActividad | filter:FiltroActividadPendiente  | orderBy:'Nombre'" class="itemBarraLateral" ng-class="GetClaseActividad(actividad.ActividadId)">
-                       <div class="input-group" >
 
-                            <a class="btn itemBarraLateralbtn"   ng-click="VerDetalles(actividad)">
+                        <div class="input-group" id="actividad{{actividad.ActividadId}}">
 
-                                <span class="col-xs-12"  style="white-space: normal; overflow: hidden; display: inline-block" >
+                            <button class="btn itemBarraLateralbtn"   ng-click="VerDetalles(actividad)" style="vertical-align: middle; min-height: 60px; padding: 10px" >
+
+                                <span   style="white-space: normal; overflow: hidden; display: inline-block; " >
                                     <div class="estatusActividad {{actividad.Estatus}} pull-left" style="margin-top: 2px"> </div>
-                                     <span style="margin-left: 5px">{{actividad.Nombre}}</span>
+                                     <span style="margin-left: 5px; font-size: 12pt">{{actividad.Nombre}}</span>
                                 </span>
 
-                                
-                            </a>
-                            
-                            <div class="input-group-btn">
-                               
-                               <!-- "context menu" -->
-                                <div class="dropdown  ">
-                                    <button class=" btn itemBarraLateralbtn "  data-toggle="dropdown">
-                                        <span class="fa fa-ellipsis-v"></span>
+                            </button>
+
+                            <!-- "context menu" -->
+                            <div  class=" btn itemBarraLateralbtn btnOptAutoHeight" ng-click="VerOptPendiente(actividad.ActividadId)" id="optPen">
+                                <span class="fa fa-ellipsis-v"></span>
+                            </div>
+                           
+
+                            <div  class="actividadOpt animated "  ng-class="{slideInRight : verpen == actividad.ActividadId, slideOutRight : verpen2 == actividad.ActividadId}" ng-show=" verpen ==  actividad.ActividadId || verpen2 ==  actividad.ActividadId" >
+
+                                 <div class="btn-group" style="height: 60px !important" id="menuActividad{{actividad.ActividadId}}">
+
+                                  <button class="btn btnOptActividad Borrar" ng-click="BorrarActividad(actividad, actividad.EventoAux.length)" >
+                                         <span class="fa fa-trash"></span> <br>Borrar
                                     </button>
 
-                                    <ul class="dropdown-menu dropdown-menu-right dropdownRight">
-                                      
-                                       <li>
-                                           <a class=" dropdownOpcion2" ng-click="RegistrarEvento('Agregar', actividad, null)"> <span class="fa fa-calendar-plus-o "></span> Registrar</a>
-                                       </li>
-                                       
-                                       <li>
-                                            <a class="  dropdownOpcion2" ng-click="VerDetalles(actividad, false, 'Copiar')"> <span class="fa fa-files-o "></span> Copiar</a>
-                                        </li>
-                                        
-                                        <li>
-                                            <a class="  dropdownOpcion2" ng-click="VerDetalles(actividad, false, 'Editar')"> <span class="fa fa-pencil"></span> Editar</a>
-                                        </li>
-                                        
-                                        <li>
-                                            <a class="  dropdownOpcion2" ng-click="BorrarActividad(actividad, actividad.EventoAux.length)"> <span class="fa fa-minus-circle "></span> Borrar</a>
-                                        </li>
-                                    </ul>
+                                    <button class="btn btnOptActividad Copiar" ng-click="VerDetalles(actividad, false, 'Copiar')">
+                                        <span class="fa fa-files-o"></span> <br>Copiar
+                                    </button>
+
+                                    <button class="btn btnOptActividad Detalle" ng-click="RegistrarEvento('Agregar', actividad, null)">
+                                        <span class="fa fa-calendar-plus-o"></span> <br>Registrar
+                                    </button>
+
+                                   <button class="btn btnOptActividad Editar" ng-click="VerDetalles(actividad, false, 'Editar')">
+                                         <span class="fa fa-pencil"></span> <br>Editar
+                                    </button>
+
                                 </div>
-                                
-                            </div>
+
+                             </div>
 
                         </div>
+                       
                     </div>
                     
                 </div>
                 
             </div>
             
-            <div class="col-sm-3 col-xs-12 ">
-                
-            </div>
-            
             <!-- Detalles -->
-            <div class="col-sm-9 col-xs-12 detallesActividadPanel" ng-show="detalle.ActividadId.length > 0" >
+            <div class="eventoForm detallesActividadPanel" ng-show="detalle.ActividadId.length > 0">
                 
                 
                  <div class="row hidden-xs">
@@ -298,6 +297,7 @@
                         <div style="height: 74px"></div>
                     </div>
                 </div>
+                
                 
                 <!-- Regresar -->
                 <div class="row" ng-show="anchoPantalla <= 767">
@@ -315,7 +315,7 @@
                   
                    <div class="col-sm-12">
                       <!-- Nombre -->            
-                       <b class="tituloActividad"> {{detalle.Nombre}} </b>
+                       <b class="tituloActividad"> {{detalle.Nombre}}</b>
                        
                        <!-- Botones -->
                        <div class="pull-right btn-group">
@@ -444,8 +444,14 @@
                              <button class="btn btnEvento" ng-click="AccionEvento(evento)">
                                 <span ng-if="('1' == evento.Hecho)" class="fa fa-check"></span> 
                              </button>
-                            
-                             <div class="text-center tituloEstatusActividad {{evento.EstatusTexto}}" >{{evento.EstatusTexto}}</div>
+                             
+                             <di ng-show="evento.Fecha == hoy" style="z-index: -1 !important">
+                                <div class="text-center labelHoy" ></div>
+                                <div class="text-center labelHoy2 {{evento.Clase}}" ></div>
+                                <div class="text-center labelHoyTxt" >Hoy</div>
+                            </di>
+
+                             <div class="text-center tituloEstatusActividad {{evento.Clase}}" >{{evento.EstatusTexto}}</div>
                             
                          </div> 
 
@@ -1384,9 +1390,11 @@
             <div class="row">
                 <div class="col-xs-8 col-sm-10">
                     <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
-                    <span ng-if="operacion == 'Agregar'" class="tituloModal">Registrar Evento</span>
-                    <span ng-if="operacion == 'Editar'" class="tituloModal">Editar Evento </span>
-                    <br><span style="font-size:12pt">Actividad: {{nuevoEvento.Actividad }}</span>
+                    
+                    <span class="tituloModal">{{nuevoEvento.Actividad }}</span><br>
+                    
+                    <span ng-if="operacion == 'Agregar'" style="font-size: 13pt">Registrar Evento</span>
+                    <span ng-if="operacion == 'Editar'" style="font-size: 13pt">Editar Evento </span>
                 </div>
                 
                 <div class="col-xs-4 col-sm-2">
@@ -1704,7 +1712,7 @@
                                       <td class="hidden-xs"> <span class="infoCenterCell">{{img.name}}</span> </td>
                                         <td class="hidden-xs">  <span class="infoCenterCell">{{(img.size/1000000).toFixed(2)}} MB</span> </td>
                                       <td class="text-center">
-                                          <a class="btn btnQuitarImg" ng-click="nuevoEvento.ImagenSrc.splice($index,1)">
+                                          <a class="btn btnQuitarImg" ng-click="nuevoEvento.ImagenSrc.splice($index,1); nuevoEvento.ImagenWeb.splice($index,1); nuevoEvento.ImagenTh.splice($index,1)">
                                              <span class="fa fa-times-circle"></span>
                                          </a>
                                       </td>
@@ -1725,7 +1733,7 @@
                                       <td style="width: 100px">
                                         <div class="imgContainer" style="height:50px">
                                              <a style="overflow: hidden !important; max-height: 50px">
-                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoEvento.Imagen, nuevoEvento.ImagenSrc, $index, 1)"/>
+                                                <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevoEvento.Imagen, nuevoEvento.ImagenSrc, $index, 1)"/>
                                              </a>
                                         </div>
                                       </td>
@@ -1761,7 +1769,7 @@
                                       <td style="width: 100px">
                                           <div class="imgContainer" style="height:50px">
                                               <a style="overflow: hidden !important; max-height: 50px">
-                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoEvento.Imagen, null, $index)"/>
+                                                  <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevoEvento.Imagen, null, $index)"/>
                                               </a>
                                           </div>
                                       </td>
@@ -1894,7 +1902,7 @@
                       <!-- Items -->
                       <div class="carousel-inner">
                         <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
-                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Web/{{img.Nombre}}"/>
                             <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
                         </div>
                       </div>
@@ -1939,7 +1947,7 @@
                                     <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                         <span class="fa fa-check-circle" ></span>
                                     </a>
-                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
                                  </div>
                             </div>
                             <div style="height: 15px"></div>

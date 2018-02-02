@@ -32,6 +32,7 @@
         
         <!-- Auto size -->
         <script type="text/javascript" src="libs/bootstrap/autosize/autosize.js"></script>
+        <!--<script src="libs/bootstrap/autosize/jquery.textarea_autosize.min.js"></script>-->
         
         <!-- Date picker -->
         <link rel="stylesheet" href="libs/bootstrap/datepicker/bootstrap-material-datetimepicker.css">
@@ -52,6 +53,8 @@
         <script src="js/Controlador/RecuperarPasswordControlador.js"></script>
         <script src="js/Controlador/AplicacionController.js"></script>
         
+        <!-- Imagen -->
+        <script type="text/javascript" src="libs/Imagen/compresor.js"></script>
         
         <!-- Sabiduría -->
             <!-- Administrar -->
@@ -81,6 +84,9 @@
                <script src="js/Controlador/Actividades/Administrar/Unidad/DivisaController.js"></script>
                <script src="js/Controlador/Actividades/Administrar/Unidad/UnidadController.js"></script>
                
+         <!-- Actividades -->
+             <script src="js/Controlador/Imagen/ImagenController.js"></script>
+               
          <!-- Sabiduría -->
             <!-- Administrar -->
             <script src="js/Controlador/Imagen/EtiquetaImagen.js"></script>
@@ -101,6 +107,9 @@
         
         <!-- Conocimiento -->
         <script src="js/Controlador/Conocimiento/ConocimientoController.js"></script>
+        
+        <!-- Conocimiento -->
+        <script src="js/Controlador/Arhivo/ArchivoAppController.js"></script>
         
          <!-- Buscador -->
         <script src="js/Controlador/Buscador/BuscadorController.js"></script>
@@ -181,7 +190,7 @@
         
 
     </head>
-    <body class="fondoPagina">
+    <body class="fondoPagina" id="body">
         <div>
            <div id="header">
                <header ng-include=" 'html/Header.html' "></header>

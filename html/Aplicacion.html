@@ -152,10 +152,11 @@
                     
                     <!-- Buscar  botón -->
                      
-                     
-                     <button class="btn  botonFiltrarBarraLateral text-center btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
-                       <b ><span class="fa fa-ban"></span> Limpiar</b>
-                    </button>
+                    <div style="margin-right: 37px">
+                         <button class="btn  botonFiltrarBarraLateral text-center pull-right" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                           <b ><span class="fa fa-ban"></span> Limpiar</b>
+                         </button>
+                    </div>
                     
                 </div>
             
@@ -283,7 +284,7 @@
                              <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                                <div class="imgContainer" >
                                     <div class="crop center-block">
-                                         <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="GetImagenEtiqueta(img)"/>
+                                         <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="GetImagenEtiqueta(img)"/>
                                      </div>
                                 </div>
                                 <div style="height: 15px"></div>
@@ -720,7 +721,7 @@
                          <!-- Opciones -->
                         <div class="btn-group pull-right" style="position: absolute; right: 0; top: 0; padding: 10px">
                            <!-- Imagenes -->
-                           <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.Imagen.length) > 0" ng-click="VerImganes(evento.Imagen)">
+                           <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.Imagen.length) > 0" ng-click="VerImganes(evento.Imagen, 0)">
                                  <span class="fa fa-picture-o"></span>
                              </a>
                                  
@@ -814,7 +815,7 @@
             
             <div class="row" ng-if="tipoDetalle == 'Imagen'">
                 <div class="col-xs-12">
-                    <img class="center-block img-responsive" style="width:80%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{detalle.Nombre}}"/><br>
+                    <img class="center-block img-responsive" style="width:80%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Web/{{detalle.Nombre}}"/><br>
                 </div>
             </div>
             
@@ -824,7 +825,7 @@
                      <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                        <div class="imgContainer" >
                             <div class="crop center-block">
-                                 <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
+                                 <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(detalle.Imagen, $index)"/>
                              </div>
                         </div>
                         <div style="height: 15px"></div>
@@ -964,7 +965,7 @@
                       <!-- Items -->
                       <div class="carousel-inner">
                         <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in img">
-                            <img   class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Web/{{img.Nombre}}"/>
                         </div>
                       </div>
                       <!-- Navigation -->

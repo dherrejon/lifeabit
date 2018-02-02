@@ -147,7 +147,10 @@ function AgregarEventoActividad()
     $imagenId = [];
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$evento->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$evento->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$evento->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$evento->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$evento->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$evento->UsuarioId,0777);
@@ -158,18 +161,33 @@ function AgregarEventoActividad()
             mkdir($dir,0777);
         }
         
+        if(!is_dir("ArchivosUsuario/".$evento->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$evento->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
-                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES ('".$imagen."', '".$name."', '".$ext."', ".$size.", ".$evento->UsuarioId.")";
+                $sql = "INSERT INTO Imagen ( Nombre, Extension, Size, UsuarioId) VALUES ( '".$name."', '".$ext."', ".$size.", ".$evento->UsuarioId.")";
                 
                 try 
                 {
@@ -188,8 +206,9 @@ function AgregarEventoActividad()
                 }
                 
                 //Subir Imagen
-                //$uploadfile = $_FILES['file']['name'];
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
                 
                 
                 //----------------------- Etiquetas --------------------
@@ -1191,7 +1210,10 @@ function EditarEventoActividad()
     $imagenId = [];
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$evento->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$evento->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$evento->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$evento->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$evento->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$evento->UsuarioId,0777);
@@ -1202,18 +1224,33 @@ function EditarEventoActividad()
             mkdir($dir,0777);
         }
         
+        if(!is_dir("ArchivosUsuario/".$evento->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$evento->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
-                $sql = "INSERT INTO Imagen (Imagen, Nombre, Extension, Size, UsuarioId) VALUES ('".$imagen."', '".$name."', '".$ext."', ".$size.", ".$evento->UsuarioId.")";
+                $sql = "INSERT INTO Imagen ( Nombre, Extension, Size, UsuarioId) VALUES ( '".$name."', '".$ext."', ".$size.", ".$evento->UsuarioId.")";
                 
                 try 
                 {
@@ -1232,8 +1269,9 @@ function EditarEventoActividad()
                 }
                 
                 //Subir Imagen
-                //$uploadfile = $_FILES['file']['name'];
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
                 
                 
                 //----------------------- Etiquetas --------------------

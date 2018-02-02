@@ -28,8 +28,25 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
                 
                 for(var k=0; k<$scope.pendiente.length; k++)
                 {
-                    $scope.pendiente[k].FechaIntencionFormato = TransformarFecha($scope.pendiente[k].FechaIntencion);
-                    $scope.pendiente[k].FechaRealizacionFormato = TransformarFecha($scope.pendiente[k].FechaRealizacion);
+                    if($scope.pendiente[k].FechaIntencion)
+                    {
+                        $scope.pendiente[k].FechaIntencionFormato = TransformarFecha($scope.pendiente[k].FechaIntencion);
+                    }
+                    else
+                    {
+                        $scope.pendiente[k].FechaIntencionFormato = "";
+                    }
+                    
+                    if($scope.pendiente[k].FechaRealizacion)
+                    {
+                        $scope.pendiente[k].FechaRealizacionFormato = TransformarFecha($scope.pendiente[k].FechaRealizacion);
+                    }
+                    else
+                    {
+                        $scope.pendiente[k].FechaRealizacionFormato = "";
+                    }
+                    
+                    
                     $scope.GetClasePendiente($scope.pendiente[k]);
                 }
             
@@ -47,16 +64,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     };
     
     $scope.GetDatosPendiente = function(pendiente, opt)
-    {
-         
-        /*GetDatosPendiente($http, $q, CONFIG, pendiente.PendienteId).then(function(data)
-        {
-            $scope.OperacionPendiente(data, opt);
-        }).catch(function(error)
-        {
-            alert(error);
-        });*/
-         
+    {         
         (self.servicioObj = LifeService.Get('GetPendiente/Datos/' + pendiente.PendienteId)).then(function (dataResponse) 
         {
             if (dataResponse.status == 200) 
@@ -293,6 +301,18 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         });
     };
     
+    //---------------------- Ordenar -----------------
+    $scope.OrdenarPorFecha = function(pendiente)
+    {
+        if(pendiente.FechaRealizacion)
+        {
+            return pendiente.FechaRealizacion;
+        }
+        else
+        {
+            return '9999-12-31';
+        }
+    };
     
     //--------------------- Filtro ----------------
     $scope.SetFiltroEtiqueta = function()
@@ -385,7 +405,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     {
         if($scope.filtro.pendiente)
         {
-            if(pendiente.Hecho == "0" && pendiente.FechaRealizacion <= $scope.hoy)
+            if(pendiente.Hecho == "0" && (pendiente.FechaRealizacion <= $scope.hoy || !pendiente.FechaRealizacion))
             {
                 return true;
             }
@@ -410,7 +430,6 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             return true;
         }
     };
-    
     
     $scope.CambiarFiltroFuturo = function()
     {
@@ -693,6 +712,12 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             pendiente.Clase = "done";
             return;
         }
+        else if(!pendiente.FechaRealizacion)
+        {
+            pendiente.EstatusTexto = "Sin Fecha";
+            pendiente.Clase = "sinFecha";
+            return;
+        }
         else if(pendiente.FechaRealizacion < $scope.hoy)
         {
             pendiente.EstatusTexto = "Atrasado";
@@ -770,6 +795,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         
         if(operacion == "Agregar")
         {
+            $scope.tituloModal = "";
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
             $scope.SetValoresDefecto();
@@ -778,6 +804,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
         }
         else if(operacion == "Editar" || operacion == "Copiar")
         {
+            $scope.tituloModal = data.Nombre;
             $scope.GetDatosPendiente(data, operacion);
         }
         
@@ -828,7 +855,7 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             
             $scope.nuevoPendiente.FechaMod = "FechaIntencion";
             
-            $scope.nuevoPendiente.Prioridad = $scope.prioridad[0];
+            $scope.nuevoPendiente.Prioridad = $scope.prioridad[3];
             
             $scope.$broadcast('IniciarArchivo', $scope.nuevoPendiente);
         }
@@ -882,25 +909,39 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     {
         locale: 'es',
         format: 'YYYY-MM-DD',
+        showClear: true,
+        showClose: true,
+        toolbarPlacement: 'bottom'
     });
 
     $scope.CambiarFechaIntencion = function(element) 
     {
         $scope.$apply(function($scope) 
         {
-            $scope.nuevoPendiente.FechaIntencion = element.value;
-            $scope.nuevoPendiente.FechaIntencionFormato = TransformarFecha(element.value);
-            
-            if($scope.nuevoPendiente.FechaIntencion > $scope.hoy)
+            if(element.value)
             {
-                $scope.nuevoPendiente.Hecho = "0";
+                $scope.nuevoPendiente.FechaIntencion = element.value;
+                $scope.nuevoPendiente.FechaIntencionFormato = TransformarFecha(element.value);
+
+                if($scope.nuevoPendiente.FechaIntencion > $scope.hoy)
+                {
+                    $scope.nuevoPendiente.Hecho = "0";
+                }
+
+                if(!$scope.cargarFechaRealizacion)
+                {
+                    if(element.value)
+                    document.getElementById('fechaRealizacion').value = element.value;
+                    $scope.nuevoPendiente.FechaRealizacion = element.value;
+                    $scope.nuevoPendiente.FechaRealizacionFormato = TransformarFecha(element.value);
+                }
             }
-            
-            if(!$scope.cargarFechaRealizacion)
+            else
             {
-                document.getElementById('fechaRealizacion').value = element.value;
-                $scope.nuevoPendiente.FechaRealizacion = element.value;
-                $scope.nuevoPendiente.FechaRealizacionFormato = TransformarFecha(element.value);
+                $scope.nuevoPendiente.FechaIntencion = null;
+                $scope.nuevoPendiente.FechaRealizacion = null;
+                $scope.nuevoPendiente.FechaIntencionFormato = null;
+                $scope.nuevoPendiente.FechaRealizacionFormato = null;
             }
         });
     };
@@ -910,15 +951,27 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     {
         locale: 'es',
         format: 'YYYY-MM-DD',
+        showClear: true,
+        showClose: true,
+        toolbarPlacement: 'bottom'
     });
 
     $scope.CambiarFechaRealizacion = function(element) 
     {
         $scope.$apply(function($scope) 
         {
-            $scope.cargarFechaRealizacion = true;
-            $scope.nuevoPendiente.FechaRealizacion = element.value;
-            $scope.nuevoPendiente.FechaRealizacionFormato = TransformarFecha(element.value);
+            if(element.value)
+            {
+                $scope.cargarFechaRealizacion = true;
+                $scope.nuevoPendiente.FechaRealizacion = element.value;
+                $scope.nuevoPendiente.FechaRealizacionFormato = TransformarFecha(element.value);
+            }
+            else
+            {
+                $scope.nuevoPendiente.FechaRealizacion = null;
+                $scope.nuevoPendiente.FechaRealizacionFormato = "";
+            }
+            
         });
     };
     
@@ -1234,15 +1287,15 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             $scope.mensajeError[$scope.mensajeError.length] = "*Indica el nombre del pendiente.";
         }
         
-        if(!$scope.nuevoPendiente.FechaIntencion)
+        /*if(!$scope.nuevoPendiente.FechaIntencion)
         {
-            $scope.mensajeError[$scope.mensajeError.length] = "*Indica la fecha de intención.";
+            $scope.mensajeError[$scope.mensajeError.length] = "*Indica la fecha.";
         }
         
         if($scope.nuevoPendiente.Hecho == "1" && !$scope.nuevoPendiente.FechaRealizacion)
         {
-            $scope.mensajeError[$scope.mensajeError.length] = "*Indica la fecha de realización.";
-        }
+            $scope.mensajeError[$scope.mensajeError.length] = "*Indica la fecha.";
+        }*/
         
         if($scope.nuevoPendiente.Unidad.Cantidad && !$scope.nuevoPendiente.Unidad.UnidadId)
         {
@@ -1419,6 +1472,34 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
             {
                 return function(e) 
                 {
+                    var compressor = new Compress();
+                    
+                    compressor.compress([theFile], {
+                        size: 10,
+                        quality: 1,
+                        maxWidth: 250,
+                        maxHeight: 150,
+                        resize: true
+                    }).then((result) => {
+
+                        $scope.nuevoPendiente.ImagenTh.push((Compress.convertBase64ToFile(result[0].data, result[0].ext)));
+
+                    });
+                    
+                    var compressor2 = new Compress();
+                    
+                    compressor2.compress([theFile], {
+                        size: 10,
+                        quality: 0.4,
+                        maxWidth: 1000,
+                        maxHeight: 1000,
+                        resize: false
+                    }).then((result) => {
+
+                        $scope.nuevoPendiente.ImagenWeb.push(Compress.convertBase64ToFile(result[0].data, result[0].ext));
+
+                    });
+                    
                     $scope.nuevoPendiente.ImagenSrc.push(theFile);
                     $scope.nuevoPendiente.ImagenSrc[$scope.nuevoPendiente.ImagenSrc.length-1].Src= (e.target.result);
                     $scope.nuevoPendiente.ImagenSrc[$scope.nuevoPendiente.ImagenSrc.length-1].Etiqueta = [];

@@ -414,7 +414,10 @@ function AgregarNota()
     $imagenId = [];
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$nota->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$nota->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
@@ -425,14 +428,29 @@ function AgregarNota()
             mkdir($dir,0777);
         }
         
+        if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 //$imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
@@ -456,7 +474,10 @@ function AgregarNota()
                 
                 //Subir Imagen
                 //$uploadfile = $_FILES['file']['name'];
+
                 move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
                 
                 //----------------------- Etiquetas --------------------
                 $countEtiqueta = count($nota->ImagenSrc[$k]->Etiqueta);
@@ -1257,20 +1278,13 @@ function EditarNota()
     $count= 0;
     $imagenId = [];
     
-    $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/";
-        if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
-        {
-            mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
-        }
-        
-        if(!is_dir($dir))
-        {
-            mkdir($dir,0777);
-        }
 
     if($countFile > 0)
     {
-        $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/";
+        $dir = "ArchivosUsuario/".$nota->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$nota->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$nota->UsuarioId."/IMG/Thumbnail/";
+        
         if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
         {
             mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
@@ -1279,16 +1293,31 @@ function EditarNota()
         if(!is_dir($dir))
         {
             mkdir($dir,0777);
+        }
+        
+        if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$nota->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
         }
         
         for($k=0; $k<$countFile; $k++)
         {
-            if($_FILES['file']['error'][$k] == 0)
+            if($_FILES['imgweb']['error'][$k] == 0)
             {
                 $count++;
                 
                 $name = $_FILES['file']['name'][$k];
-                $size = $_FILES['file']['size'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
                 $ext = pathinfo($name, PATHINFO_EXTENSION);
                 //$imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
                 
@@ -1316,6 +1345,8 @@ function EditarNota()
             }
             
             move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+            move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+            move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
             
             //----------------------- Etiquetas --------------------
             $countEtiqueta = count($nota->ImagenSrc[$k]->Etiqueta);
@@ -2103,7 +2134,18 @@ function GetNotaOrdenUsuario($id)
         $stmt = $db->query($sql);
         $response = $stmt->fetchAll(PDO::FETCH_OBJ);
         
-        echo '[ { "Estatus": "Exito"}, {"Id":'.$response[0]->Id.'} ]'; 
+        
+        $count = count($response);
+        
+        if($count >0)
+        {
+            echo '[ { "Estatus": "Exito"}, {"Id":'.$response[0]->Id.'} ]'; 
+        }
+        else
+        {
+            echo '[ { "Estatus": "Exito"}, {"Id":"-1"} ]'; 
+        }
+        
         $db = null;
  
     } 

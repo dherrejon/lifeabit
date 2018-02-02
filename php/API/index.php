@@ -349,11 +349,19 @@
     $app->post('/GetGaleriaFotos', $seguridad, $ChecarSesion, 'GetGaleriaFotos');
     $app->post('/GetFototeca', $seguridad, $ChecarSesion, 'GetFototeca');
     $app->get('/GetImagenEtiqueta/:id', $seguridad, $ChecarSesion, 'GetImagenEtiqueta');
+    $app->post('/GetImagenApp', $seguridad, $ChecarSesion, 'GetImagenApp');
+    $app->delete('/BorrarImgen', $seguridad, $ChecarSesion, 'BorrarImgen');
+    $app->put('/EditarEtiquetaImagen', $seguridad, $ChecarSesion, 'EditarEtiquetaImagen');
+    $app->get('/GetNumeroImagen/:id', $seguridad, $ChecarSesion, 'GetNumeroImagen');
 
     /*-----------------------  Archivo ------------------------------------------*/
     $app->get('/GetArchivo/:id', $seguridad, $ChecarSesion, 'GetArchivo');
     $app->get('/GetNumeroArchivo/:id', $seguridad, $ChecarSesion, 'GetNumeroArchivo');
-
+    $app->post('/GetArchivoApp', $seguridad, $ChecarSesion, 'GetArchivoApp');
+    $app->delete('/BorrarArchivo', $seguridad, $ChecarSesion, 'BorrarArchivo');
+    $app->get('/GetEtiquetaPorArchivo/:id', $seguridad, $ChecarSesion, 'GetEtiquetaPorArchivo');
+    $app->put('/EditarEtiquetaArchivo', $seguridad, $ChecarSesion, 'EditarEtiquetaArchivo');
+    
     //---------------------------------------------------------------------------------------------------------------Conocimiento
 
     /*-----------------------  Conocimiento ------------------------------------------*/

@@ -33,6 +33,9 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     $scope.datosNota = false;
     $scope.showEliminada = false;
     
+    $scope.verpen = "";
+    $scope.verpen2 = "";
+    
     //filtro
     $scope.filtro = {tema:[], etiqueta:[], fecha:"", fechaFormato: "", usuarioId: ""};
     
@@ -52,7 +55,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     //Orden
     $scope.notaOrden = GetNotaOrden();
-    $scope.ordenNota = $scope.notaOrden[0];
+    $scope.ordenNota = $scope.notaOrden[1];
     
     
     /*------------------ Catálogos -----------------------------*/
@@ -77,9 +80,10 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             {
                 return;
             }
+
             for(var k=0; k<$scope.notaOrden.length; k++)
             {
-                if(data.Id == $scope.notaOrden[k].Id)
+                if(data == $scope.notaOrden[k].Id)
                 {
                     $scope.ordenNota = $scope.notaOrden[k];
                     break;
@@ -259,7 +263,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     
     
     //-------- Notas de detalles --------
-    $scope.GetNotasPorId = function(id, tipo)
+    $scope.GetNotasPorId = function(id, barraLateral)
     {
         var datos = {Id:id};
         
@@ -270,14 +274,40 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
                 data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
                 data[k].ObservacionHTML = $sce.trustAsHtml(data[k].ObservacionHTML);
             }
-             
-            $scope.detalle = data;
+            
+            if(barraLateral)
+            {
+                $scope.OperacionBarraLateral(barraLateral, data[0]);
+            }
+            else
+            {
+                $scope.detalle = data;
+            }
+            
         
         }).catch(function(error)
         {
             alert(error);
         });
         
+    };
+    
+    $scope.OperacionBarraLateral = function(opt, data)
+    {
+        switch(opt)
+        {
+            case 'Editar':
+                $scope.AbrirNota('Editar', data);
+                break;
+            case 'Copiar':
+                $scope.AbrirNota('Copiar', data);
+                break;
+            case 'Detalle':
+                $scope.VerDetallesNota(data);
+                break;
+            default: 
+                break;
+        }
     };
     
     $scope.GetNotasFiltro = function()
@@ -421,6 +451,43 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         
         $('#detalleNota').modal('toggle');
     };
+    
+    $scope.VerOptPendiente = function(id)
+    {
+        if($scope.verpen != id)
+        {
+             var y = $('#nota' + id).height();
+            $('#menuNota' + id).css('height', y);
+            
+            $scope.verpen2 = $scope.verpen;
+            $scope.verpen = id;
+            
+            setTimeout(function()
+            {
+                 $scope.verpen2 = "";
+                $scope.$apply();
+            }, 700);
+        }
+    };
+    
+    document.getElementById('body').onclick = function(e) 
+    {   
+        if($scope.verpen)
+        {
+            if(e.target.id != "optPen" && $(e.target).parents("#optPen").size() == 0)
+            { 
+                $scope.verpen2 = $scope.verpen;
+                $scope.verpen = "";
+                $scope.$apply();
+                
+                setTimeout(function()
+                {
+                     $scope.verpen2 = "";
+                    $scope.$apply();
+                }, 700);
+            }
+        }        
+    }; 
     
     $scope.GetEtiquetaVisible = function(data)
     {
@@ -1235,6 +1302,24 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             $scope.notaInicial = SetNota($scope.nuevaNota);   
             document.getElementById("fechaNota").value = $scope.nuevaNota.Fecha;
         }
+        else if(operacion == "Copiar")
+        {
+            $scope.nuevaNota = SetNota(objeto); 
+            
+            $scope.nuevaNota.Notas = "";
+            
+            $scope.ActivarDesactivarTema($scope.nuevaNota.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevaNota.Etiqueta);
+            
+            for(var k=0; k<$scope.nuevaNota.Imagen.length; k++)
+            {
+                $scope.GetImagenEtiqueta($scope.nuevaNota.Imagen[k], false);
+            }
+            $scope.IniciarNota();
+            
+            $scope.notaInicial = SetNota($scope.nuevaNota);   
+            
+        }
         
         $scope.$broadcast('IniciarArchivo', $scope.nuevaNota);
         
@@ -1513,7 +1598,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     $scope.$on('TerminarEtiquetaOcultaArchivo',function()
     {    
         $scope.nuevaNota.UsuarioId = $scope.usuarioLogeado.UsuarioId;
-        if($scope.operacion == "Agregar")
+        if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
         {
             $scope.AgregarNota();
         }
@@ -1538,7 +1623,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
                 $scope.nuevaNota.NotaId = data[1].NotaId;
                 $scope.nuevaNota.Etiqueta = data[2].Etiqueta;
                 $scope.nuevaNota.Tema = data[3].Tema;
-                 $scope.nuevaNota.FechaModificacion = data[4].FechaModificacion;
+                $scope.nuevaNota.FechaModificacion = data[4].FechaModificacion;
                 
                 $scope.SetNuevaNota($scope.nuevaNota);
                 
@@ -1656,12 +1741,6 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         {
             sql = sqlBase + nota.Tema[k].TemaActividadId + "'";
             //tema Filtro
-            /*count = alasql(sql, [$scope.temaF]);
-            
-            if(count[0].num === 0)
-            {
-               $scope.temaF.push(nota.Tema[k]);
-            }*/
             
             //dropdown
             count = alasql(sql, [$scope.tema]);
@@ -1678,14 +1757,6 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
         for(var k=0; k<nota.Etiqueta.length; k++)
         {
             sql = sqlBase + nota.Etiqueta[k].EtiquetaId + "'";
-            //etiqueta Filtro
-            /*count = alasql(sql, [$scope.etiquetaF]);
-            
-            if(count[0].num === 0)
-            {
-               $scope.etiquetaF.push(nota.Etiqueta[k]);
-            }*/
-            
             //etiqueta Dropdownlist
             count = alasql(sql, [$scope.etiqueta]);
             
@@ -1696,71 +1767,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             }
         }
         
-         $scope.VerDetalles(nota.NotaId, true);
-        
-        /*if($scope.tipoDato == "Nota")
-        {
-            $scope.VerDetalles(nota.NotaId, true);
-        }
-        else if($scope.tipoDato == "Etiqueta")
-        {
-            if(nota.Etiqueta.length > 0)
-            {
-                var permanece = false;
-
-                for(var k=0; k<nota.Etiqueta.length; k++)
-                {
-                    if(nota.Etiqueta[k].EtiquetaId == $scope.idDetalle)
-                    {
-                        $scope.VerDetalles(nota.Etiqueta[k].Nombre, nota.Etiqueta[k].EtiquetaId, 'Etiqueta', true);
-                        permanece = true;
-                        break;
-                    }
-                }
-
-                if(!permanece)
-                {
-                    $scope.VerDetalles(nota.Etiqueta[0].Nombre, nota.Etiqueta[0].EtiquetaId, 'Etiqueta', true);
-                }
-            }
-            else
-            {
-                  $scope.LimpiarDetalle();
-            }
-          
-        }
-        else if($scope.tipoDato == "Tema")
-        {
-            if(nota.Tema.length > 0)
-            {
-                var permanece = false;
-
-                for(var k=0; k<nota.Tema.length; k++)
-                {
-                    if(nota.Tema[k].TemaActividadId == $scope.idDetalle)
-                    {
-                        $scope.VerDetalles(nota.Tema[k].Tema, nota.Tema[k].TemaActividadId, 'Tema', true);
-                        permanece = true;
-                        break;
-                    }
-                }
-
-                if(!permanece)
-                {
-                    $scope.VerDetalles(nota.Tema[0].Tema, nota.Tema[0].TemaActividadId, 'Tema', true);
-                }
-            }
-            else
-            {
-                $scope.LimpiarDetalle();
-            }
-        }
-        else
-        {
-            $scope.VerDetalles(nota.Titulo, nota.NotaId, 'Nota', true);
-        }*/
-        
-        if($scope.operacion == "Agregar" && $scope.FiltrarNota(nota))
+        if(($scope.operacion == "Agregar" || $scope.operacion == "Copiar") && $scope.FiltrarNota(nota))
         { 
             $scope.GetNotasFiltro();
         }
@@ -1781,6 +1788,8 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
                     break;
                 }
             }
+            
+            $scope.VerDetalles(nota.NotaId, true);
         }
     };
     
@@ -1955,6 +1964,34 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
             {
                 return function(e) 
                 {
+                    var compressor = new Compress();
+                    
+                    compressor.compress([theFile], {
+                        size: 10,
+                        quality: 1,
+                        maxWidth: 250,
+                        maxHeight: 150,
+                        resize: true
+                    }).then((result) => {
+
+                        $scope.nuevaNota.ImagenTh.push((Compress.convertBase64ToFile(result[0].data, result[0].ext)));
+
+                    });
+                    
+                    var compressor2 = new Compress();
+                    
+                    compressor2.compress([theFile], {
+                        size: 10,
+                        quality: 0.4,
+                        maxWidth: 1000,
+                        maxHeight: 1000,
+                        resize: false
+                    }).then((result) => {
+
+                        $scope.nuevaNota.ImagenWeb.push(Compress.convertBase64ToFile(result[0].data, result[0].ext));
+
+                    });
+                    
                     $scope.nuevaNota.ImagenSrc.push(theFile);
                     $scope.nuevaNota.ImagenSrc[$scope.nuevaNota.ImagenSrc.length-1].Src= (e.target.result);
                     $scope.nuevaNota.ImagenSrc[$scope.nuevaNota.ImagenSrc.length-1].Etiqueta = [];
@@ -2288,6 +2325,7 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     };
 
     autosize($('textarea'));
+     //$('textarea.js-auto-size').textareaAutoSize();
     
     //----------- Archivos --------
     $(document).on('hide.bs.modal','#EtiquetaFile', function () 

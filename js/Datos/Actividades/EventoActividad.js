@@ -28,6 +28,9 @@ class EventoActividad
         
         this.Archivo = [];
         this.ArchivoSrc = [];
+        
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
     }
 }
 

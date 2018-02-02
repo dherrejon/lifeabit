@@ -32,6 +32,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.mostrarFrecuencia = false;
     $scope.mostrarLugar = false;
     
+    $scope.verpen = "";
+    $scope.verpen2 = "";
+    
     //filtro
     $scope.buscarTemaFiltro = "";
     $scope.buscarEtiquetaFiltro = "";
@@ -42,6 +45,9 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.filtroFecha = {Fecha:"", FechaFormato:"", Seleccion:""};
     $scope.campoBuscar = "Conceptos";
     $scope.buscarActividad = "";
+    
+    
+    
     //$scope.buscarConcepto = "";
     
     $scope.hoy = GetDate();
@@ -73,7 +79,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.modulo = "";
     $scope.buscarTituloFiltro = "";
     $scope.verTodos = false;
-
+    
     /*------------------ Catálogos -----------------------------*/
     $scope.GetActividad = function()              
     {
@@ -448,14 +454,17 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                     actividad[k].NotasHTML = $sce.trustAsHtml(actividad[k].NotasHTML);
                 }
 
-                $scope.detalle = actividad[0];
-                $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible($scope.detalle.Etiqueta);
-                
-                $scope.eventoActividad = actividad[0].Evento;
-
                 if(opt)
                 {
-                    $scope.AbrirActividad(opt, $scope.detalle);
+                    $scope.AbrirActividad(opt, actividad[0]);
+                }
+                else
+                {
+                    $scope.detalle = actividad[0];
+                    
+                    $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible($scope.detalle.Etiqueta);
+                
+                    $scope.eventoActividad = actividad[0].Evento;
                 }
             } 
             else 
@@ -641,6 +650,42 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         $scope.detalle = new Actividad();
     };
     
+    $scope.VerOptPendiente = function(id)
+    {
+        if($scope.verpen != id)
+        {
+             var y = $('#actividad' + id).height();
+            $('#menuActividad' + id).css('height', y);
+            
+            $scope.verpen2 = $scope.verpen;
+            $scope.verpen = id;
+            
+            setTimeout(function()
+            {
+                 $scope.verpen2 = "";
+                $scope.$apply();
+            }, 700);
+        }
+    };
+    
+    document.getElementById('body').onclick = function(e) 
+    {   
+        if($scope.verpen)
+        {
+            if(e.target.id != "optPen" && $(e.target).parents("#optPen").size() == 0)
+            { 
+                $scope.verpen2 = $scope.verpen;
+                $scope.verpen = "";
+                $scope.$apply();
+                
+                setTimeout(function()
+                {
+                     $scope.verpen2 = "";
+                    $scope.$apply();
+                }, 700);
+            }
+        }        
+    };    
     
     //------------------------------- Filtrar -------------------------
     $scope.FitroActividad = function(info)
@@ -2787,30 +2832,26 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         if(evento.Hecho == "1")
         {
-            if(evento.Fecha == $scope.hoy)
-            {
-                evento.EstatusTexto = "Hoy";
-            }
-            else
-            {
-                evento.EstatusTexto = "Hecho";
-            }
-            
+            evento.EstatusTexto = "Hecho";
+            evento.Clase = "done";
             return "done";
         }
         else if(evento.Fecha < $scope.hoy)
         {
-            evento.EstatusTexto = "Pendiente";
+            evento.EstatusTexto = "Atrasado";
+            evento.Clase = "pendiente";
             return "pendiente";
         }
         else if(evento.Fecha > $scope.hoy)
         {
             evento.EstatusTexto = "En espera";
+            evento.Clase = "enEspera";
             return "enEspera";
         }
         else if(evento.Fecha == $scope.hoy)
         {
-            evento.EstatusTexto = "Hoy";
+            evento.EstatusTexto = "Pendiente";
+            evento.Clase = "hoyPendiente";
             return "hoyPendiente";
         }
     };
@@ -3853,6 +3894,34 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             {
                 return function(e) 
                 {
+                    var compressor = new Compress();
+                    
+                    compressor.compress([theFile], {
+                        size: 10,
+                        quality: 1,
+                        maxWidth: 250,
+                        maxHeight: 150,
+                        resize: true
+                    }).then((result) => {
+
+                        $scope.nuevoEvento.ImagenTh.push((Compress.convertBase64ToFile(result[0].data, result[0].ext)));
+
+                    });
+                    
+                    var compressor2 = new Compress();
+                    
+                    compressor2.compress([theFile], {
+                        size: 10,
+                        quality: 0.4,
+                        maxWidth: 1000,
+                        maxHeight: 1000,
+                        resize: false
+                    }).then((result) => {
+
+                        $scope.nuevoEvento.ImagenWeb.push(Compress.convertBase64ToFile(result[0].data, result[0].ext));
+
+                    });
+                    
                     $scope.nuevoEvento.ImagenSrc.push(theFile);
                     $scope.nuevoEvento.ImagenSrc[$scope.nuevoEvento.ImagenSrc.length-1].Src= (e.target.result);
                     $scope.nuevoEvento.ImagenSrc[$scope.nuevoEvento.ImagenSrc.length-1].Etiqueta = [];

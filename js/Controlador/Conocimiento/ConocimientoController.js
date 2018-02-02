@@ -86,6 +86,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoConocimiento, 'Conocimiento');
             
             $scope.iniciarHecho = $scope.nuevoConocimiento.Hecho;
+            
+            $scope.nuevoConocimiento.Resolucion = "Alta";
         }
         else if(opt == "Detalle")
         {
@@ -588,6 +590,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
             
+            $scope.nuevoConocimiento.Resolucion = "Alta";
+            
             $scope.$broadcast('IniciarArchivo', $scope.nuevoConocimiento);
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoConocimiento, 'Conocimiento');
             $scope.conocimientoInicio = jQuery.extend({}, $scope.nuevoConocimiento);
@@ -1038,18 +1042,48 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             {
                 continue;
             }
-
+            
             var reader = new FileReader();
-
+            var imgc = null;
+    
             reader.onload = (function(theFile) 
             {
                 return function(e) 
                 {
                     $scope.nuevoConocimiento.ImagenSrc.push(theFile);
+                    
+                    var compressor = new Compress();
+                    
+                    compressor.compress([theFile], {
+                        size: 10,
+                        quality: 1,
+                        maxWidth: 250,
+                        maxHeight: 150,
+                        resize: true
+                    }).then((result) => {
+
+                        $scope.nuevoConocimiento.ImagenTh.push((Compress.convertBase64ToFile(result[0].data, result[0].ext)));
+
+                    });
+                    
+                    var compressor2 = new Compress();
+                    
+                    compressor2.compress([theFile], {
+                        size: 10,
+                        quality: 0.4,
+                        maxWidth: 1000,
+                        maxHeight: 1000,
+                        resize: false
+                    }).then((result) => {
+
+                        $scope.nuevoConocimiento.ImagenWeb.push(Compress.convertBase64ToFile(result[0].data, result[0].ext));
+
+                    });
+                    
                     $scope.nuevoConocimiento.ImagenSrc[$scope.nuevoConocimiento.ImagenSrc.length-1].Src= (e.target.result);
                     $scope.nuevoConocimiento.ImagenSrc[$scope.nuevoConocimiento.ImagenSrc.length-1].Etiqueta = [];
                     $scope.nuevoConocimiento.ImagenSrc[$scope.nuevoConocimiento.ImagenSrc.length-1].Tema = [];
-
+                    
                     if( $scope.srcSize === $scope.nuevoConocimiento.ImagenSrc.length)
                     {
                         $scope.todasImg = "src";
@@ -1071,6 +1105,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
  
     document.getElementById('cargarImagen').addEventListener('change', ImagenSeleccionada, false);
     
+    
+    $scope.resolucion = ["Alta", "Media", "Baja"];
     //-------- ver Imagenes ----------
     $scope.VerImganes = function(Agregadas, Seleccionadas, Eliminadas, ImagenA, ImagenS, index, indexOrigen)
     {
@@ -1374,37 +1410,6 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
         }
     });
     
-    //------------- Borrar ----------------
-    $scope.BorrarPendiente = function(pendiente)
-    {
-        $scope.borrarPendiente = pendiente;
-
-        $scope.mensajeBorrar = "¿Estas seguro de eliminar el pendiente \"" + pendiente.Nombre + "\"?";
-
-        $("#borrarPendiente").modal('toggle');
-    };
-    
-    $scope.ConfirmarBorrarPendiente = function()
-    {
-        (self.servicioObj = LifeService.Delete('BorrarPendiente', $scope.borrarPendiente.PendienteId )).then(function (dataResponse) 
-        {
-            if (dataResponse.status == 200) 
-            {
-                $scope.GetPendiente();    
-            }
-            else 
-            {
-                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
-            }
-            self.servicioObj.detenerTiempo();
-        }, 
-        function (error) 
-        {
-            $rootScope.$broadcast('Alerta', error, 'error');
-        });
-    };
-    
-    
     /*----------------------- Usuario logeado --------------------------*/
     $scope.InicializarControlador = function()
     {
@@ -1462,7 +1467,6 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
         $scope.ActivarDesactivarTema($scope.nuevoConocimiento.Tema);
         $scope.ActivarDesactivarEtiqueta($scope.nuevoConocimiento.Etiqueta);
     });
-    
     
     //------------ Cambiar hecho -------
     $scope.CambiarHecho = function(hecho)

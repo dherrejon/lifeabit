@@ -141,6 +141,16 @@ app.config(['$routeProvider', '$httpProvider', function($routeProvider, $httpPro
             templateUrl: 'html/Buscador/Buscador.html'
         }).
     
+    //Imagen
+        when('/Imagen',{
+            templateUrl: 'html/Imagen/Imagenes.html'
+        }).
+    
+    //Archivo
+        when('/Archivo',{
+            templateUrl: 'html/Archivo/ArchivoApp.html'
+        }).
+    
     
     otherwise({
         templateUrl: 'html/Login.html'

@@ -54,7 +54,7 @@
                           
                           <input type="text" ng-show="campoBuscar=='Conceptos'" placeholder="Concepto" class="inputBuscar form-control" name="buscarConceptoFiltro" ng-model="buscarConceptoBarra" id="buscarConcepto" autocomplete="off">
                           <button ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscar text-left" ng-click="AbrirCalendario()">{{filtro.fechaFormato}}</button>
-                          <input type="text" ng-show="campoBuscar=='Título'" placeholder="Título de la actividad" class="inputBuscar form-control" name="buscarTituloBarra" ng-model="buscarTituloBarra" id="buscarTitulo" autocomplete="off">
+                          <input type="text" ng-show="campoBuscar=='Título'" placeholder="Título de la nota" class="inputBuscar form-control" name="buscarTituloBarra" ng-model="buscarTituloBarra" id="buscarTitulo" autocomplete="off">
                             
                           <!--<button ng-show="campoBuscar=='Fecha'" type="text" class="form-control inputBuscar text-left" ng-click="AbrirCalendario()" >{{filtro.fechaFormato}}</button>-->
 
@@ -171,9 +171,11 @@
                     </div>
                     
                     <!-- Buscar  botón -->
-                     <button class="btn  botonFiltrarBarraLateral text-center btn-block" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
-                        <b ><span class="fa fa-ban"></span> Limpiar</b>
-                     </button>
+                    <div style="margin-right: 37px">
+                         <button class="btn  botonFiltrarBarraLateral text-center pull-right" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                            <b ><span class="fa fa-ban"></span> Limpiar</b>
+                         </button>
+                    </div>
                     
                 </div>
                 
@@ -197,12 +199,54 @@
                 
                 <!-- Titulo -->
                 <div class="row" ng-if="agrupar == 'Titulo'">
-                    <a  ng-repeat="nota in nota | orderBy:ordenNota.Orden | filter:BuscarTituloBarra " ng-click="VerDetalles(nota.NotaId, false)"  class="btn itemBarraLateral {{GetClaseDiario(nota.NotaId)}}"> <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
-                        <!-- indicador -->
-                        <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
-                            {{nota.Titulo}}<br>
-                        </span>
-                    </a>
+                    
+                    
+                    <div ng-repeat="nota in nota | orderBy:ordenNota.Orden | filter:BuscarTituloBarra " class="itemBarraLateral" ng-class="GetClaseDiario(nota.NotaId)">
+
+                        <div class="input-group" id="nota{{nota.NotaId}}">
+
+                            <button class="btn itemBarraLateralbtn "   ng-click="VerDetalles(nota.NotaId, false)"  style="vertical-align: middle; min-height: 60px; padding: 10px" >
+
+                                <span   style="white-space: normal; overflow: hidden; display: inline-block; " >
+    
+                                     <span style="font-size: 12pt">{{nota.Titulo}}</span>
+                                </span>
+
+                            </button>
+
+                            <!-- "context menu" -->
+                            <div  class=" btn itemBarraLateralbtn btnOptAutoHeight" ng-click="VerOptPendiente(nota.NotaId)" id="optPen">
+                                <span class="fa fa-ellipsis-v"></span>
+                            </div>
+                           
+
+                            <div  class="actividadOpt animated "  ng-class="{slideInRight : verpen == nota.NotaId, slideOutRight : verpen2 == nota.NotaId}" ng-show=" verpen ==  nota.NotaId || verpen2 ==  nota.NotaId" >
+
+                                 <div class="btn-group" style="height: 60px !important" id="menuNota{{nota.NotaId}}">
+
+                                  <button class="btn btnOptActividad Borrar" ng-click="BorrarNota(nota)" >
+                                         <span class="fa fa-trash"></span> <br>Borrar
+                                    </button>
+
+                                    <button class="btn btnOptActividad Copiar" ng-click="GetNotasPorId(nota.NotaId, 'Copiar')">
+                                        <span class="fa fa-files-o"></span> <br>Copiar
+                                    </button>
+
+                                    <button class="btn btnOptActividad Detalle" ng-click="GetNotasPorId(nota.NotaId, 'Detalle')">
+                                        <span class="fa fa-eye"></span> <br>Detalles
+                                    </button>
+
+                                   <button class="btn btnOptActividad Editar" ng-click="GetNotasPorId(nota.NotaId, 'Editar')">
+                                         <span class="fa fa-pencil"></span> <br>Editar
+                                    </button>
+
+                                </div>
+
+                             </div>
+
+                        </div>
+                       
+                    </div>
                 </div>
                 
                 <!-- Etiquetas -->
@@ -239,11 +283,8 @@
                 
             </div>
             
-            <div class="col-sm-3 col-xs-12 " >
-            </div>
-            
             <!-- Detalles -->
-            <div class="col-sm-9 col-xs-12 detallesActividadPanel" ng-show="detalle.length > 0" >
+            <div class="eventoForm detallesActividadPanel" ng-show="detalle.length > 0" >
                 <!-- Regresar -->
                 <div class="row" ng-show="anchoPantalla <= 767">
                     <div class="col-xs-12" style="background: #E6E6E6;">
@@ -380,6 +421,10 @@
                                                     <li><a class=" dropdownOpcion2" ng-click="AbrirNota('Editar', nota)">
                                                          <span class="fa fa-pencil"> Editar</span>
                                                     </a></li>
+                                                     
+                                                     <li><a class=" dropdownOpcion2" ng-click="AbrirNota('Copiar', nota)">
+                                                         <span class="fa fa-clone"> Copiar</span>
+                                                    </a></li>
 
                                                      <li><a class=" dropdownOpcion2" ng-click="BorrarNota(nota)">
                                                          <span class="fa fa-trash"> Borrar</span>
@@ -406,8 +451,8 @@
                                         <div style="padding-left: 12px; padding-right: 12px">
                                              <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                                                <div class="imgContainer" >
-                                                    <div class="crop">
-                                                         <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
+                                                    <div class="crop center-block">
+                                                         <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(true, false, false, nota.Imagen, null, $index)"/>
                                                      </div>
                                                 </div>
                                                 <div style="height: 15px"></div>
@@ -491,8 +536,7 @@
             <div class="row">
                 <div class="col-xs-8 col-sm-10">
                     <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
-                    <span ng-if="operacion == 'Agregar'" class="tituloModal">Agregar Nota</span>
-                    <span ng-if="operacion == 'Editar'" class="tituloModal">Editar Nota</span>
+                    <span  class="tituloModal">{{operacion}} Nota</span>
                 </div>
                 
                 <div class="col-xs-4 col-sm-2">
@@ -527,10 +571,6 @@
                  </div>
                  
                  <br>
-                 <!-- Datos -->
-                 <div ng-show="tabModal == 'Datos'">
-                   
-                </div>
                 
                 <!-- Notas -->
                 <div ng-show="tabModal == 'Nota'">
@@ -555,31 +595,31 @@
                     <br>
                    <!-- Titulo -->
                     <div class="row">
-
-                        <div class="col-xs-12 col-sm-12 etiquetaDropdownList" >
+                        <div class="col-sm-12">
                             
-
-                             <div class="input-group">
-                               
+                            <div class="input-group">
                                 <div class="entrada2">
-                                    <input type="text" required class="entrada form-control" name="titulo" ng-model="nuevaNota.Titulo"  ng-maxlength="300" autocomplete="off" ng-blur="CrearEtiquetaSugerida()"/>
-                                    <label class="">Título</label><br>
-                                 </div>
+                                    <textarea id="titulonota" required type="text"  class="form-control entrada areainput" style="font-size:12pt;" name="nota" ng-model="nuevaNota.Titulo" autocomplete="off" ng-blur="CrearEtiquetaSugerida()" rows="1"></textarea>
+                                    <label class="">Título</label>
+                                </div>
+                                
                                 <span class="input-group-btn">
                                     <a class="btn close cerrarModal"  ng-click="nuevaNota.Titulo = ''" type="button"><span class="fa fa-times-circle"></span></a>
                                 </span>
+                                
                             </div>
 
-                        </div>
-
+                       </div>             
                     </div>
+                    <br>
                     
                     <!-- Nota -->
                     <div class="row">
                         <div class="col-sm-12">
                              <div class="">
                                 <label class="etiquetaNormal">Notas</label>
-                                <textarea required type="text"  class="form-control contenidoArea" style="font-size:12pt; min-height: 300px !important" name="contenido" id="contenido" ng-model="nuevaNota.Notas" maxlength="20000"></textarea>
+                                
+                                <textarea required name="contenido" id="contenido"  class="form-control contenidoArea js-auto-size" rows="10" placeholder="" ng-model="nuevaNota.Notas" maxlength="20000"></textarea>
                             </div>
                         </div>
                     </div>
@@ -701,7 +741,7 @@
                                   <td class="hidden-xs">  {{img.name}} </td>
                                   <td class="hidden-xs">  {{(img.size/1000000).toFixed(2)}} MB </td>
                                   <td class="text-center">  
-                                      <a class="btn btnQuitarImg" ng-click="nuevaNota.ImagenSrc.splice($index,1)">
+                                      <a class="btn btnQuitarImg" ng-click="nuevaNota.ImagenSrc.splice($index,1); nuevaNota.ImagenTh.splice($index,1); nuevaNota.ImagenWeb.splice($index,1)">
                                          <span class="fa fa-times-circle"></span>
                                      </a>
                                   </td>
@@ -721,7 +761,7 @@
                                   <td style="width: 100px">
                                     <div class="imgContainer" style="height:50px">
                                          <a style="overflow: hidden !important; max-height: 50px">
-                                            <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 1)"/>
+                                            <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(true, true, false, nuevaNota.Imagen, nuevaNota.ImagenSrc, $index, 1)"/>
                                          </a>
                                     </div>
                                   </td>
@@ -758,7 +798,7 @@
                                   <td style="width: 100px">
                                       <div class="imgContainer" style="height:50px">
                                           <a style="overflow: hidden !important; max-height: 50px">
-                                              <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevaNota.Imagen, null, $index)"/>
+                                              <img class="img-responsive" style="width: 100%" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(false, false, true, nuevaNota.Imagen, null, $index)"/>
                                           </a>
                                       </div>
                                   </td>
@@ -847,133 +887,6 @@
         </div>
     </div>
     
-    <!-- Filtro -->
-    <div class="modal fade" id="modalFiltro" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
-        <br>    <br>   <br>
-        <div class="modal-dialog modalPrincipal">            
-            <div class="row">
-                <div class="col-xs-12">
-                    <span class="tituloModal">Filtrar</span>
-                    
-                    <button class="btn botonFiltroBarraLateral pull-right" data-dismiss="modal" aria-label="Close" ng-click="GetDatosFiltro()">
-                        <span>OK</span>
-                    </button>
-
-                   <button class="btn botonFiltroBarraLateral pull-right" ng-disabled = "(filtro.tema.length + filtro.etiqueta.length + filtro.fecha.length) == 0" data-toggle="tooltip" data-placement="bottom" title="Limpiar filtro" ng-click="LimpiarFiltro()">
-                        <span >Limpiar</span>
-                    </button>
-                </div>  
-            </div>
-            <br>
-            
-            <form name="filtroForma">
-                
-                <!-- Etiquetas -->
-                <button class="btn btn-block panelOperacionBotonLateral">Etiqueta</button>
-
-                <div  style="background: white">
-                   <div class="col-xs-12" style="margin-top: 10px"></div>
-
-                    <div class="col-xs-12">
-                       <div class="input-group">
-                            <input type="text"  placeholder="Buscar Etiqueta" class="entrada form-control" name="buscarEtiquetaFiltro" ng-model="buscarEtiquetaFiltro" id="bucarEtiquetaFiltro" autocomplete="off">
-                            <span class="input-group-btn">
-                                <a class="btn close cerrarModal"  ng-click="buscarEtiquetaFiltro = ''" type="button"><span aria-hidden="true">&times;</span></a>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="col-xs-12" style="margin-top: 10px"></div>
-                    <div class="panel  filtroModal" style="border-radius: 0px;">
-                        <div class="row " >
-                            <div class="col-xs-12">
-
-                               <div ng-repeat="etiqueta in etiquetaF | orderBy:'Nombre'" ng-show="(BuscarEtiquetaFiltro(etiqueta) && buscarEtiquetaFiltro.length > 0) || etiqueta.Filtro ">
-
-                                    <div class="checkbox" style="margin-top:5px !important">
-                                        <label class="anchoTotal">
-                                            <input  class="form-control" ng-model="etiqueta.Filtro" type="checkbox" ng-click="SetFiltroEtiqueta(etiqueta.EtiquetaId)">
-                                            <span class="cr"> <i class="cr-icon fa fa-check"></i> </span> <span>{{etiqueta.Nombre}}</span>
-                                        </label>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!------ Tema ------>
-                <button class="btn btn-block panelOperacionBotonLateral">Tema</button>
-
-                <div  style="background: white">
-                   <div class="col-xs-12" style="margin-top: 10px"></div>
-
-                    <div class="col-xs-12">
-                       <div class="input-group">
-                            <input type="text"  placeholder="Buscar Tema" class="entrada form-control" name="buscarTema" ng-model="buscarTemaFiltro" id="buscarTemaFiltro" autocomplete="off">
-                            <span class="input-group-btn">
-                                <a class="btn close cerrarModal"  ng-click="buscarTemaFiltro = ''" type="button"><span aria-hidden="true">&times;</span></a>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="col-xs-12" style="margin-top: 10px"></div>
-                    <div class="panel  filtroModal" style="border-radius: 0px;">
-                        <div class="row " >
-                            <div class="col-xs-12">
-
-                                <div ng-repeat="tema in temaF | orderBy:'Tema'" ng-show="(BuscarTemaFiltro(tema) && buscarTemaFiltro.length > 0) || tema.Filtro ">
-                                    <div class="checkbox" style="margin-top:5px !important;">
-                                        <label class="anchoTotal">
-                                            <input class="form-control" ng-model="tema.Filtro" type="checkbox"  ng-click="SetFiltroTema(tema.TemaActividadId)">
-                                            <span class="cr"> <i class="cr-icon fa fa-check"></i> </span>{{tema.Tema}}
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!------ Fecha ------>
-                <button class="btn btn-block panelOperacionBotonLateral">Fecha</button>
-
-                <div  style="background: white">
-                   <div class="col-xs-12" style="margin-top: 10px"></div>
-                    
-                    <div class="col-xs-12">
-                        <input type="text"  id="fechaFiltro" class="form-control entrada"  style="display: block; position: fixed; width:1%; border-color: transparent" onblur="angular.element(this).scope().CambiarFechaFiltro(this)"/> 
-                      </div>
-
-                    <div class="col-xs-12">
-                    
-                       <div class="input-group">
-                            <button type="text"   class="entrada form-control text-left"  id="buscarFechaFiltro" ng-click="AbrirCalendario()">
-                                {{filtro.fechaFormato}}
-                           </button>
-                            <span class="input-group-btn">
-                                <a class="btn close cerrarModal"  ng-click="LimpiarFiltroFecha()" type="button"><span aria-hidden="true">&times;</span></a>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="panel  filtroModal" style="border-radius: 0px;">
-                        <div class="row " >
-                            <div class="col-xs-12">
-
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-               
-            </form> 
-            
-        </div>
-    </div>
-    
     <div class="modal fade" id="detalleNota">
         <br>    <br>   <br>
         <div class="modal-dialog modal-lg modalPrincipal">
@@ -1006,7 +919,7 @@
             <div ng-repeat="img in detalleNota.Imagen">
                  <div class="col-xs-6 col-sm-4 col-lg-3 ">
                     <div class="crop">
-                         <img class="img-responsive center-block" style="margin-bottom:15px; max-width:100%; height:150px;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="VerImganes(true, false, false, detalleNota.Imagen, null, $index)"/>
+                         <img class="img-responsive center-block" style="margin-bottom:15px; max-width:100%; height:150px;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(true, false, false, detalleNota.Imagen, null, $index)"/>
                      </div>
                  </div>
             </div>
@@ -1032,8 +945,8 @@
                <br>
                 <div class="col-xs-12">
                     <!-- Fecha -->
-                    <span>{{detalleNota.FechaFormato}}</span><br>
-                    
+                    <span><b>Creada: </b>  {{detalleNota.FechaFormato}}</span><br>
+                    <span><b>Modificada: </b>  {{detalleNota.FechaModificacionFormato}}</span><br>
                     <!-- Etiqueta -->
                     <span ng-if="detalleNota.EtiquetaVisible.length > 0">
                         <b>Etiquetas: </b> 
@@ -1145,7 +1058,7 @@
                       <!-- Items -->
                       <div class="carousel-inner">
                         <div class="item" ng-class="{active: $index == iImg}" ng-repeat="img in detalleImagen">
-                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}"/>
+                            <img   ng-if="iImg <= iLmt" class="img-responsive center-block" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Web/{{img.Nombre}}"/>
                             <img   ng-if="iImg > iLmt" class="img-responsive center-block" src="{{img.Src}}"/>
                         </div>
                       </div>
@@ -1220,7 +1133,7 @@
                                     <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                         <span class="fa fa-check-circle" ></span>
                                     </a>
-                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                                     <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="AgregarQuitarImagenFototeca(img)"/>
                                  </div>
                             </div>
                             <div style="height: 15px"></div>
@@ -1266,7 +1179,7 @@
                            <a class="btn checkImage btn-block" ng-if="img.Seleccionada" ng-click="AgregarQuitarImagenFototeca(img)">
                                 <span class="fa fa-check-circle" ></span>
                             </a>
-                            <img class="img-responsive center-block imgFototecaSel" style="margin-bottom:15px; max-width:100%; height:120px;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/{{img.Nombre}}" data-toggle="modal" data-target="#verFototeca" ng-click="AgregarQuitarImagenFototeca(img)"/>
+                            <img class="img-responsive center-block imgFototecaSel" style="margin-bottom:15px; max-width:100%; height:120px;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" data-toggle="modal" data-target="#verFototeca" ng-click="AgregarQuitarImagenFototeca(img)"/>
                          </div>
                      </div>
                 </div>
