@@ -416,4 +416,195 @@ function EditarEtiquetaArchivo()
     echo '[ { "Estatus": "Exitoso" } ]';
 }
 
+function GetNumeroArchivoPorConcepto($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT Nombre, ConceptoId, Tipo, UsuarioId FROM NumeroArchivoPorConceptoVista WHERE UsuarioId = ".$id;
+ 
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ); 
+        
+        $app->status(200);
+        $db = null;
+        echo json_encode($response);
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
+function AgregarArchivo()
+{
+    $request = \Slim\Slim::getInstance()->request();
+    $archivo = json_decode($_POST['datos']);
+    global $app;
+
+    //------------------------------ Archivos inicia --------------------------------------
+    $countFile = 0;
+    if($archivo->AgregarArchivo > 0)
+    {
+        $countFile = count($_FILES['Archivo']['name']);
+    }
+        
+    $count= 0;
+    $archivoId = [];
+    if($countFile > 0)
+    {
+        try 
+        {
+            $db = getConnection();
+            $db->beginTransaction();
+
+        } catch(PDOException $e) 
+        {
+            echo $e;
+            echo '[{"Estatus": "Fallo"}]';
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+
+        $dir = "ArchivosUsuario/".$archivo->UsuarioId."/Archivo/";
+        if(!is_dir("ArchivosUsuario/".$archivo->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$archivo->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['Archivo']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['Archivo']['name'][$k];
+                $size = $_FILES['Archivo']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                //$archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$archivo->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $archivoId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //$uploadfile = $_FILES['file']['name'];
+                move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($archivo->ArchivoSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($archivo->ArchivoSrc[$k]->Etiqueta[$i]->Visible || $archivo->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1")
+                        {
+                            $sql .= " (".$archivo->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
+                        }
+                        else
+                        {
+                             $sql .= " (".$archivo->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
+                        }
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($archivo->ArchivoSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$archivo->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $archivoId[$k] = 0;
+            }
+            
+        }
+       
+    }
+    
+    //----------------------------- archvios  fin--------------------------------------- 
+    
+    echo '[{"Estatus": "Exitoso"}]';
+    $app->status(200);
+    $db->commit();
+    $db = null;
+    
+  
+}
+
+
 ?>

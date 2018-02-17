@@ -87,6 +87,20 @@
     font-style: bold;
 }
 
+.botonInfoActividad, .botonInfoActividad:active, .botonInfoActividad:focus, .botonInfoActividad:hover, .botonInfoActividad:disabled
+{
+    background: transparent;
+    color:  #1859b2;
+    border-radius: 0px;
+    font-size: 16pt;
+    margin-top: -5px;
+    
+    opacity: 1;
+    cursor: default;
+    outline: none !important;
+    box-shadow: none;
+}
+
 .botonDetallesActividad, .botonDetallesActividad:active, .botonDetallesActividad:focus, .botonDetallesActividad:hover
 {
     background: transparent;

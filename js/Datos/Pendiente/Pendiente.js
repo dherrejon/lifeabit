@@ -63,6 +63,8 @@ function SetPendiente(data)
     pendiente.FechaRealizacion = data.FechaRealizacion;
     pendiente.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
     
+    
+    
     if(pendiente.FechaRealizacion)
     {
         pendiente.FechaRealizacionFormato = TransformarFecha(data.FechaRealizacion);

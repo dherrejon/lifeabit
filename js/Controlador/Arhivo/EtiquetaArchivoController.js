@@ -1,10 +1,11 @@
 app.controller("EtiquetaArchivoController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, LifeService)
 {  
     
-    $scope.$on('AbrirEtiquetaArchivo', function(evento, archivo, nombre)
+    $scope.$on('AbrirEtiquetaArchivo', function(evento, archivo, nombre, modal)
     {
         $scope.fl = archivo;
         $scope.nombreArchivo = nombre;
+        $scope.modal = modal;
         
         $scope.ValidarEtiquetaArchivo(archivo.Etiqueta);
         $scope.ValidarTemaArchivo(archivo.Tema);
@@ -176,6 +177,10 @@ app.controller("EtiquetaArchivoController", function($scope, $window, $http, $ro
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.admObjeto.ArchivoSrc[$scope.ifile], 'Archivo');
             $rootScope.$broadcast('SepararEtiqueta', $scope.admObjeto.ArchivoSrc[$scope.ifile].Tema, 'Archivo');
         }
+        else
+        {
+            $rootScope.$broadcast('TerminarEtiquetaOcultaArchivo');
+        }
     });
     
     $scope.$on('EtiquetaOcultaArchivoApp',function(evento, objeto)
@@ -237,7 +242,7 @@ app.controller("EtiquetaArchivoController", function($scope, $window, $http, $ro
         }
         if(modal == "Archivo" && $scope.modal =="Archivo")
         {
-            $rootScope.$broadcast('TerminarEtiquetaOcultaArchivo', $scope.archivo);
+            $rootScope.$broadcast('TerminarEtiquetaOcultaArchivo2', $scope.archivo);
         }
         
     });
@@ -271,7 +276,15 @@ app.controller("EtiquetaArchivoController", function($scope, $window, $http, $ro
     
     $scope.TerminarEtiquetaArchivo = function()
     {
-        $rootScope.$broadcast('TerminarEtiquetas');
+        if($scope.modal == "Archivo")
+        {
+            $('#EtiquetaFile').modal('hide');
+        }
+        else if ($scope.modal == "App")
+        {
+            $rootScope.$broadcast('TerminarEtiquetas');
+        }
+        
     };
     
 });

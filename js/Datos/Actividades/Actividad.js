@@ -9,8 +9,16 @@ class Actividad
         this.Frecuencia = new Frecuencia();
         this.Tema = [];
         this.Etiqueta = [];
-        this.Imagen = [];
         this.Lugar = new Lugar();
+        
+        this.Imagen = [];
+        this.ImagenSrc = [];
+        
+        this.Archivo = [];
+        this.ArchivoSrc = [];
+        
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
     }
 }
 
@@ -49,6 +57,8 @@ function SetActividad(data)
     actividad.FechaCreacion = data.FechaCreacion;
     actividad.Notas = data.Notas;
     actividad.Hora = data.Hora;
+    actividad.Imagen = data.Imagen;
+    actividad.Archivo = data.Archivo;
     
     actividad.FechaCreacionFormato = TransformarFecha(data.FechaCreacion);
     

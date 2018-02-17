@@ -1479,327 +1479,6 @@ function EditarNota()
             }
         }
         
-        //------------------------------ Archivos inicia --------------------------------------
-         $sql = "DELETE FROM ArchivoPorNota WHERE NotaId =".$nota->NotaId;
-        try 
-        {
-            $stmt = $db->prepare($sql); 
-            $stmt->execute(); 
-
-        } 
-        catch(PDOException $e) 
-        {
-            echo '[ { "Estatus": "Fallo" } ]';
-            echo $e;
-            $db->rollBack();
-            $app->status(409);
-            $app->stop();
-        }
-        
-        $countFile = 0;
-        if($nota->AgregarArchivo > 0)
-        {
-            $countFile = count($_FILES['Archivo']['name']);
-        }
-
-        $count= 0;
-        $archivoId = [];
-        if($countFile > 0)
-        {
-            $dir = "ArchivosUsuario/".$nota->UsuarioId."/Archivo/";
-            if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
-            {
-                mkdir("ArchivosUsuario/".$nota->UsuarioId, 0777);
-            }
-
-            if(!is_dir($dir))
-            {
-                mkdir($dir, 0777);
-            }
-
-            for($k=0; $k<$countFile; $k++)
-            {
-                if($_FILES['Archivo']['error'][$k] == 0)
-                {
-                    $count++;
-
-                    $name = $_FILES['Archivo']['name'][$k];
-                    $size = $_FILES['Archivo']['size'][$k];
-                    $ext = pathinfo($name, PATHINFO_EXTENSION);
-                    $archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
-
-                    $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$nota->UsuarioId.")";
-
-                    try 
-                    {
-                        $stmt = $db->prepare($sql);                
-                        $stmt->execute();
-
-                        $archivoId[$k]  = $db->lastInsertId();
-                    } 
-                    catch(PDOException $e) 
-                    {
-                        echo '[{"Estatus": "Fallo"}]';
-                        echo $sql;
-                        $db->rollBack();
-                        $app->status(409);
-                        $app->stop();
-                    }
-
-                    //Subir Imagen
-                    //$uploadfile = $_FILES['file']['name'];
-                    move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
-
-
-                    //----------------------- Etiquetas --------------------
-                    $countEtiqueta = count($nota->ArchivoSrc[$k]->Etiqueta);
-
-                    if($countEtiqueta > 0)
-                    {
-                        $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
-
-                        for($i=0; $i<$countEtiqueta; $i++)
-                        {
-                            if($nota->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1" || $nota->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
-                            {
-                                $sql .= " (".$nota->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
-                            }
-                            else
-                            {
-                                $sql .= " (".$nota->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
-                            }
-                        }
-
-                        $sql = rtrim($sql,",");
-
-                        try 
-                        {
-                            $stmt = $db->prepare($sql);
-                            $stmt->execute();
-
-                        } 
-                        catch(PDOException $e) 
-                        {
-                            echo '[{"Estatus": "Fallo"}]';
-                            echo $sql;
-                            $db->rollBack();
-                            $app->status(409);
-                            $app->stop();
-                        }
-                    }
-
-
-                    //----------------------- Temas ---------------------------------
-                    $countTema = count($nota->ArchivoSrc[$k]->Tema);
-
-                    if($countTema > 0)
-                    {
-                        $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
-
-                        for($i=0; $i<$countTema; $i++)
-                        {
-                            $sql .= " (".$nota->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
-                        }
-
-                        $sql = rtrim($sql,",");
-
-                        try 
-                        {
-                            $stmt = $db->prepare($sql);
-                            $stmt->execute();
-
-                        } 
-                        catch(PDOException $e) 
-                        {
-                            echo '[{"Estatus": "Fallo"}]';
-                            echo $sql;
-                            $db->rollBack();
-                            $app->status(409);
-                            $app->stop();
-                        }
-                    }
-                }
-                else
-                {
-                    $archivoId[$k] = 0;
-                }
-
-            }
-
-
-            if($count > 0)
-            {
-                $sql = "INSERT INTO ArchivoPorNota(NotaId, ArchivoId) VALUES";
-
-                //Imagen del nota
-                for($k=0; $k<$countFile; $k++)
-                {
-                    if($archivoId[$k] != 0)
-                    {
-                        $sql .= " (".$nota->NotaId.", ".$archivoId[$k]."),";
-                    }
-                }
-
-                $sql = rtrim($sql,",");
-
-                try 
-                {
-                    $stmt = $db->prepare($sql);
-                    $stmt->execute();
-
-                } 
-                catch(PDOException $e) 
-                {
-                    echo '[{"Estatus": "Fallo"}]';
-                    echo $sql;
-                    $db->rollBack();
-                    $app->status(409);
-                    $app->stop();
-                }
-            }
-        }
-
-         $countArch = count($nota->Archivo);
-
-        if($countArch>0)  
-        {    
-            $sql = "INSERT INTO ArchivoPorNota (NotaId, ArchivoId) VALUES";
-
-            $count = 0;
-            for($k=0; $k<$countArch; $k++)
-            {
-                if(!$nota->Archivo[$k]->Eliminado)
-                {
-                    $count++;
-                    $sql .= " (".$nota->NotaId.", ".$nota->Archivo[$k]->ArchivoId."),";
-                }
-            }
-            if($count > 0)
-            {
-                $sql = rtrim($sql,",");
-
-                try 
-                {
-                    $stmt = $db->prepare($sql);
-                    $stmt->execute();
-                } 
-                catch(PDOException $e) 
-                {
-                    echo '[{"Estatus": "Fallo"}]';
-                    echo $e;
-                    $db->rollBack();
-                    $app->status(409);
-                    $app->stop();
-                }
-
-                //----------------------- Etiquetas --------------------
-                for($k=0; $k<$countArch; $k++)
-                {
-                    $sql = "DELETE FROM EtiquetaPorArchivo WHERE ArchivoId =".$nota->Archivo[$k]->ArchivoId;
-                    try 
-                    {
-                        $stmt = $db->prepare($sql); 
-                        $stmt->execute(); 
-                    } 
-                    catch(PDOException $e) 
-                    {
-                        echo '[ { "Estatus": "Fallo" } ]';
-                        echo $e;
-                        $db->rollBack();
-                        $app->status(409);
-                        $app->stop();
-                    }
-
-                    $countEtiqueta = count($nota->Archivo[$k]->Etiqueta);
-                    if($countEtiqueta > 0)
-                    {
-                        $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
-
-                        for($i=0; $i<$countEtiqueta; $i++)
-                        {
-                            if($nota->Archivo[$k]->Etiqueta[$i]->Visible == "1" || $nota->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
-                            {
-                                $sql .= " (".$nota->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$nota->Archivo[$k]->ArchivoId.", 1),";
-                            }
-                            else
-                            {
-                                $sql .= " (".$nota->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$nota->Archivo[$k]->ArchivoId.", 0),";
-                            }
-
-
-                        }
-
-                        $sql = rtrim($sql,",");
-
-                        try 
-                        {
-                            $stmt = $db->prepare($sql);
-                            $stmt->execute();
-
-                        } 
-                        catch(PDOException $e) 
-                        {
-                            echo '[{"Estatus": "Fallo"}]';
-                            echo $sql;
-                            $db->rollBack();
-                            $app->status(409);
-                            $app->stop();
-                        }
-                    }
-
-
-                    //----------------------- Temas ---------------------------------
-                    $sql = "DELETE FROM TemaPorArchivo WHERE ArchivoId =".$nota->Archivo[$k]->ArchivoId;
-                    try 
-                    {
-                        $stmt = $db->prepare($sql); 
-                        $stmt->execute(); 
-                    } 
-                    catch(PDOException $e) 
-                    {
-                        echo '[ { "Estatus": "Fallo" } ]';
-                        echo $e;
-                        $db->rollBack();
-                        $app->status(409);
-                        $app->stop();
-                    }
-
-                    $countTema = count($nota->Archivo[$k]->Tema);
-
-                    if($countTema > 0)
-                    {
-                        $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
-
-                        for($i=0; $i<$countTema; $i++)
-                        {
-                            $sql .= " (".$nota->Archivo[$k]->Tema[$i]->TemaActividadId.", ".$nota->Archivo[$k]->ArchivoId."),";
-                        }
-
-                        $sql = rtrim($sql,",");
-
-                        try 
-                        {
-                            $stmt = $db->prepare($sql);
-                            $stmt->execute();
-
-                        } 
-                        catch(PDOException $e) 
-                        {
-                            echo '[{"Estatus": "Fallo"}]';
-                            echo $sql;
-                            $db->rollBack();
-                            $app->status(409);
-                            $app->stop();
-                        }
-                    }
-                }
-            }
-
-
-        }
-
-        //----------------------------- archvios  fin---------------------------------------
-        
         //----------------------- Etiquetas --------------------
         for($k=0; $k<$countImg; $k++)
         {
@@ -1893,6 +1572,328 @@ function EditarNota()
             }
         }
     }
+    
+    //------------------------------ Archivos inicia --------------------------------------
+    $sql = "DELETE FROM ArchivoPorNota WHERE NotaId =".$nota->NotaId;
+    try 
+    {
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        echo $e;
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+
+    $countFile = 0;
+    if($nota->AgregarArchivo > 0)
+    {
+        $countFile = count($_FILES['Archivo']['name']);
+    }
+    
+    $count= 0;
+    $archivoId = []; 
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$nota->UsuarioId."/Archivo/";
+        if(!is_dir("ArchivosUsuario/".$nota->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$nota->UsuarioId, 0777);
+        }
+
+        if(!is_dir($dir))
+        {
+            mkdir($dir, 0777);
+        }
+
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['Archivo']['error'][$k] == 0)
+            {
+                $count++;
+
+                $name = $_FILES['Archivo']['name'][$k];
+                $size = $_FILES['Archivo']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
+
+                $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$nota->UsuarioId.")";
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+
+                    $archivoId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                //Subir Imagen
+                //$uploadfile = $_FILES['file']['name'];
+                move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
+
+
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($nota->ArchivoSrc[$k]->Etiqueta);
+
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($nota->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1" || $nota->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
+                        {
+                            $sql .= " (".$nota->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
+                        }
+                        else
+                        {
+                            $sql .= " (".$nota->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
+                        }
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $countTema = count($nota->ArchivoSrc[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$nota->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $archivoId[$k] = 0;
+            }
+
+        }
+
+
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ArchivoPorNota(NotaId, ArchivoId) VALUES";
+
+            //Imagen del nota
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($archivoId[$k] != 0)
+                {
+                    $sql .= " (".$nota->NotaId.", ".$archivoId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+
+     $countArch = count($nota->Archivo);
+
+    if($countArch>0)  
+    {    
+        $sql = "INSERT INTO ArchivoPorNota (NotaId, ArchivoId) VALUES";
+
+        $count = 0;
+        for($k=0; $k<$countArch; $k++)
+        {
+            if(!$nota->Archivo[$k]->Eliminado)
+            {
+                $count++;
+                $sql .= " (".$nota->NotaId.", ".$nota->Archivo[$k]->ArchivoId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countArch; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorArchivo WHERE ArchivoId =".$nota->Archivo[$k]->ArchivoId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($nota->Archivo[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($nota->Archivo[$k]->Etiqueta[$i]->Visible == "1" || $nota->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
+                        {
+                            $sql .= " (".$nota->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$nota->Archivo[$k]->ArchivoId.", 1),";
+                        }
+                        else
+                        {
+                            $sql .= " (".$nota->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$nota->Archivo[$k]->ArchivoId.", 0),";
+                        }
+
+
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorArchivo WHERE ArchivoId =".$nota->Archivo[$k]->ArchivoId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($nota->Archivo[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$nota->Archivo[$k]->Tema[$i]->TemaActividadId.", ".$nota->Archivo[$k]->ArchivoId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    //----------------------------- archvios  fin---------------------------------------
+        
     
     $countTema = count($nota->Tema);
     

@@ -269,9 +269,10 @@
     /*-----------------------  Actividad ------------------------------------------*/
     $app->post('/GetActividad', 'GetActividad');
     $app->post('/AgregarActividad', $seguridad, $ChecarSesion, 'AgregarActividad');
-    $app->put('/EditarActividad', $seguridad, $ChecarSesion, 'EditarActividad');
+    $app->post('/EditarActividad', $seguridad, $ChecarSesion, 'EditarActividad');
     $app->delete('/BorrarActividad', $seguridad, $ChecarSesion, 'BorrarActividad');
-
+    
+    $app->get('/GetConceptoPorActividad/:id', $seguridad, $ChecarSesion, 'GetConceptoPorActividad');
     $app->get('/GetEtiquetaPorActividad/:id', $seguridad, $ChecarSesion, 'GetEtiquetaPorActividad');
     $app->get('/GetTemaPorActividad/:id', $seguridad, $ChecarSesion, 'GetTemaPorActividad');
     $app->get('/GetFechaActividad/:id', $seguridad, $ChecarSesion, 'GetFechaActividad');
@@ -353,14 +354,18 @@
     $app->delete('/BorrarImgen', $seguridad, $ChecarSesion, 'BorrarImgen');
     $app->put('/EditarEtiquetaImagen', $seguridad, $ChecarSesion, 'EditarEtiquetaImagen');
     $app->get('/GetNumeroImagen/:id', $seguridad, $ChecarSesion, 'GetNumeroImagen');
+    $app->get('/GetNumeroImagenPorConcepto/:id', $seguridad, $ChecarSesion, 'GetNumeroImagenPorConcepto');
+    $app->post('/AgregarImagen', $seguridad, $ChecarSesion, 'AgregarImagen');
 
     /*-----------------------  Archivo ------------------------------------------*/
     $app->get('/GetArchivo/:id', $seguridad, $ChecarSesion, 'GetArchivo');
     $app->get('/GetNumeroArchivo/:id', $seguridad, $ChecarSesion, 'GetNumeroArchivo');
+    $app->get('/GetNumeroArchivoPorConcepto/:id', $seguridad, $ChecarSesion, 'GetNumeroArchivoPorConcepto');
     $app->post('/GetArchivoApp', $seguridad, $ChecarSesion, 'GetArchivoApp');
     $app->delete('/BorrarArchivo', $seguridad, $ChecarSesion, 'BorrarArchivo');
     $app->get('/GetEtiquetaPorArchivo/:id', $seguridad, $ChecarSesion, 'GetEtiquetaPorArchivo');
     $app->put('/EditarEtiquetaArchivo', $seguridad, $ChecarSesion, 'EditarEtiquetaArchivo');
+    $app->post('/AgregarArchivo', $seguridad, $ChecarSesion, 'AgregarArchivo');
     
     //---------------------------------------------------------------------------------------------------------------Conocimiento
 
@@ -370,6 +375,8 @@
     $app->post('/AgregarConocimiento', $seguridad, $ChecarSesion, 'AgregarConocimiento');
     $app->post('/EditarConocimiento', $seguridad, $ChecarSesion, 'EditarConocimiento');
     $app->delete('/BorrarConocimiento', $seguridad, $ChecarSesion, 'BorrarConocimiento');
+    $app->get('/GetNumeroConocimiento/:id', $seguridad, $ChecarSesion, 'GetNumeroConocimiento');
+    $app->get('/GetNumeroConocimientoPorConcepto/:id', $seguridad, $ChecarSesion, 'GetNumeroConocimientoPorConcepto');
 
 
     //---------------------------------------------------------------------------------------------------------------Aplicacion

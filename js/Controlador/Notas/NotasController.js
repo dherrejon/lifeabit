@@ -1789,7 +1789,10 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
                 }
             }
             
-            $scope.VerDetalles(nota.NotaId, true);
+            if(nota.NotaId == $scope.idDetalle)
+            {
+                $scope.VerDetalles(nota.NotaId, true);
+            }
         }
     };
     
@@ -2330,8 +2333,11 @@ app.controller("NotasController", function($scope, $window, $http, $rootScope, m
     //----------- Archivos --------
     $(document).on('hide.bs.modal','#EtiquetaFile', function () 
     {
-        $scope.ActivarDesactivarTema($scope.nuevaNota.Tema);
-        $scope.ActivarDesactivarEtiqueta($scope.nuevaNota.Etiqueta);
+        if($scope.nuevaNota)
+        {
+            $scope.ActivarDesactivarTema($scope.nuevaNota.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevaNota.Etiqueta);
+        }
     });
     
     

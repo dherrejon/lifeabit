@@ -53,7 +53,7 @@ function GetBuscador()
     
     //Evento
     $sqlEtiquetaEvento = "";
-    $sqlEtiquetaBaseEvento1 = " SELECT e.EventoActividadId FROM EtiquetaEventoVista e WHERE EtiquetaId IN ";
+    $sqlEtiquetaBaseEvento1 = " SELECT e.EventoActividadId FROM EtiquetaEventoActividaVista e WHERE EtiquetaId IN ";
     $sqlEtiquetaBaseEvento2 = " GROUP BY e.EventoActividadId";
     
     //Pendiente
@@ -184,7 +184,7 @@ function GetBuscador()
                     INNER JOIN ("
                         .$sqlEtiquetaEvento.
                 
-                    " UNION ALL SELECT t.EventoActividadId FROM TemaEventoVista t
+                    " UNION ALL SELECT t.EventoActividadId FROM TemaEventoActividadVista t
                     WHERE TemaActividadId  IN ".$whereTema." GROUP BY t.EventoActividadId HAVING count(*) = ".$numTema.
                 
                     ") x ON x.EventoActividadId = e.EventoActividadId GROUP BY e.EventoActividadId HAVING count(*) = ".($numEtiqueta+1);
@@ -285,7 +285,7 @@ function GetBuscador()
             
             $sqlEvento = "SELECT e.EventoActividadId, e.Fecha, e.Actividad, e.ActividadId FROM EventoActividadVista e
                     INNER JOIN (
-                        SELECT t.EventoActividadId FROM TemaEventoVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.EventoActividadId HAVING count(*) = ".$numTema."
+                        SELECT t.EventoActividadId FROM TemaEventoActividadVista t WHERE t.TemaActividadId in ".$whereTema." GROUP BY t.EventoActividadId HAVING count(*) = ".$numTema."
                     ) x ON x.EventoActividadId = e.EventoActividadId";
             
             $sqlPendiente = "SELECT p.PendienteId, p.Nombre, p.Hecho, p.FechaIntencion, p.FechaRealizacion, p.NombrePrioridad, p.Importancia   FROM PendienteVista p
@@ -576,8 +576,8 @@ function GetBuscador()
     }
 
     $db = null;
-    echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}, {"Archivo":'.json_encode($archivo).'}, {"Conocimiento":'.json_encode($conocimiento).'}]';
     
+    echo '[{"Estatus": "Exito"}, {"Notas":'.json_encode($nota).'}, {"Diario":'.json_encode($diario).'}, {"Actividad":'.json_encode($actividad).'}, {"Imagen":'.json_encode($imagen).'}, {"Evento":'.json_encode($evento).'}, {"Pendiente":'.json_encode($pendiente).'}, {"Archivo":'.json_encode($archivo).'}, {"Conocimiento":'.json_encode($conocimiento).'}]';
 }
 
 function GetDiarioPorId()
@@ -646,6 +646,21 @@ function GetDiarioPorId()
             {
                 $stmt = $db->query($sql);
                 $diario[$k]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+            } 
+            catch(PDOException $e) 
+            {
+                //echo($e);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            $sql = "SELECT ArchivoId, Nombre, Size FROM ArchivoDiarioVista WHERE DiarioId = ".$diario[$k]->DiarioId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $diario[$k]->Archivo = $stmt->fetchAll(PDO::FETCH_OBJ);
             } 
             catch(PDOException $e) 
             {

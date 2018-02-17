@@ -452,7 +452,14 @@
                         <span >
                            <p style="font-size:12pt" ng-bind-html="detalle.NotaHTML"></p>
                         </span>
-                        <br>
+                    </span>
+                    <br>
+                    
+                    <span ng-if="detalle.Recordatorio">
+                        <b>Recordatorio: </b> <br>
+                        <span >
+                           <p style="font-size:12pt" ng-bind-html="detalle.RecordatorioHTML"></p>
+                        </span>
                     </span>
                     <br>
 
@@ -597,11 +604,10 @@
                             <div class="row" ng-if="detalle.Hora.length > 0">
                                <div class="col-sm-12"> 
                                    <b> Hora:  </b>
-                                   <span class="textoDetalle"> {{detalle.FechaCreacionFormato}} </span>             
+                                   <span class="textoDetalle"> {{detalle.Hora}} </span>             
                                </div>
                             </div>
-
-
+                                
                             <!--Notas -->
                             <br ng-if="detalle.Notas.length > 0">
                             <div class="row" ng-if="detalle.Notas.length > 0">
@@ -610,6 +616,53 @@
                                    <p ng-bind-html="detalle.NotasHTML"></p>                
                                </div>
                             </div>
+                            
+                            <!-- Imagenes -->
+                            <div ng-repeat="img in detalle.Imagen" >
+                                
+                                 <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
+                                   <div class="imgContainer" >
+                                        <div class="crop center-block">
+                                             <img class="" style=" width:100%;" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{img.Nombre}}" ng-click="VerImganes(detalle.Imagen, $index)"/>
+                                         </div>
+                                    </div>
+                                    <div style="height: 15px"></div>
+                                 </div>
+                                 
+                            </div>
+                            <br>
+                            
+                            <!-- Archivos -->
+                            <div ng-if="detalle.Archivo.length > 0">
+                               <table  class="table ">
+
+                                    <tbody  style="cursor: pointer">
+
+                                        <!-- Archivos agregados -->
+                                        <tr ng-repeat="file in detalle.Archivo"  >
+
+                                          <td >
+                                              <span class="infoCenterCell">
+                                                  <span>{{file.Nombre}}</span>
+                                               </span> 
+                                          </td>
+
+                                          <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                          <td class="text-center">
+                                              <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                                 <span class="fa fa-download"></span>
+                                             </a>
+                                          </td>
+
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+                           
                         </div>
                     </div>
                 </div>
@@ -622,6 +675,12 @@
                </div>
             </div>
             <br>
+            
+            <div class="row" ng-show="detalle.Titulo">
+                <div class="col-xs-12">
+                    <b style="font-size: 12pt">{{detalle.Titulo}}</b>
+                </div>
+            </div>
              
              <div class="row">
                <div class="col-sm-12"> 
@@ -640,11 +699,17 @@
                         
                          <div class="actividad {{GetClaseEvento(evento)}}" style="margin-top: -1px">
                          
-                             <button class="btn btnEvento" ng-click="AccionEvento(evento)" ng-disabled="true">
+                             <button class="btn btnEvento" ng-click="AccionEvento(evento)">
                                 <span ng-if="('1' == evento.Hecho)" class="fa fa-check"></span> 
                              </button>
-                            
-                             <div class="text-center tituloEstatusActividad {{evento.EstatusTexto}}" >{{evento.EstatusTexto}}</div>
+                             
+                             <di ng-show="evento.Fecha == hoy" style="z-index: -1 !important">
+                                <div class="text-center labelHoy" ></div>
+                                <div class="text-center labelHoy2 {{evento.Clase}}" ></div>
+                                <div class="text-center labelHoyTxt" >Hoy</div>
+                            </di>
+
+                             <div class="text-center tituloEstatusActividad {{evento.Clase}}" >{{evento.EstatusTexto}}</div>
                             
                          </div> 
                           
@@ -689,15 +754,10 @@
                              </span>  
                              
                              <!-- Lugar y cuydad -->
-                             <span ng-if="evento.Lugar.LugarId.length > 0 || evento.Ciudad.CiudadId.length > 0 ">
+                             <span ng-if="evento.Lugar.LugarId.length > 0">
                                  <b class="fa fa-map-marker"></b>
-                                 <span ng-if="evento.Lugar.LugarId.length > 0 ">
-                                     <span ng-if="evento.Ciudad.CiudadId.length > 0 ">{{evento.Lugar.Nombre}},</span>
-                                     <span ng-if="evento.Ciudad.CiudadId.length == 0 ">{{evento.Lugar.Nombre}}</span>
-                                 </span>
-                                 
-                                 <span ng-if="evento.Ciudad.CiudadId.length > 0 ">
-                                     {{evento.Ciudad.Ciudad}} ({{evento.Ciudad.AbreviacionPais}}).
+                                 <span>
+                                     <span >{{evento.Lugar.Nombre}}.</span>
                                  </span>
                                  <br>
                              </span>
@@ -721,12 +781,12 @@
                          <!-- Opciones -->
                         <div class="btn-group pull-right" style="position: absolute; right: 0; top: 0; padding: 10px">
                            <!-- Imagenes -->
-                           <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.Imagen.length) > 0" ng-click="VerImganes(evento.Imagen, 0)">
+                           <!--<a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.Imagen.length) > 0" ng-click="VerImganes(evento.Imagen, 0)">
                                  <span class="fa fa-picture-o"></span>
-                             </a>
+                             </a>-->
                                  
                             <!-- Concepto -->
-                            <span class="dropdown">
+                            <!--<span class="dropdown">
                 
                                
                                 <a class=" operacionEvento" data-toggle="dropdown" ng-if="(evento.EtiquetaVisible.length + evento.Tema.length) > 0">
@@ -786,7 +846,7 @@
                                         </form>
                                     </li>
                                 </ul>
-                            </span>
+                            </span>-->
 
                              <!-- Opciones de evento evento -->
                              <span class="dropdown" style="position: relative">
@@ -821,7 +881,7 @@
             
             <!-- Imagenes -->
             <div ng-repeat="img in detalle.Imagen" ng-if="tipoDetalle == 'Nota' || tipoDetalle == 'Diario' || tipoDetalle == 'Pendiente' || tipoDetalle == 'Conocimiento'">
-                <div style="padding-left: 12px; padding-right: 12px">
+                <div style="padding-left: -3px; padding-right: -3px">
                      <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px">
                        <div class="imgContainer" >
                             <div class="crop center-block">
@@ -833,7 +893,7 @@
                  </div>
             </div>
             
-            <div class="row" ng-if="tipoDetalle == 'Pendiente' || tipoDetalle == 'Conocimiento'">
+            <div class="row" ng-if="tipoDetalle == 'Pendiente' || tipoDetalle == 'Conocimiento' || tipoDetalle == 'Diario' || tipoDetalle == 'Nota'">
                 <div class="col-xs-12">
                     <div class="table-responsive">
                        <table  class="table table-responsive">
@@ -882,8 +942,13 @@
                     <button class="btn close cerrarModal" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">&times;</span></button>
                     
                     <!-- Fecha -->
-                    <span class="tituloModal">{{detalleEvento.FechaFormato}}</span><br><br>
+                    <span class="tituloModal">{{detalleEvento.FechaFormato}}</span><br>
                     <span></span>
+                    
+                    <!-- Hora -->
+                    <span ng-if="detalleEvento.Hora.length > 0">
+                         <span>{{detalleEvento.Hora}}</span><br>
+                    </span><br>
                     
                     <!-- Separador -->
                     <div class="row">
@@ -924,6 +989,24 @@
                         </span>
                     </span>
                     
+                    <!-- Etiqueta -->
+                    <span ng-if="detalleEvento.EtiquetaVisible.length > 0">
+                        <b>Etiquetas: </b> 
+                        <span ng-repeat="etiqueta in detalleEvento.EtiquetaVisible | orderBy:'Nombre'">
+                            <span ng-if="!$last">{{etiqueta.Nombre}}, </span>
+                            <span ng-if="$last">{{etiqueta.Nombre}}.</span>
+                        </span><br>
+                    </span>
+                    
+                    <!-- Temas -->
+                    <span ng-if="detalleEvento.Tema.length > 0">
+                        <b>Temas: </b> 
+                        <span ng-repeat="tema in detalleEvento.Tema | orderBy:'Tema'">
+                            <span ng-if="!$last">{{tema.Tema}}, </span>
+                            <span ng-if="$last">{{tema.Tema}}.</span>
+                        </span>
+                    </span><br>
+                    
 
                 </div>
             </div>
@@ -940,6 +1023,61 @@
                 </div>
             </div>
             
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <br>
+                 </div>
+            </div>
+
+            <!-- Imagenes -->
+            <div ng-repeat="i in detalleEvento.Imagen track by $index">
+                <div class="col-xs-4 col-sm-3 col-lg-2" style="padding-left: 3px; padding-right: 3px; margin-bottom: 10px">
+                   <div class="imgContainer" >
+                        <div class="crop center-block">
+                             <img class="" style=" width:100%; cursor: pointer" src="php/API/ArchivosUsuario/{{UsuarioId}}/IMG/Thumbnail/{{i.Nombre}}" ng-click="VerImganes(detalleEvento.Imagen, $index)"/>
+                         </div>
+                    </div>
+                </div>
+            </div>
+                 
+             <div class="col-xs-12">
+                 <br>
+             </div>
+            
+            <div class="row">
+                 <div class="col-xs-12">
+                    <div class="table-responsive">
+                       <table  class="table table-responsive">
+
+                            <tbody  style="cursor: pointer">
+
+                                <!-- Archivos agregados -->
+                                <tr ng-repeat="file in detalleEvento.Archivo" ng-if="detalleEvento.Archivo.length > 0" >
+
+                                  <td >
+                                      <span class="infoCenterCell">
+                                          <span>{{file.Nombre}}</span>
+                                       </span> 
+                                  </td>
+
+                                  <td class="hidden-xs" style="text-align: right">  <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span> </td>
+
+                                  <td class="text-center">
+                                      <a class="btn btnOptDiarioDetalles boton" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                         <span class="fa fa-download"></span>
+                                     </a>
+                                  </td>
+
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+                    </div>
+               </div>
+            </div>
             
         </div>
     </div>

@@ -8,7 +8,11 @@ class Imagen
         this.Extension = "";
         this.Size = "";
         
-        this.Etiqueta = "";
-        this.Tema = "";
+        this.Etiqueta = [];
+        this.Tema = [];
+        
+        this.ImagenSrc = [];
+        this.ImagenTh = [];
+        this.ImagenWeb = [];
     }
 }

@@ -1904,5 +1904,62 @@ function EditarConocimiento()
   
 }
 
+function GetNumeroConocimiento($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT COUNT(*) as Numero FROM Conocimiento WHERE UsuarioId = ".$id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ); 
+        
+        $app->status(200);
+        $db = null;
+        echo $response[0]->Numero; 
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
+function GetNumeroConocimientoPorConcepto($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT Nombre, ConceptoId, Tipo, UsuarioId FROM NumeroConocimientoPorConceptoVista WHERE UsuarioId = ".$id;
+ 
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ); 
+        
+        $app->status(200);
+        $db = null;
+        echo json_encode($response);
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
+
 
 ?>

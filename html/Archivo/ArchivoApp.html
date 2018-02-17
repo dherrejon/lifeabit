@@ -1,0 +1,358 @@
+<div ng-controller="ArchivoAppController as file" ng-init="CambiarNumeroCarpeta()">
+
+   <div class="container-fluid">
+       
+        <!-- Barra de Busqueda -->
+        <div class="barraBuscarInformacion">
+            
+
+            <div class="row ">
+               <div class="col-xs-12">
+
+                   <div class="input-group input-group-lg" style="color: black">
+
+                         <!-- Agregar -->
+                         <span class="input-group-btn ">
+                               <button type="button" class="btn botonBuscarFiltro botonAgregarBusqueda" ng-click="AbrirArchivo('Agregar', null)">
+                                    <span class="fa fa-plus"></span> <span class="hidden-xs"> Agregar</span>
+                               </button>
+                          </span>
+
+                         <!-- Span Buscar -->
+                         <div class="input-group-addon addonGroup" style="border-right-width: 0px">
+                            <span class="fa fa-search"></span>
+                        </div>
+
+                          <!-- entradas -->
+                          <input type="text" placeholder="Buscar por Concepto" class="form-control inputBuscar" ng-model="buscarConceptoBarra" uib-typeahead="e as (e.Nombre + e.Tema) for e in FiltroConcepto($viewValue)  | limitTo:7" typeahead-on-select="SetFiltroEtiqueta()" typeahead-select-on-blur="true" typeahead-focus-first="true" typeahead-editable="true" id="filtroConcepto" autocomplete="off" style="border-left-width: 0px"><!-- ng-blur="SetFiltroEtiquetaBlur(selected)" --> 
+                          
+                          <!-- limpiar texto -->
+                          <span class="input-group-btn">
+
+                             <button class="btn botonBuscarFiltro"  ng-click="buscarConceptoBarra = ''" style="border-width: 0px; border-right: 3px solid #1859b2; border-radius: 0px !important">
+                                   <span class="fa fa-times-circle" ></span>
+                             </button>
+                          </span>
+                    </div>
+
+               </div>
+            </div>
+
+        </div>
+        
+        <div class="row">
+
+            <div class="col-xs-12">
+                
+                
+                <!-- Separador -->
+                <div class="row" style="height:57px">
+                   <div class="col-xs-12" >
+                   </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-xs-12" style="width: 100%">
+
+                      <!-- Separador -->
+                        <div class="row" style="height:74px">
+                           <div class="col-xs-12  text-center" >
+                           </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fitros -->
+                <div class="row verFitros" ng-show="(filtro.tema.length + filtro.frecuencia.length + filtro.etiqueta.length) > 0" style="border-top: 2px  solid #79adf4;">
+                   
+                    <div class="btn-group pull-right">
+                         
+                         <!-- Limpiar filtro -->
+                         <button class="btn  botonFiltrarBarraLateral text-center" style="color:black" ng-click="GetArchivo()" >
+                             <b ><span class="fa fa-search"></span> Buscar</b>
+                         </button>
+                       
+                       <button class="btn  botonDetallesActividad" ng-click="CambiarVerFiltro()" >
+                           <b class="fa fa-angle-double-right" ng-if="!verFiltro"></b>
+                           <b class="fa fa-angle-double-up" ng-if="verFiltro"></b>
+                       </button>
+                    </div>
+                    
+                    <!-- Etiquetas -->
+                    <div class="col-xs-12" ng-show="filtro.etiqueta.length && verFiltro">
+                        <b> Etiquetas: </b><br>
+                        <span ng-repeat="etiqueta in filtro.etiqueta | orderBy:'Nombre' track by $index">
+                            <div class="btn-group" role="group" style="margin-bottom:8px">
+                                <a class="btn campoAgregado" ng-click="QuitaretiquetaFiltro(etiqueta)" style="font-size:10pt">{{etiqueta.Nombre}}</a>
+                                <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitaretiquetaFiltro(etiqueta)"><span class="fa fa-times-circle"></span></a>
+                            </div>
+                        </span>
+                    </div>
+
+                    <!-- Temas -->
+                    <div class="col-xs-12" ng-show="filtro.tema.length > 0 && verFiltro">
+                        <b> Tema: </b><br>                        
+                        <span ng-repeat="tema in filtro.tema | orderBy:'Tema'" >
+                            <div class="btn-group" role="group" style="margin-bottom:8px">
+                                <a class="btn campoAgregado" ng-click="QuitarTemaFiltro(tema)" style="font-size:10pt">{{tema.Tema}}</a>
+                                <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="QuitarTemaFiltro(tema)"><span class="fa fa-times-circle"></span></a>
+                            </div>
+                        </span>
+                    </div>
+                    
+                    <div class="col-xs-12" ng-show="(filtro.fecha.length > 0) && verFiltro">
+                        <div style="height: 6px"></div>
+                    </div>
+                    
+                    <!-- Buscar  botón -->
+                    <div style="margin-right: 37px">
+                        <button class="btn  botonFiltrarBarraLateral text-center pull-right" style="color:black; border-right: : 2px solid black" ng-click="LimpiarFiltro()" ng-show="verFiltro">
+                            <b ><span class="fa fa-ban"></span> Limpiar</b>
+                        </button>
+                    </div>
+
+                    
+                </div>
+
+                
+                <div ng-include=" 'html/Control/BotonTop.html' "></div>
+                
+            </div>
+       </div>
+       
+       <div style="margin-top: 25px"></div>
+       
+       
+        <div ng-show="!buscar" class="row">
+            <div class="col-xs-12 textoUsuario text-center" style="font-size: 12pt">
+                Tienes Guardados {{NumeroArchivo}} Archivos<br>
+                <!--<span style="font-size: 12pt">-Selecciona uno o más conceptos para realizar una búsqueda-</span>-->
+            </div>
+        </div>
+        <br>
+        
+        <div ng-show="!buscar" ng-repeat="folder in conceptoArchivo | orderBy:'Nombre'">
+           <div ng-class="{row : ($index +1)%numeroCarpeta == 0}">
+
+                <div class="col-xs-4 col-sm-3 col-lg-2 ">
+
+                    <button class="btnFolder" ng-click="BuscarCarpetaConcepto(folder)">
+                        <span class="fa fa-folder fa-4x" ></span> <br>
+                        <b style="color: black">{{folder.Nombre}}</b><br>
+                        <!--<span style="color: gray; overflow: hidden">{{folder.NumeroArchivo}} Archivo(s)</span>-->
+                    </button>
+                    <div style="margin-top: 15px"></div>
+
+                </div>     
+           </div>
+       </div>
+       
+       <div class="row" ng-if="buscar">
+             <div class="col-xs-12">
+                 
+                 <div   ng-repeat="file in archivo" ng-if="archivo.length > 0">
+                  
+        
+                   <div  class="input-group conocimientoFormUp" style="height: 60px; margin-top: 0px" ng-class="{Primero: $first}">
+                      
+                      <div class="input-group-btn" id="archivo{{file.ArchivoId}}">
+
+                            <a class="btn operacionEvento infoCenterCell" style="font-size: 13pt; height: 60px" ng-click="GetEtiquetaPorArchivo(file)">
+                                <span >
+                                 <span class="fa fa-tag"> </span> <span> ({{file.NumeroEtiqueta}}) </span>
+                                 <span class="fa fa-comment-o"> </span> <span> ({{file.NumeroTema}}) </span>
+                                </span>
+                             </a>
+                        
+                        </div>
+
+                        <button class="btn control-form itemBarraLateralbtn"  style="vertical-align: middle; min-height: 60px; padding: 10px; cursor: default;">
+                            <span style="white-space: normal; overflow: hidden; display: inline-block; " >{{file.Nombre}}</span>       
+                        </button>
+                        
+                        <div class="input-group-btn hidden-xs">
+                            
+                            <button class="btn itemBarraLateralbtn " style="vertical-align: middle; min-height: 60px; cursor: default" >
+                                <span class="infoCenterCell">{{(file.Size/1000000).toFixed(2)}} MB</span>
+                            </button>
+                        
+                        </div>
+                        
+                        <div class="input-group-btn">
+
+                            <button class="btn PendienteOptBtn" ng-click="VerOpt(file.ArchivoId)" id="optPen" style="height: 60px;" >
+                                <span class="fa fa-ellipsis-v"></span>
+                            </button>
+                        
+                        </div>
+                        
+                        <!-- opt de conocimiento -->
+                        <div  class=" actividadOpt animated " ng-class="{slideInRight : verpen == file.ArchivoId, slideOutRight : verpen2 == file.ArchivoId}" ng-show=" verpen ==  file.ArchivoId || verpen2 ==  file.ArchivoId" style="width: auto">
+
+                             <div class="btn-group" style="height: 60px !important" id="menuArchivo{{file.ArchivoId}}">
+                                
+                                 
+                                 <button class="btn btnOptActividad Borrar" ng-click="BorrarArchivo(file)">
+                                     <span class="fa fa-trash"></span> <br>Borrar
+                                </button>
+                                
+                                 <a class="btn btnOptActividad Detalle" href="php/API/ArchivosUsuario/{{UsuarioId}}/Archivo/{{file.Nombre}}" target="_blank">
+                                    <span class="fa fa-download"></span> <br>Ver
+                                 </a>
+                                        
+                            </div>
+
+                         </div>
+                    
+                   </div>
+                   
+               </div>
+               
+               <div class="col-xs-12"  ng-show="archivo.length == 0">
+                    <div class="textoUsuario">
+                        Sin Resultados
+                    </div>   
+               </div>
+
+           </div>     
+       </div>            
+       <br>
+        
+    </div>
+    
+    <!-------- Modales -------------->
+    <div class="modal fade" id="modalApp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="true" data-backdrop="static">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal">
+        
+            <div class="row">
+                <div class="col-xs-8 col-sm-10">
+                    <!--<button class="btn close cerrarModal" ng-click="CerrarCancion()"><span aria-hidden="true">&times;</span></button>-->
+                    <span class="tituloModal">{{operacion}} Archivo</span>
+                </div>
+                
+                <div class="col-xs-4 col-sm-2">
+                    <div class="btn-group-vertical pull-right" role="group" >
+                        <a class="btn botonFinModal"  ng-click="CerrarArchivo()"><span class="fa fa-times"></span></a>
+                        <a focus class="btn botonFinModal" id="terminarDiario" ng-click="TerminarArchivo()"><span class="fa fa-check"></span></a>
+                    </div>
+                </div>
+                
+                
+            </div>
+            
+            <form name="archivoForma">
+                
+                <!-- Etiqueta -->
+                <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('File')" ng-controller="ControlEtiquetaController as lc"></div>
+                
+                <!-- Archivos -->
+                <div ng-include=" 'html/Archivo/Archivo.html' " ></div>   
+            </form>
+            
+            
+            <br>
+            <!---- botones de operacion -->
+            <div class="row">
+                <div class="col-xs-6">
+                    <a class="btn botonFinModal btn-block" ng-click="CerrarArchivo()">CANCELAR</a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a focus class="btn botonFinModal btn-block" ng-click="TerminarArchivo()">TERMINAR</a>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+    
+    <!-- Cerrar -->
+    <div class="modal fade sombraDivModal" id="cerrarArchivo">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">¿Estas seguro de salir sin guardar los cambios?</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarCerrarArchivo()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <!-- mensaje -->
+    <div class="modal fade sombraDivModal" id="mensajeArchivo">
+        <br>    <br>   <br>
+        <div class="modal-dialog modal-sm modalPrincipal">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="text-center textoError">
+                        <span class=" fa fa-times-circle-o fa-3x"></span><br>
+                        <span>¡Error!</span>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-xs-12">
+                     <div ng-repeat="error in mensajeError">
+                        <span>{{error}}</span>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+         
+            <div class="row">
+                <button class="btn botonModalError" data-dismiss="modal" aria-label="Close">Aceptar</button> 
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Borrar -->
+    <div class="modal fade sombraDivModal" id="borrarArchivo">
+        <br>    <br>   <br>
+        <div class="modal-dialog modalPrincipal text-center">
+           
+            <div class="row">
+                <div class="col-xs-12">
+                    <span style="font-size:14pt">{{mensajeBorrar}}</span>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close">No</button>
+                </div>
+                <div class="col-xs-6">
+                    <button class="btn botonFinModal" data-dismiss="modal" aria-label="Close" ng-click="ConfirmarBorrarArchivo()">Si</button>
+                </div>
+            </div>
+                        
+        </div>
+    </div>
+    
+    <div ng-include=" 'html/Archivo/EtiquetaArchivo.html' "></div>
+</div>
+  
+<!--------------- otros html -------------------->
+<div ng-include=" 'html/Imagen/EtiquetaImagen.html' "></div>
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/AgregarEtiqueta.html' "></div>
+<div ng-include=" 'html/Sabiduria/Administrar/Etiqueta/EtiquetaEquivalente.html' "></div>
+<div ng-include=" 'html/Control/AgregarTema.html' "></div>
+  
+
+   
+
+   
+    

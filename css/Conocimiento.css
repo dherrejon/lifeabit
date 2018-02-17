@@ -5,6 +5,11 @@
     margin-top: 10px;
 }
 
+.conocimientoFormUp.Primero
+{
+    border-top: 1px solid #D9D9D9;
+}
+
 .conocimientoForm
 {
     display: inline-block; 

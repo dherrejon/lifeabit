@@ -197,7 +197,7 @@
        
        <div style="margin-top: 10px"></div>
        <div class="row">
-           <div class="col-xs-12" ng-repeat="p in pendiente |  orderBy:['Hecho', OrdenarPorFecha, '-Importancia'] | filter:FiltroPendiente">
+           <div class="col-xs-12" ng-repeat="p in pendiente |  orderBy:['Hecho', OrdenarPorFecha, '-Importancia', 'HoraRealizacionFormato'] | filter:FiltroPendiente">
                <div  class="eventoVista" style="position: relative; border-width: 0px">
                  
                     <div class="pendienteapp {{p.Clase}}" style="margin-top: -1px">

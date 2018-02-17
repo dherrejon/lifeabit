@@ -218,22 +218,26 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
         var url = self.urlBase + url;
         
         var fd = new FormData();
+        
+        if(data.ImagenSrc)
+        {
     
-        for(var k=0; k<data.ImagenSrc.length; k++)
-        {
-            fd.append('file[]', data.ImagenSrc[k]);
+            for(var k=0; k<data.ImagenSrc.length; k++)
+            {
+                fd.append('file[]', data.ImagenSrc[k]);
+            }
+
+            for(var k=0; k<data.ImagenTh.length; k++)
+            {
+                fd.append('imgth[]', data.ImagenTh[k]);
+            }
+
+            for(var k=0; k<data.ImagenWeb.length; k++)
+            {
+                fd.append('imgweb[]', data.ImagenWeb[k]);
+            }
         }
-        
-        for(var k=0; k<data.ImagenTh.length; k++)
-        {
-            fd.append('imgth[]', data.ImagenTh[k]);
-        }
-        
-        for(var k=0; k<data.ImagenWeb.length; k++)
-        {
-            fd.append('imgweb[]', data.ImagenWeb[k]);
-        }
-        
+
         if(data.ArchivoSrc)
         {
             for(var k=0; k<data.ArchivoSrc.length; k++)
@@ -242,7 +246,7 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
             }
         }
 
-        if(data.Imagen.length > 0)
+        if(data.Imagen)
         {
             for(var k=0; k<data.Imagen.length; k++)
             {
@@ -265,10 +269,16 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
         }
         
         var Datos = jQuery.extend({}, data);
-
-        Datos.AgregarImagen = data.ImagenSrc.length;
         
-        Datos.AgregarArchivo = data.ArchivoSrc ? data.ArchivoSrc.length: 0;
+        if(data.ImagenSrc)
+        {
+            Datos.AgregarImagen = data.ImagenSrc.length;
+        }
+        
+        if(data.ArchivoSrc)
+        {
+            Datos.AgregarArchivo = data.ArchivoSrc ? data.ArchivoSrc.length: 0;
+        }
         
         
         Datos.ImagenWeb = null;
@@ -276,18 +286,24 @@ app.factory('LifeService', ['$http', '$q', '$rootScope', function ($http, $q, $r
         Datos.ImagenSrc = [];
         Datos.ArchivoSrc = [];
         
-        for(var k=0; k<data.ImagenSrc.length; k++)
+        if(data.ImagenSrc)
         {
-            Datos.ImagenSrc[k] =  new Object();
-            Datos.ImagenSrc[k].Etiqueta = data.ImagenSrc[k].Etiqueta;
-            Datos.ImagenSrc[k].Tema = data.ImagenSrc[k].Tema;
+            for(var k=0; k<data.ImagenSrc.length; k++)
+            {
+                Datos.ImagenSrc[k] =  new Object();
+                Datos.ImagenSrc[k].Etiqueta = data.ImagenSrc[k].Etiqueta;
+                Datos.ImagenSrc[k].Tema = data.ImagenSrc[k].Tema;
+            }
         }
         
-        for(var k=0; k<data.ArchivoSrc.length; k++)
+        if(data.ArchivoSrc)
         {
-            Datos.ArchivoSrc[k] =  new Object();
-            Datos.ArchivoSrc[k].Etiqueta = data.ArchivoSrc[k].Etiqueta;
-            Datos.ArchivoSrc[k].Tema = data.ArchivoSrc[k].Tema;
+            for(var k=0; k<data.ArchivoSrc.length; k++)
+            {
+                Datos.ArchivoSrc[k] =  new Object();
+                Datos.ArchivoSrc[k].Etiqueta = data.ArchivoSrc[k].Etiqueta;
+                Datos.ArchivoSrc[k].Tema = data.ArchivoSrc[k].Tema;
+            }
         }
 
         fd.append('datos', JSON.stringify(Datos));

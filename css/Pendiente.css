@@ -9,7 +9,6 @@
 
 .PendienteOptBtn, .PendienteOptBtn:focus, .PendienteOptBtn:active
 {
-    background: transparent;
     color: black;
     height: 90px;
     border-radius: 0px;

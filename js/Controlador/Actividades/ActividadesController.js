@@ -332,8 +332,16 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             
             if(val !== false)
             {
-                $scope.SetTemaImagenEvento(imagen, $scope.nuevoEvento.Tema);
-                $scope.SetEtiquetaImagenEvento(imagen, $scope.nuevoEvento.Etiqueta);
+                if($scope.modulo == "Evento")
+                {
+                    $scope.SetTemaImagenEvento(imagen, $scope.nuevoEvento.Tema);
+                    $scope.SetEtiquetaImagenEvento(imagen, $scope.nuevoEvento.Etiqueta);
+                }
+                if($scope.modulo == "Actividad")
+                {
+                    $scope.SetTemaImagenActividad(imagen, $scope.nuevaActividad.Tema);
+                    $scope.SetEtiquetaImagenActividad(imagen, $scope.nuevaActividad.Etiqueta);
+                }
             }
             //console.log(imagen);
         }).catch(function(error)
@@ -477,43 +485,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         {
             $rootScope.$broadcast('Alerta', error, 'error');
         });
-        
-        /*GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
-        {
-            for(var k=0; k<data.length; k++)
-            {   
-                //Notas
-                data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
-            }
-            
-            $scope.detalle = data[0];
-            $scope.detalle.EtiquetaVisible = $scope.GetEtiquetaVisible($scope.detalle.Etiqueta);
-            
-            
-            if(data.length > 0)
-            {
-                 var eventoActividad = []; 
-                for(var k=0; k<data[0].Evento.length; k++)
-                {
-                    //Notas
-                    data[0].Evento[k].NotasHTML = $sce.trustAsHtml(data[0].Evento[k].NotasHTML);
-                }
-
-                $scope.eventoActividad = data[0].Evento;
-                //console.log($scope.eventoActividad);
-            }
-           
-            if(opt)
-            {
-                $scope.AbrirActividad(opt, $scope.detalle);
-            }
-            
-            //console.log($scope.detalle);
-           
-        }).catch(function(error)
-        {
-            alert(error);
-        });*/
     };
     
     $scope.GetEventoActividadPorId = function(id, opt)
@@ -559,7 +530,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 }
 
                 $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
-                $scope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
+                //$scope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
+                $scope.modulo = "Evento";
         
                 $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoEvento, 'Evento');
             }
@@ -586,6 +558,10 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     //----------- Detalles -------------------
     $scope.VerDetalles = function(actividad, editar, opt)
     {
+        if(actividad.ActividadId != $scope.detalle.ActividadId && opt == "Nuevo")
+        {
+            return;
+        }
         if(actividad.ActividadId != $scope.detalle.ActividadId)
         {
             $scope.GetActividadPorId(actividad.ActividadId, opt);
@@ -1522,11 +1498,16 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.AbrirActividad = function(operacion, actividad)
     {
         $scope.operacion = operacion;
+        $scope.tabModal = "Actividad";
+        
+        $scope.nuevaActividad = new Actividad();
         $scope.modulo = "Actividad";
+        $scope.etiquetaSugerida = [];
+        
         
         if(operacion == "Agregar")
         {
-            $scope.nuevaActividad = new Actividad();
+            
             $scope.ActivarDesactivarTema([]);
             $scope.ActivarDesactivarEtiqueta([]);
             
@@ -1553,11 +1534,39 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         }
         
         $scope.inicioActividad = jQuery.extend({}, $scope.nuevaActividad);
+        
+        //$rootScope.$broadcast('IniciarArchivo', $scope.nuevaActividad);
     
         $('#modalApp').modal('toggle');
         
         $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevaActividad, 'Actividad');
     };
+    
+    
+    $scope.$on('IniciarArchivoApp', function()
+    {
+        if($scope.modulo == "Actividad")
+        {
+            $rootScope.$broadcast('IniciarArchivo', $scope.nuevaActividad);
+        }
+        else if($scope.modulo == "Evento")
+        {
+            for(var k=0; k<$scope.actividadSel.Etiqueta.length; k++)
+            {
+                $scope.actividadSel.Etiqueta[k].Actividad = true;
+                $scope.nuevoEvento.Etiqueta.push($scope.actividadSel.Etiqueta[k]);
+            }
+            
+            for(var k=0; k<$scope.actividadSel.Tema.length; k++)
+            {
+                $scope.actividadSel.Tema[k].Actividad = true;
+                $scope.nuevoEvento.Tema.push($scope.actividadSel.Tema[k]);
+            }
+                
+            $rootScope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
+        }
+    });
+    
     
     $scope.ActivarDesactivarTema = function(tema)
     {
@@ -1606,6 +1615,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         actividad.FechaCreacionFormato = data.FechaCreacionFormato;
         actividad.Notas = data.Notas;
         actividad.Hora = data.Hora;
+        actividad.Imagen = data.Imagen;
+        actividad.Archivo = data.Archivo;
         
         if(data.Notas !== null && data.Notas !== undefined)
         {
@@ -1951,9 +1962,18 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             var promesas = [];
             for(var k=0; k<$scope.nuevoEvento.Etiqueta.length; k++)
             {
-                if(!$scope.nuevoEvento.Etiqueta[k].Visible)
+                if(!$scope.nuevoEvento.Etiqueta[k].Visible || $scope.nuevoEvento.Etiqueta[k].Actividad)
                 {
                     $scope.nuevoEvento.Etiqueta.splice(k, 1);
+                    k--;
+                }
+            }
+            
+            for(var k=0; k<$scope.nuevoEvento.Tema.length; k++)
+            {
+                if($scope.nuevoEvento.Tema[k].Actividad)
+                {
+                    $scope.nuevoEvento.Tema.splice(k, 1);
                     k--;
                 }
             }
@@ -1965,6 +1985,18 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     $scope.$on('TerminarEtiquetaOculta',function(evento, modal)
     {           
         if(modal == "Actividad")
+        {
+            $rootScope.$broadcast('EtiquetaOcultaArchivoIniciar', $scope.nuevaActividad);
+        }
+        else if(modal == "Evento")
+        {   
+            $rootScope.$broadcast('EtiquetaOcultaArchivoIniciar', $scope.nuevoEvento); 
+        }
+    });
+    
+    $scope.$on('TerminarEtiquetaOcultaArchivo',function()
+    {   
+        if($scope.modulo == "Actividad")
         {
             $scope.nuevaActividad.Hora = $scope.SetNullHora($scope.nuevaActividad.Hora);
             $scope.nuevaActividad.UsuarioId = $rootScope.UsuarioId;
@@ -1981,34 +2013,29 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.EditarActividad();
             }
         }
-        else if(modal == "Evento")
-        {   
-            $rootScope.$broadcast('EtiquetaOcultaArchivoIniciar', $scope.nuevoEvento); 
-        }
-    });
-    
-    $scope.$on('TerminarEtiquetaOcultaArchivo',function()
-    {   
-        $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
-        $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
-        if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
+        else if($scope.modulo == "Evento")
         {
-            $scope.AgregarEventoActividad();
-        }
-        else if($scope.operacion == "Editar")
-        {
-            $scope.EditarEventoActividad();
+            $scope.nuevoEvento.UsuarioId = $rootScope.UsuarioId;
+            $scope.nuevoEvento.Hora = $scope.SetNullHora($scope.nuevoEvento.Hora);
+            if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
+            {
+                $scope.AgregarEventoActividad();
+            }
+            else if($scope.operacion == "Editar")
+            {
+                $scope.EditarEventoActividad();
+            }
         }
     });
     
     
     $scope.AgregarActividad = function()    
     {
-        AgregarActividad($http, CONFIG, $q, $scope.nuevaActividad).then(function(data)
+        (self.servicioObj = LifeService.File('AgregarActividad', $scope.nuevaActividad)).then(function (dataResponse) 
         {
-            if(data[0].Estatus == "Exitoso")
+            if (dataResponse.status == 200) 
             {
-                
+                var data = dataResponse.data;
                 $scope.mensaje = "Actividad agregada.";
                 $scope.EnviarAlerta('Vista');
                 
@@ -2025,6 +2052,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 //$scope.VerDetalles($scope.actividad[$scope.actividad.length-1]);
                 
                 $scope.mensajeEvento = "¿Desas registrar un evento de " + $scope.nuevaActividad.Nombre  + " ?";
+                $scope.actividadSel = $scope.nuevaActividad;
                 $('#registrarEventoPregunta').modal('toggle');
                 
                 
@@ -2032,28 +2060,29 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $('#modalApp').modal('toggle');
                 $scope.LimpiarInterfaz();
                 
-                
-            }
-            else
+            } 
+            else 
             {
-                $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde.";
-                $('#mensajeError').modal('toggle');
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede realizar la operación, intentelo más tarde", 'error');
             }
-            
-            
-        }).catch(function(error)
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
         {
-            $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
-            $('#mensajeError').modal('toggle');
+            $rootScope.$broadcast('Alerta', error, 'error');
         });
+        
     };
     
     $scope.EditarActividad = function()    
     {   
-        EditarActividad($http, CONFIG, $q, $scope.nuevaActividad).then(function(data)
+        
+         (self.servicioObj = LifeService.File('EditarActividad', $scope.nuevaActividad)).then(function (dataResponse) 
         {
-            if(data[0].Estatus == "Exitoso")
+            if (dataResponse.status == 200) 
             {
+                var data = dataResponse.data;
+
                 $scope.nuevaActividad.Etiqueta = data[1].Etiqueta;
                 $scope.nuevaActividad.Tema = data[2].Tema;
                 
@@ -2063,18 +2092,16 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.EnviarAlerta('Vista');
                 
                 $('#modalApp').modal('toggle');
-            }
-            else
+            } 
+            else 
             {
-                $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde.";
-                $('#mensajeError').modal('toggle');
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede realizar la operación, intentelo más tarde", 'error');
             }
-            
-            
-        }).catch(function(error)
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
         {
-            $scope.mensajeError[$scope.mensajeError.length] = "Ha ocurrido un error. Intente más tarde. Error: " + error;
-            $('#mensajeError').modal('toggle');
+            $rootScope.$broadcast('Alerta', error, 'error');
         });
     };
     
@@ -2119,12 +2146,15 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         if($scope.operacion == "Agregar" || $scope.operacion == "Copiar")
         {
             //$scope.actividad.push(nact);
-            $scope.VerDetalles(nact);
+            //$scope.VerDetalles(nact);
             $scope.GetActividad();
         }
         else if($scope.operacion == "Editar")
         {
-            $scope.VerDetalles(nact, true);
+            if($scope.detalle.ActividadId == nact.ActividadId)
+            {
+                $scope.VerDetalles(nact, true);
+            }
             
             $scope.GetActividad();
             /*for(var k=0; k<$scope.actividad.length; k++)
@@ -2566,8 +2596,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     };
     
-    /*--------------------------- Operaciones -----------------------------*/
-    
+    /*--------------------------- Operaciones -----------------------------*/    
     $scope.VerDetallesEvento = function(evento)
     {
         $scope.GetEventoActividadPorId(evento.EventoActividadId, "Detalle");
@@ -2577,14 +2606,13 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.RegistrarEvento = function(operacion, actividad, evento)
     {
+        $scope.actividadSel = actividad;
         $scope.operacion = operacion;
-        $scope.modulo = "Evento";
         $scope.tabModal = "Evento";
-        
+    
         if($scope.operacion == "Agregar")
         {
             $scope.nuevoEvento = new EventoActividad();
-            
             $scope.SetValoresDefecto(actividad);
             $scope.IniciarEvento(actividad);
             
@@ -2592,7 +2620,8 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.ActivarDesactivarEtiqueta([]);
             
             $scope.inicioEvento = jQuery.extend({}, $scope.nuevoEvento);
-            $scope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
+            $scope.modulo = "Evento";
+            //$scope.$broadcast('IniciarArchivo', $scope.nuevoEvento);
         
             $scope.$broadcast('IniciarEtiquetaControl', $scope.etiqueta, $scope.tema, $scope.nuevoEvento, 'Evento');
         }
@@ -2605,39 +2634,6 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             document.getElementById("horaEvento").value = evento.Hora;
             
             $scope.hechoInicio = evento.Hecho;
-            
-            /*$scope.nuevoEvento = $scope.SetEvento(evento);
-            
-           
-
-            if(evento.Ciudad.CiudadId !== null && evento.Ciudad.CiudadId !== undefined)
-            {
-                if(evento.Ciudad.CiudadId.length > 0)
-                {
-                    $scope.buscarCiudad = SetCiudad(evento.Ciudad);
-                }
-                else
-                {
-                    $scope.buscarCiudad = "";
-                }
-            }
-            else
-            {
-                $scope.buscarCiudad = "";
-            }
-            
-            $scope.ActivarDesactivarTema(evento.Tema);
-            $scope.ActivarDesactivarEtiqueta(evento.Etiqueta);
-            
-            for(var k=0; k<evento.Imagen.length; k++)
-            {
-                $scope.GetImagenEtiqueta(evento.Imagen[k], false);
-            }
-            
-            if($scope.operacion == "Copiar")
-            {
-                $scope.nuevoEvento.Hecho = "0";
-            }*/
         }
         
         $('#modalEvento').modal('toggle');
@@ -2713,6 +2709,38 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 $scope.nuevoEvento.Hecho = "0";
             }
         });
+    };
+    
+    
+    //---------- Registrar evento desde barra lateral ----------------
+    $scope.RegistarEventoBarraLateral = function(actividad)
+    {
+        (self.servicioObj = LifeService.Get('GetConceptoPorActividad/' + actividad.ActividadId  )).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                actividad.Etiqueta = dataResponse.data[0].Etiqueta;
+                actividad.Tema = dataResponse.data[1].Tema;
+                
+                for(var k=0; k<actividad.Etiqueta.length; k++)
+                {
+                    actividad.Etiqueta[k].Visible =  actividad.Etiqueta[k].Visible == "1" ? true : false;
+                }
+                
+                $scope.RegistrarEvento('Agregar', actividad, null);
+            } 
+            else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+            
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+        
     };
     
     //----------- Hora -------------
@@ -2904,6 +2932,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 if(evento.hecho == "1")
                 {
                     $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $scope.actividadSel = $scope.detalle;
                     $('#registrarEventoPregunta').modal('toggle');
                 }
             }
@@ -3068,6 +3097,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 if( $scope.nuevoEvento.Hecho == "1")
                 {
                     $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $scope.actividadSel = $scope.detalle;
                     $('#registrarEventoPregunta').modal('toggle');
                 }
 
@@ -3137,6 +3167,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
                 if( $scope.nuevoEvento.Hecho == "1" && $scope.hechoInicio == "0")
                 {
                     $scope.mensajeEvento = "¿Deseas registrar un próximo evento de  " + $scope.detalle.Nombre + "?";
+                    $scope.actividadSel = $scope.detalle;
                     $('#registrarEventoPregunta').modal('toggle');
                 }
                                 
@@ -3456,30 +3487,64 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         var agregada = false;
         var count = 0;
-        for(var k=0; k< $scope.fototeca.length; k++)
+        if($scope.modulo == "Evento")
         {
-            if($scope.fototeca[k].Seleccionada)
+            for(var k=0; k< $scope.fototeca.length; k++)
             {
-                agregada = false;
-                for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+                if($scope.fototeca[k].Seleccionada)
                 {
-                    if($scope.nuevoEvento.Imagen[i].ImagenId == $scope.fototeca[k].ImagenId)
+                    agregada = false;
+                    for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
                     {
-                        agregada = true;
-                        break;
+                        if($scope.nuevoEvento.Imagen[i].ImagenId == $scope.fototeca[k].ImagenId)
+                        {
+                            agregada = true;
+                            break;
+                        }
+                    }
+                    if(!agregada)
+                    {
+                        if(count === 0)
+                        {
+                            count ++;
+                            $scope.todasImg = "opt";
+                            $scope.GetImagenEtiqueta($scope.fototeca[k]);
+                            $scope.lastIndex = $scope.nuevoEvento.Imagen.length + 1;
+                        }
+
+                        $scope.nuevoEvento.Imagen.push($scope.fototeca[k]);
                     }
                 }
-                if(!agregada)
+            }
+        }
+        
+        if($scope.modulo == "Actividad")
+        {
+            for(var k=0; k< $scope.fototeca.length; k++)
+            {
+                if($scope.fototeca[k].Seleccionada)
                 {
-                    if(count === 0)
+                    agregada = false;
+                    for(var i=0; i<$scope.nuevaActividad.Imagen.length; i++)
                     {
-                        count ++;
-                        $scope.todasImg = "opt";
-                        $scope.GetImagenEtiqueta($scope.fototeca[k]);
-                        $scope.lastIndex = $scope.nuevoEvento.Imagen.length + 1;
+                        if($scope.nuevaActividad.Imagen[i].ImagenId == $scope.fototeca[k].ImagenId)
+                        {
+                            agregada = true;
+                            break;
+                        }
                     }
-                    
-                    $scope.nuevoEvento.Imagen.push($scope.fototeca[k]);
+                    if(!agregada)
+                    {
+                        if(count === 0)
+                        {
+                            count ++;
+                            $scope.todasImg = "opt";
+                            $scope.GetImagenEtiqueta($scope.fototeca[k]);
+                            $scope.lastIndex = $scope.nuevaActividad.Imagen.length + 1;
+                        }
+
+                        $scope.nuevaActividad.Imagen.push($scope.fototeca[k]);
+                    }
                 }
             }
         }
@@ -3555,6 +3620,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             $scope.TerminarAgregarTemaImagen();
         }
     };
+    
     
      //-------- ver Imagenes ----------
     $scope.VerImganes = function(Agregadas, Seleccionadas, Eliminadas, ImagenA, ImagenS, index, indexOrigen)
@@ -3675,7 +3741,14 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {   
         if($scope.todasImg == "opt" || $scope.todasImg == "tema" || $scope.todasImg == "src")
         {
-            $scope.TerminarAgregarTemaImagen();
+            if($scope.modulo == "Evento")
+            {
+                $scope.TerminarAgregarTemaImagen();
+            }
+            else if($scope.modulo == "Actividad")
+            {
+                $scope.TerminarAgregarTemaImagenActiviad();
+            }
         }
     });
     
@@ -3764,11 +3837,14 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     };
     
     //destecta cuando se agrego una etiqueta
-    $scope.$on('EtiquetaSet',function(etiqueta)
+    $scope.$on('EtiquetaSet',function(evelto, etiqueta, modal)
     {
-        if($scope.modulo == "Evento")
+        if(modal == "Evento" || modal == "Actividad")
         {
-            $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+            if($scope.modulo == "Evento" || $scope.modulo == "Actividad")
+            {
+                $scope.SetEtiquetaTodasImagenes(ETIQUETA.GetEtiqueta());
+            }
         }
     });
     
@@ -3776,21 +3852,37 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     {
         var e = [];
         e[0] = etiqueta;
-
-        for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
-        {
-            $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.Imagen[i], e);
-        }
         
-        for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+        if($scope.modulo == "Evento")
         {
-            $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.ImagenSrc[i], e);
+            for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+            {
+                $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.Imagen[i], e);
+            }
+
+            for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+            {
+                $scope.SetEtiquetaImagenEvento($scope.nuevoEvento.ImagenSrc[i], e);
+            }
+        }
+        if($scope.modulo == "Actividad")
+        {
+            for(var i=0; i<$scope.nuevaActividad.Imagen.length; i++)
+            {
+                $scope.SetEtiquetaImagenActividad($scope.nuevaActividad.Imagen[i], e);
+            }
+
+            for(var i=0; i<$scope.nuevaActividad.ImagenSrc.length; i++)
+            {
+                $scope.SetEtiquetaImagenActividad($scope.nuevaActividad.ImagenSrc[i], e);
+            }
         }
     };
     
-    $scope.$on('TemaSet',function(etiqueta)
+    $scope.$on('TemaSet',function(evento, etiqueta, modal)
     {
-        if($scope.modulo == "Evento")
+        
+        if(modal == "Evento" || modal == "Actividad")
         {
             $scope.todasImg = "tema";
             $scope.SetTemaTodasImagenes(ETIQUETA.GetEtiqueta());
@@ -3804,38 +3896,84 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
         
         $scope.temaAgregar = e;
         
-        if($scope.nuevoEvento.Imagen.length > 0)
+        
+        if($scope.modulo == "Evento")
         {
-            $scope.SetTemaImagenEvento($scope.nuevoEvento.Imagen[0], e);
+            if($scope.nuevoEvento.Imagen.length > 0)
+            {
+                $scope.SetTemaImagenEvento($scope.nuevoEvento.Imagen[0], e);
+            }
+            else if($scope.nuevoEvento.ImagenSrc.length > 0)
+            {
+                $scope.SetTemaImagenEvento($scope.nuevoEvento.ImagenSrc[0], e);
+            }
         }
-        else if($scope.nuevoEvento.ImagenSrc.length > 0)
+        else if($scope.modulo == "Actividad")
         {
-            $scope.SetTemaImagenEvento($scope.nuevoEvento.ImagenSrc[0], e);
+            if($scope.nuevaActividad.Imagen.length > 0)
+            {
+                $scope.SetTemaImagenActividad($scope.nuevaActividad.Imagen[0], e);
+            }
+            else if($scope.nuevaActividad.ImagenSrc.length > 0)
+            {
+                $scope.SetTemaImagenActividad($scope.nuevaActividad.ImagenSrc[0], e);
+            }
         }
+        
     };
     
     $scope.$on('QuitarEtiqueta',function(evento, etiqueta)
     {
-        for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+        if($scope.modulo == "Evento")
         {
-            for(var j=0; j<$scope.nuevoEvento.Imagen[i].Etiqueta.length; j++)
+            for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
             {
-                if($scope.nuevoEvento.Imagen[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                for(var j=0; j<$scope.nuevoEvento.Imagen[i].Etiqueta.length; j++)
                 {
-                    $scope.nuevoEvento.Imagen[i].Etiqueta.splice(j,1);
-                    break;
+                    if($scope.nuevoEvento.Imagen[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                    {
+                        $scope.nuevoEvento.Imagen[i].Etiqueta.splice(j,1);
+                        break;
+                    }
+                }
+            }
+
+            for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+            {
+                for(var j=0; j<$scope.nuevoEvento.ImagenSrc[i].Etiqueta.length; j++)
+                {
+                    if($scope.nuevoEvento.ImagenSrc[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                    {
+                        $scope.nuevoEvento.ImagenSrc[i].Etiqueta.splice(j,1);
+                        break;
+                    }
                 }
             }
         }
         
-        for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+        if($scope.modulo == "Actividad")
         {
-            for(var j=0; j<$scope.nuevoEvento.ImagenSrc[i].Etiqueta.length; j++)
+            for(var i=0; i<$scope.nuevaActividad.Imagen.length; i++)
             {
-                if($scope.nuevoEvento.ImagenSrc[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                for(var j=0; j<$scope.nuevaActividad.Imagen[i].Etiqueta.length; j++)
                 {
-                    $scope.nuevoEvento.ImagenSrc[i].Etiqueta.splice(j,1);
-                    break;
+                    if($scope.nuevaActividad.Imagen[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                    {
+                        $scope.nuevaActividad.Imagen[i].Etiqueta.splice(j,1);
+                        break;
+                    }
+                }
+            }
+
+            for(var i=0; i<$scope.nuevaActividad.ImagenSrc.length; i++)
+            {
+                for(var j=0; j<$scope.nuevaActividad.ImagenSrc[i].Etiqueta.length; j++)
+                {
+                    if($scope.nuevaActividad.ImagenSrc[i].Etiqueta[j].EtiquetaId == etiqueta.EtiquetaId)
+                    {
+                        $scope.nuevaActividad.ImagenSrc[i].Etiqueta.splice(j,1);
+                        break;
+                    }
                 }
             }
         }
@@ -3843,33 +3981,66 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     
     $scope.$on('QuitarTema',function(evento, tema)
     {
-        for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
+        if($scope.modulo == "Evento")
         {
-            for(var j=0; j<$scope.nuevoEvento.Imagen[i].Tema.length; j++)
+            for(var i=0; i<$scope.nuevoEvento.Imagen.length; i++)
             {
-                if($scope.nuevoEvento.Imagen[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                for(var j=0; j<$scope.nuevoEvento.Imagen[i].Tema.length; j++)
                 {
-                    $scope.nuevoEvento.Imagen[i].Tema.splice(j,1);
-                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevoEvento.Imagen[i], $scope.etiqueta, $scope.tema);
-                    break;
+                    if($scope.nuevoEvento.Imagen[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                    {
+                        $scope.nuevoEvento.Imagen[i].Tema.splice(j,1);
+                        IMAGEN.CambiarEtiquetasOcultas($scope.nuevoEvento.Imagen[i], $scope.etiqueta, $scope.tema);
+                        break;
+                    }
                 }
+            }
+
+            for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+            {
+                for(var j=0; j<$scope.nuevoEvento.ImagenSrc[i].Tema.length; j++)
+                {
+                    if($scope.nuevoEvento.ImagenSrc[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                    {
+                        $scope.nuevoEvento.ImagenSrc[i].Tema.splice(j,1);
+                        IMAGEN.CambiarEtiquetasOcultas($scope.nuevoEvento.ImagenSrc[i], $scope.etiqueta, $scope.tema);
+                        break;
+                    }
+                }
+                
             }
         }
         
-        for(var i=0; i<$scope.nuevoEvento.ImagenSrc.length; i++)
+        if($scope.modulo == "Actividad")
         {
-            for(var j=0; j<$scope.nuevoEvento.ImagenSrc[i].Tema.length; j++)
+            for(var i=0; i<$scope.nuevaActividad.Imagen.length; i++)
             {
-                if($scope.nuevoEvento.ImagenSrc[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                for(var j=0; j<$scope.nuevaActividad.Imagen[i].Tema.length; j++)
                 {
-                    $scope.nuevoEvento.ImagenSrc[i].Tema.splice(j,1);
-                    IMAGEN.CambiarEtiquetasOcultas($scope.nuevoEvento.ImagenSrc[i], $scope.etiqueta, $scope.tema);
-                    break;
+                    if($scope.nuevaActividad.Imagen[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                    {
+                        $scope.nuevaActividad.Imagen[i].Tema.splice(j,1);
+                        IMAGEN.CambiarEtiquetasOcultas($scope.nuevaActividad.Imagen[i], $scope.etiqueta, $scope.tema);
+                        break;
+                    }
                 }
+            }
+
+            for(var i=0; i<$scope.nuevaActividad.ImagenSrc.length; i++)
+            {
+                for(var j=0; j<$scope.nuevaActividad.ImagenSrc[i].Tema.length; j++)
+                {
+                    if($scope.nuevaActividad.ImagenSrc[i].Tema[j].TemaActividadId == tema.TemaActividadId)
+                    {
+                        $scope.nuevaActividad.ImagenSrc[i].Tema.splice(j,1);
+                        IMAGEN.CambiarEtiquetasOcultas($scope.nuevaActividad.ImagenSrc[i], $scope.etiqueta, $scope.tema);
+                        break;
+                    }
+                }
+                
             }
         }
     });
-    
     
     //Imagenes de archivo
     function ImagenSeleccionada(evt) 
@@ -3943,7 +4114,7 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
             
             reader.readAsDataURL(f);
         }
-         document.getElementById('cargarImagen').value = "";
+        document.getElementById('cargarImagen').value = "";
     }
  
     document.getElementById('cargarImagen').addEventListener('change', ImagenSeleccionada, false);
@@ -3953,9 +4124,215 @@ app.controller("ActividadesController", function($scope, $window, $http, $rootSc
     //----------- Archivos --------
     $(document).on('hide.bs.modal','#EtiquetaFile', function () 
     {
-        $scope.ActivarDesactivarTema($scope.nuevoEvento.Tema);
-        $scope.ActivarDesactivarEtiqueta($scope.nuevoEvento.Etiqueta);
+        if($scope.nuevoEvento && $scope.modulo == "Evento")
+        {    
+            $scope.ActivarDesactivarTema($scope.nuevoEvento.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevoEvento.Etiqueta);
+        }
+        
+        if($scope.nuevaActividad && $scope.modulo == "Actividad")
+        {    
+            $scope.ActivarDesactivarTema($scope.nuevaActividad.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevaActividad.Etiqueta);
+        }
     });
+    
+    $('#modalEvento').on('hidden.bs.modal', function () 
+    {
+        $scope.modulo = "";
+        $scope.$apply();
+    });
+    
+    $('#modalApp').on('hidden.bs.modal', function () 
+    {
+        $scope.modulo = "";
+        $scope.$apply();
+    });
+    
+    
+    //---------------------- Imagenes Actividad----------------------------
+    $scope.SetEtiquetaImagenActividad = function(imagen, etiqueta)
+    {
+        for(var j=0; j<etiqueta.length; j++)
+        {
+            if(etiqueta[j].Visible)
+            {
+                var label = false;
+                for(var i=0; i<imagen.Etiqueta.length; i++)
+                {
+                    if(etiqueta[j].EtiquetaId == imagen.Etiqueta[i].EtiquetaId)
+                    {
+                        label = true;
+                        imagen.Etiqueta[i].Visible = "1"; 
+                        break;
+                    }
+                }
+
+                if(!label)
+                {
+                    var e = new Object();
+
+                    e.EtiquetaId = etiqueta[j].EtiquetaId;
+                    e.Nombre = etiqueta[j].Nombre;
+                    e.Visible = "1";
+
+                    imagen.Etiqueta.push(e);
+                }
+            }
+        }
+    };
+    
+    $scope.SetTemaImagenActividad = function(imagen, tema)
+    {
+        var agregado = false;
+        for(var j=0; j<tema.length; j++)
+        {
+            var label = false;
+            for(var i=0; i<imagen.Tema.length; i++)
+            {
+                if(tema[j].TemaActividadId == imagen.Tema[i].TemaActividadId)
+                {
+                    label = true;
+                    break;
+                }
+            }
+            
+            if(!label)
+            {
+                var t = new Object();
+                
+                t.TemaActividadId = tema[j].TemaActividadId;
+                t.Tema = tema[j].Tema;
+                
+                imagen.Tema.push(t);
+                
+                agregado = true;
+            }
+        }
+        
+        if(agregado)
+        {
+            IMAGEN.CambiarEtiquetasOcultas(imagen, $scope.etiqueta, $scope.tema);
+        }
+        else if($scope.todasImg == "opt" || $scope.todasImg == "tema" || $scope.todasImg == "src")
+        {
+            $scope.TerminarAgregarTemaImagenActiviad();
+        }
+    };
+    
+    
+    //--------------- Etiquetas de Imagenes -----------------------------    
+    $scope.TerminarAgregarTemaImagenActiviad = function()
+    {
+        var opt = $scope.todasImg;
+        $scope.todasImg = "";
+        
+        if(opt === "tema")
+        {   
+            for(var k=1; k<$scope.nuevaActividad.Imagen.length; k++)
+            {
+                $scope.SetTemaImagenActividad($scope.nuevaActividad.Imagen[k], $scope.temaAgregar);
+            }
+            
+            for(var i=1; i<$scope.nuevaActividad.ImagenSrc.length; i++)
+            {
+                $scope.SetTemaImagenActividad($scope.nuevaActividad.ImagenSrc[i], $scope.temaAgregar);
+            }
+        }
+        else if(opt == "opt")
+        {
+            for(var k=$scope.lastIndex; k<$scope.nuevaActividad.Imagen.length; k++)
+            {
+                $scope.GetImagenEtiqueta($scope.nuevaActividad.Imagen[k]);
+            }
+        }
+        else if(opt == "src")
+        {
+            for(var k=$scope.lastIndex; k<$scope.nuevaActividad.ImagenSrc.length; k++)
+            {
+                $scope.SetTemaImagenActividad($scope.nuevaActividad.ImagenSrc[k], $scope.nuevaActividad.Tema);
+            }
+        }
+    };
+    
+    function ImagenSeleccionadaActividad(evt) 
+    {
+        var files = evt.target.files;
+        
+        $scope.index = $scope.nuevaActividad.ImagenSrc.length;
+        $scope.lastIndex = $scope.nuevaActividad.ImagenSrc.length + 1;
+        $scope.srcSize = $scope.nuevaActividad.ImagenSrc.length + files.length;
+        
+        
+        for (var i = 0, f; f = files[i]; i++) 
+        {
+            if (!f.type.match('image.*')) 
+            {
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = (function(theFile) 
+            {
+                return function(e) 
+                {
+                    var compressor = new Compress();
+                    
+                    compressor.compress([theFile], {
+                        size: 10,
+                        quality: 1,
+                        maxWidth: 250,
+                        maxHeight: 150,
+                        resize: true
+                    }).then((result) => {
+
+                        $scope.nuevaActividad.ImagenTh.push((Compress.convertBase64ToFile(result[0].data, result[0].ext)));
+
+                    });
+                    
+                    var compressor2 = new Compress();
+                    
+                    compressor2.compress([theFile], {
+                        size: 10,
+                        quality: 0.4,
+                        maxWidth: 1000,
+                        maxHeight: 1000,
+                        resize: false
+                    }).then((result) => {
+
+                        $scope.nuevaActividad.ImagenWeb.push(Compress.convertBase64ToFile(result[0].data, result[0].ext));
+
+                    });
+                    
+                    $scope.nuevaActividad.ImagenSrc.push(theFile);
+                    $scope.nuevaActividad.ImagenSrc[$scope.nuevaActividad.ImagenSrc.length-1].Src= (e.target.result);
+                    $scope.nuevaActividad.ImagenSrc[$scope.nuevaActividad.ImagenSrc.length-1].Etiqueta = [];
+                    $scope.nuevaActividad.ImagenSrc[$scope.nuevaActividad.ImagenSrc.length-1].Tema = [];
+
+                    if($scope.srcSize === $scope.nuevaActividad.ImagenSrc.length)
+                    {
+                        $scope.todasImg = "src";
+                        $scope.SetTemaImagenActividad($scope.nuevaActividad.ImagenSrc[$scope.index], $scope.nuevaActividad.Tema);
+                    }
+                    
+                    $scope.SetEtiquetaImagenActividad($scope.nuevaActividad.ImagenSrc[$scope.nuevaActividad.ImagenSrc.length-1], $scope.nuevaActividad.Etiqueta);
+                    
+                    $scope.$apply();
+                };
+                
+            })(f);
+            
+            
+            reader.readAsDataURL(f);
+        }
+         document.getElementById('imgActividad').value = "";
+    }
+ 
+    document.getElementById('imgActividad').addEventListener('change', ImagenSeleccionadaActividad, false);
+    
+    autosize($('textarea'));
+    
     
     
 });

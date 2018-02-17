@@ -6,7 +6,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
     $scope.tipo = null;
     
     $scope.$on('EtiquetaImagen',function()
-    {
+    {        
         $scope.img = IMAGEN.GetImagen();
         
         $scope.imagen = new Object();
@@ -19,6 +19,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
         $scope.buscarConceptoImg = "";
         
         $scope.IniciarImagen();
+        
         
         $('#EtiquetaImagen').modal('toggle');
     });
@@ -172,7 +173,7 @@ app.controller("EtiquetaImagenController", function($scope, $window, $http, $roo
         
         $scope.verEtiqueta = "0";
         
-        etiqueta = etiqueta.split(" ");
+        etiqueta = LimiparCaracteresLabel(etiqueta);//etiqueta.split(" ");
         
         var promesas = [];
         for(var k=0; k<etiqueta.length; k++)

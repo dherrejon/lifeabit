@@ -1,0 +1,58 @@
+.btnInfo, .btnInfo:active, .btnInfo:hover, .btnInfo:focus
+{
+    color: black;
+    border-radius: 0px;
+    border-width: 0px;
+    text-align: left;
+    font-size: 13pt;
+    
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    
+    cursor: default;
+    outline: none !important;
+    box-shadow: none;
+}
+
+
+.archivoItem
+{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btnFolder, .btnFolder:active, .btnFolder:focus
+{
+    border-radius: 0px;
+    border: 0px;
+    background: white;
+    color:  #2076ed;
+    width: 100%;
+    
+    outline: none !important;
+    box-shadow: none;
+}
+
+.btnFolder:hover
+{
+    background: #d2e4fb;
+}
+
+/*----------------------- colums same height ---------------------*/
+.flex-parent
+{
+    display: -ms-flex;
+    display: -webkit-flex;
+    display: flex;
+}
+
+.flex-child
+{
+    display: -ms-flex;
+    display: -webkit-flex;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}

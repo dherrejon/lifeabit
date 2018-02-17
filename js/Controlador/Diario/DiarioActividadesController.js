@@ -85,6 +85,16 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     $scope.GetFechaDiario = function(filtro)              
     {
         filtro.UsuarioId = $rootScope.UsuarioId;
+        
+        if((filtro.etiqueta.length + filtro.tema.length) > 0)
+        {
+            $scope.tipo = "todo";
+        }
+        else
+        {
+            $scope.tipo = "fecha";
+        }
+        
         GetFechaDiario($http, $q, CONFIG, filtro).then(function(data)
         {
             if(data[0].Estatus == "Exito")
@@ -924,6 +934,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     $scope.AbrirDiario = function(operacion, objeto, fecha)
     {
         $scope.operacion = operacion;
+        $scope.etiquetaSugerida = [];
     
         document.getElementById("fechaDiaria");
         $scope.tabModal = "Diario";
@@ -1014,6 +1025,7 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         diario.HoraFormato = $scope.SetHora(data.Hora);
         diario.Imagen = data.Imagen;
         diario.Archivo = data.Archivo;
+        diario.Titulo = data.Titulo;
         
         diario.iActive = data.iActive;
         
@@ -3122,6 +3134,75 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
         }
     });
     
+     //--Etiquetas Sugeridas
+    $scope.CrearEtiquetaSugerida = function()
+    {
+        if($scope.nuevoDiario.Titulo)
+        {
+            $scope.etiquetaSugerida = LimiparCaracteresLabel($scope.nuevoDiario.Titulo);
+            $scope.temaSugerido = [];
+
+            for(var k=0; k<$scope.etiquetaSugerida.length; k++)
+            {
+                if($scope.etiquetaSugerida[k] === "")
+                {
+                    $scope.etiquetaSugerida.splice(k,1);
+                    k--;
+                    continue;
+                }
+
+                for(var i=0; i<$scope.nuevoDiario.Etiqueta.length; i++)
+                {
+                    if($scope.nuevoDiario.Etiqueta[i].Nombre.toLowerCase() == $scope.etiquetaSugerida[k].toLowerCase())
+                    {
+                        if($scope.nuevoDiario.Etiqueta[i].Visible)
+                        {
+                            $scope.etiquetaSugerida.splice(k,1);
+                            k--;
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            $scope.temaSugerido = [];
+            $scope.etiquetaSugerida = [];
+        }
+    };
+    
+    $scope.AgregarEtiquetaSugerida = function(etiqueta, k)
+    {
+        if($rootScope.erEtiqueta.test(etiqueta))
+        {
+            $scope.$broadcast('AgregarEtiquetaSugerida', $scope.etiqueta, $scope.tema, $scope.nuevoDiario, 'Diario', etiqueta);
+        }
+        else
+        {
+            $scope.mensajeError = [];
+            $scope.mensajeError[0] = "*Etiqueta no válida. " + etiqueta;
+        }
+        
+        if( k != -1)
+        {
+            $scope.etiquetaSugerida.splice(k,1);
+        }
+    };
+    
+    $scope.AgregarTodaEtiquetaSugerida = function()
+    {
+        $scope.verEtiqueta = true;
+        
+        for(var k=0; k<$scope.etiquetaSugerida.length; k++)
+        {
+            $scope.AgregarEtiquetaSugerida($scope.etiquetaSugerida[k], -1);
+        }
+        
+        $scope.etiquetaSugerida = [];
+    };
+    
     
     //------------------- Alertas ---------------------------
     $scope.EnviarAlerta = function(alerta)
@@ -3242,8 +3323,11 @@ app.controller("DiarioController", function($scope, $window, $http, $rootScope, 
     //----------- Archivos --------
     $(document).on('hide.bs.modal','#EtiquetaFile', function () 
     {
-        $scope.ActivarDesactivarTema($scope.nuevoDiario.Tema);
-        $scope.ActivarDesactivarEtiqueta($scope.nuevoDiario.Etiqueta);
+        if($scope.nuevoDiario)
+        {
+            $scope.ActivarDesactivarTema($scope.nuevoDiario.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevoDiario.Etiqueta);
+        }
     });
     
 });

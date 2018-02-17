@@ -153,7 +153,7 @@
                 </div>
                 
                 <div ng-if="diario.length > 0" style="margin-top: -2px">
-                    <div class="row">
+                    <div class="row" ng-if="tipo== 'fecha'">
                        <div class="col-xs-12" style="padding-left: 0px; padding-right: 0px">
                             <a class="btn labelConcepto dropdown-toggle" data-toggle="dropdown" aria-haspopup="true">
                                 <b>{{yearSel}} <span class="fa fa-caret-down pull-right"></span></b> 
@@ -171,7 +171,7 @@
                         </div>
                     </div>   
 
-                    <div class="row">
+                    <div class="row" ng-if="tipo== 'fecha'">
                        <div class="col-xs-12" style="padding-left: 0px; padding-right: 0px">
                           <a class="btn labelConcepto dropdown-toggle" data-toggle="dropdown" aria-haspopup="true">
                                 <b>{{mesSel}} <span class="fa fa-caret-down pull-right"></span> </b>
@@ -191,10 +191,18 @@
                     </div>        
 
                     <div class="row">
-                        <a ng-if="diario.Mes == mesSel && diario.Year == yearSel" class="btn itemBarraLateral {{GetClaseDiario(diario.Fecha)}}" ng-repeat="diario in diario | orderBy:'-DiaN'" ng-click="VerDetalles(diario)" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                        <a ng-if="tipo== 'fecha'" ng-show="diario.Mes == mesSel && diario.Year == yearSel" class="btn itemBarraLateral {{GetClaseDiario(diario.Fecha)}}" ng-repeat="diario in diario | orderBy:'-DiaN'" ng-click="VerDetalles(diario)" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
+                            <!-- indicador -->
+                            <span  class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
+                                {{diario.Dia}}
+                                <button class="fechaIndicador" ng-if="(hoy == diario.Fecha)">Hoy</button>
+                            </span>
+                        </a>
+                        
+                        <a ng-if="tipo == 'todo'" class="btn itemBarraLateral {{GetClaseDiario(diario.Fecha)}}" ng-repeat="diario in diario | orderBy:'-Fecha'" ng-click="VerDetalles(diario)" > <!-- ng-if="(fecha.Diario | filter:FiltrarDiario).length > 0" -->
                             <!-- indicador -->
                             <span class="col-xs-12"  style="white-space: normal; max-width: 90%; overflow: hidden;">
-                                {{diario.Dia}}
+                                {{diario.FechaFormato}}
                                 <button class="fechaIndicador" ng-if="(hoy == diario.Fecha)">Hoy</button>
                             </span>
                         </a>
@@ -392,13 +400,17 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                    
+                                        
                                         <span class="textoGris btn botonAparente" ng-show="diario.Hora.length > 0"><span class="fa fa-clock-o"></span> {{diario.Hora}}</span>
                                         <span class="textoGris btn botonAparente" ng-show="diario.Ciudad.CiudadId != null"><span class="fa fa-map-marker"></span> {{diario.Ciudad.Ciudad}} ({{diario.Ciudad.AbreviacionPais}})</span>
                                          
                                      </div>
                                     
                                     <!-- Notas -->
+                                    <div class="col-xs-12">
+                                        <b style="font-size:12pt" > {{diario.Titulo}}</b>
+                                    </div>
+                                    
                                     <div class="col-xs-12">
                                         <p style="font-size:12pt" ng-bind-html="diario.NotasHTML"></p>
                                     </div>
@@ -601,6 +613,26 @@
                         </div>
                     
                     </div>
+                    <br>
+                    
+                    <!-- Título -->
+                     <div class="row">
+                         <div class="col-xs-12">
+                             
+                            <div class="input-group">
+                                 <div class="entrada2">
+                                    <textarea  type="text"  class="form-control entrada areainput" style="font-size:12pt" name="titulo" ng-model="nuevoDiario.Titulo" maxlength="255" autocomplete="off" ng-blur="CrearEtiquetaSugerida()" rows="1"></textarea>
+                                    <label class="">Título</label>
+                                 </div>
+                                 
+                                 <span class="input-group-btn">
+                                    <a class="btn close cerrarModal"  ng-click="nuevoDiario.Titulo = ''" type="button"><span class="fa fa-times-circle"></span></a>
+                                </span>
+                             </div>
+                             
+                         </div>
+                     </div>
+                     <br>
                 
                     <!-- Notas -->
                     <div class="row">
@@ -612,6 +644,51 @@
                         </div>
                     </div>
                     <br>
+                    
+                    <!-- Etiquera sugerida -->
+                     <div class="row" >
+                    
+                         <div class="col-sm-12">
+
+                          <div ng-show="etiquetaSugerida.length > 0">
+                            <div>
+                               <b >Etiquetas Sugeridas</b>
+                                <span class="btn-group pull-right">
+                                     <a class="btn btnOptDiarioDetalles boton" ng-click="AgregarTodaEtiquetaSugerida()"> <span class="fa fa-check-circle-o"></span></a>
+                                     <a class="btn btnOptDiarioDetalles boton" ng-click="etiquetaSugerida = []"> <span class="fa fa-times-circle-o"></span></a>
+                                 </span>
+                            </div>
+                            <br>
+
+                             <span ng-repeat="etiqueta in etiquetaSugerida track by $index">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+                                  <a class="btn campoAgregado"  style="font-size:10pt" ng-click="AgregarEtiquetaSugerida(etiqueta, $index)">{{etiqueta}}</a>
+                                  <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="etiquetaSugerida.splice($index, 1)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br> 
+                         </div>
+
+                         <div ng-show="temaSugerido.length > 0">
+                             <div>                         
+                                 <b >Temas Sugeridos</b><br><br>   
+                             </div> 
+                             <span ng-repeat="tema in temaSugerido track by $index">
+                                 <div class="btn-group" role="group" style="margin-bottom:8px">
+                                  <a class="btn campoAgregado"  style="font-size:10pt" ng-click="AgregarTemaSugerido(tema, $index)">{{tema}}</a>
+                                  <a class="btn campoAgregadoQuitar" style="font-size:10pt" ng-click="temaSugerido.splice(index, 1)"><span class="fa fa-times-circle"></span></a>
+                                </div>
+                             </span>
+                             <br>
+
+                         </div>
+                         <br>
+
+
+
+                        </div>
+                    </div>
+                    
                     <!-- Etiqueta -->
                     <div ng-include=" 'html/Control/EtiquetaControl.html' " ng-init="IniciarModal('Diario')" ng-controller="ControlEtiquetaController as lc"></div>
                     <br>
@@ -1000,6 +1077,12 @@
             </div>
             
             <!-- Contenido -->
+            <div class="row" ng-show="detalleDiario.Titulo">
+                <div class="col-xs-12">
+                    <b style="font-size: 12pt">{{detalleDiario.Titulo}}</b>
+                </div>
+            </div>
+            
             <div class="row">
                 <div class="col-xs-12 detalleInformacion" >
                     <p style="font-size:12pt" ng-bind-html="detalleDiario.NotasHTML"></p>
@@ -1009,6 +1092,8 @@
             <br>
             
             <!-- Separador -->
+            
+            
             <div class="row" ng-if="detalleDiario.Notas.length > 0">
                 <div class="col-xs-12"> <div class="divisorAzul1"></div> </div>
             </div>

@@ -163,7 +163,6 @@
 
 .operacionEvento, .operacionEvento:focus, .operacionEvento:active
 {
-    background: transparent;
     color: #081e3b;
     border-radius: 0px;
     font-size: 14pt;

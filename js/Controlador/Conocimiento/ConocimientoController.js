@@ -10,10 +10,12 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
     $scope.vercon = "";
     
     $scope.tabModal = "";
+    $scope.burcar = false;
 
     //------------------ Catálogos ----------------------------
     $scope.GetConocimiento = function()
     {
+        $scope.buscar =true;
         //if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) > 0 )
         //{
              $scope.filtro.usuarioId = $rootScope.UsuarioId;
@@ -66,6 +68,28 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
         });
     };
     
+    $scope.GetNumeroConocimientoPorConcepto = function()
+    {
+        (self.servicioObj = LifeService.Get('GetNumeroConocimientoPorConcepto/' + $rootScope.UsuarioId )).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                $scope.conceptoConocimiento = dataResponse.data;
+
+            } else 
+            {
+                $scope.conceptoArchivo = [];
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $scope.conceptoArchivo = [];
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+    };
+    
     $scope.OperacionConocimiento = function(conocimiento, opt)
     {
         if(opt == "Editar" || opt == "Copiar")
@@ -74,8 +98,6 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             
             $scope.ActivarDesactivarTema(conocimiento.Tema);
             $scope.ActivarDesactivarEtiqueta(conocimiento.Etiqueta);
-            
-            $scope.conocimientoInicio = jQuery.extend({}, $scope.nuevoConocimiento);
             
             for(var k=0; k<$scope.nuevoConocimiento.Imagen.length; k++)
             {
@@ -88,6 +110,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             $scope.iniciarHecho = $scope.nuevoConocimiento.Hecho;
             
             $scope.nuevoConocimiento.Resolucion = "Alta";
+            
+            $scope.conocimientoInicio = jQuery.extend({}, $scope.nuevoConocimiento);
         }
         else if(opt == "Detalle")
         {
@@ -205,6 +229,27 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
         });
     };
     
+    $scope.GetNumeroConocimiento = function()
+    {
+        (self.servicioObj = LifeService.Get('GetNumeroConocimiento/' + $rootScope.UsuarioId )).then(function (dataResponse) 
+        {
+            if (dataResponse.status == 200) 
+            {
+                $scope.NumeroConocimiento = parseInt(dataResponse.data);
+
+            } else 
+            {
+                $scope.NumeroConocimiento = 0;
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
+        });
+    };
+    
     //--------------------- Filtro ----------------
     $scope.SetFiltroEtiqueta = function()
     {
@@ -228,6 +273,9 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             {
                 $scope.etiqueta[k].filtro = false;
                 $scope.filtro.etiqueta.push($scope.etiqueta[k]);
+                
+                $scope.buscar = false;
+                $scope.conocimiento = [];
                 //$scope.GetConocimiento();
                 break;
             }
@@ -242,6 +290,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             {
                 $scope.tema[k].filtro = false;
                 $scope.filtro.tema.push($scope.tema[k]);
+                $scope.buscar = false;
+                $scope.conocimiento = [];
                 //$scope.GetConocimiento();
                 break;
             }
@@ -289,7 +339,37 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
     $scope.CambiarVerFiltro = function()
     {
         $scope.verFiltro = !$scope.verFiltro;
-    };    
+    };  
+    
+    $scope.BuscarCarpetaConcepto = function(concepto)
+    {
+        if(concepto.Tipo == "Etiqueta")
+        {
+            for(var k=0; k<$scope.etiqueta.length; k++)
+            {
+                if($scope.etiqueta[k].EtiquetaId == concepto.ConceptoId)
+                {
+                    $scope.etiqueta[k].filtro = false;
+                    $scope.filtro.etiqueta.push($scope.etiqueta[k]);
+                    $scope.GetConocimiento();
+                    break;
+                }
+            }
+        }
+        else if(concepto.Tipo == "Tema")
+        {
+            for(var k=0; k<$scope.tema.length; k++)
+            {
+                if($scope.tema[k].TemaActividadId == concepto.ConceptoId)
+                {
+                    $scope.tema[k].filtro = false;
+                    $scope.filtro.tema.push($scope.tema[k]);
+                    $scope.GetConocimiento();
+                    break;
+                }
+            }
+        }
+    };
     
     //-------- Typeahead ------------------
     $scope.FiltroConcepto = function(concepto)
@@ -413,11 +493,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             }
         }
         
-        if(($scope.filtro.tema.length + $scope.filtro.etiqueta.length) == 0)
-        {
-             $scope.GetConocimiento();
-        }
-       
+        $scope.buscar = false;
+        $scope.conocimiento = [];
     };
     
     $scope.QuitaretiquetaFiltro = function(etiqueta)
@@ -445,6 +522,8 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             $scope.GetConocimiento();
         }
         
+        $scope.buscar = false;
+        $scope.conocimiento = [];
     };
     
      $scope.LimpiarFiltro = function()
@@ -462,7 +541,9 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             $scope.tema[k].filtro = true;
         }
         
-        $scope.GetConocimiento();
+        //$scope.GetConocimiento();
+         $scope.conocimiento = [];
+         $scope.buscar = "";
     };
     
     //-------- vista principal --------
@@ -772,9 +853,15 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
         {
             if (dataResponse.status == 200) 
             {
-                $scope.GetConocimiento();
                 $('#modalApp').modal('toggle');
                 $rootScope.$broadcast('Alerta', 'El conocimiento se agrego.','exito');
+                
+                if($scope.buscar)
+                {
+                    $scope.GetConocimiento();
+                }
+                $scope.NumeroConocimiento++;
+                $scope.GetNumeroConocimientoPorConcepto();
                                 
             } else 
             {
@@ -795,6 +882,7 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             if (dataResponse.status == 200) 
             {
                 $scope.GetConocimiento();
+                $scope.GetNumeroConocimientoPorConcepto();
                 $('#modalApp').modal('toggle');
                 $rootScope.$broadcast('Alerta', 'El conocimiento se edito.','exito');
                                 
@@ -860,10 +948,13 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
                 {
                     if($scope.conocimiento[k].ConocimientoId == $scope.borrarConocimiento.ConocimientoId)
                     {
+                        $scope.NumeroConocimiento -= 1;
                         $scope.conocimiento.splice(k,1); 
                         break;
                     }
                 }
+                
+                $scope.GetNumeroConocimientoPorConcepto();
             }
             else 
             {
@@ -1422,8 +1513,9 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
             $rootScope.UsuarioId = $scope.usuarioLogeado.UsuarioId;
             $scope.GetTemaActividad();
             $scope.GetEtiqueta();
-            $scope.GetConocimiento();
-            
+            //$scope.GetConocimiento();
+            $scope.GetNumeroConocimiento();
+            $scope.GetNumeroConocimientoPorConcepto();
             $rootScope.CargarExterior = true;
         }
     };
@@ -1464,8 +1556,11 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
     //------- archivos -----
     $(document).on('hide.bs.modal','#EtiquetaFile', function () 
     {
-        $scope.ActivarDesactivarTema($scope.nuevoConocimiento.Tema);
-        $scope.ActivarDesactivarEtiqueta($scope.nuevoConocimiento.Etiqueta);
+        if($scope.nuevoConocimiento)
+        {
+            $scope.ActivarDesactivarTema($scope.nuevoConocimiento.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevoConocimiento.Etiqueta);
+        }
     });
     
     //------------ Cambiar hecho -------
@@ -1486,6 +1581,28 @@ app.controller("ConocimientoController", function($scope, $window, $http, $rootS
     $scope.ConfirmarCambiarHecho = function()
     {
         $scope.nuevoConocimiento.Hecho = $scope.nuevoConocimiento.Hecho == '1' ?   '0' : '1';
+    };
+    
+    /*------------- Cambiar tamaño de la pantalla y ajustar carpetas --------------------*/
+    $( window ).resize(function() 
+    {
+        $scope.CambiarNumeroCarpeta();
+    });
+    
+    $scope.CambiarNumeroCarpeta = function()
+    {
+        if($rootScope.anchoPantalla <= 767)
+        {
+            $scope.numeroCarpeta = 3;
+        }
+        else if($rootScope.anchoPantalla > 767 && $rootScope.anchoPantalla < 1200)
+        {
+            $scope.numeroCarpeta = 4;
+        }
+        else if($rootScope.anchoPantalla >= 1200)
+        {
+            $scope.numeroCarpeta = 6;
+        }
     };
     
 });

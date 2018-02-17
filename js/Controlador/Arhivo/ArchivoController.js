@@ -1,10 +1,18 @@
 app.controller("ArchivoController", function($scope, $window, $http, $rootScope, md5, $q, CONFIG, ETIQUETA)
 {   
-    $scope.$on('IniciarArchivo', function(evento, objeto)
+    $scope.$on('IniciarArchivo', function(evento, objeto, misarchivos)
     {
         $scope.objeto = objeto;
         $scope.showEliminada = false;
+        $scope.misarchivos = misarchivos;
     });
+    
+    $scope.IniciarArchivoApp = function() 
+    {
+        $rootScope.$broadcast('IniciarArchivoApp');
+    };
+    
+    
     
     //------------ CARGAR ARCHIVOS ---------------
     function LoadFiles(evt) 
@@ -69,7 +77,7 @@ app.controller("ArchivoController", function($scope, $window, $http, $rootScope,
     //--------------------------- Etiqueta -----------------
     $scope.EtiquetarFile = function(archivo, nombre)
     {
-        $rootScope.$broadcast('AbrirEtiquetaArchivo', archivo, nombre);
+        $rootScope.$broadcast('AbrirEtiquetaArchivo', archivo, nombre, 'Archivo');
     };
     
     

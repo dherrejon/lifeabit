@@ -46,6 +46,24 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
                         $scope.pendiente[k].FechaRealizacionFormato = "";
                     }
                     
+                    if($scope.pendiente[k].HoraIntencion)
+                    {
+                        $scope.pendiente[k].HoraIntencionFormato = convertTo24Hour($scope.pendiente[k].HoraIntencion);
+                    }
+                    else
+                    {
+                        $scope.pendiente[k].HoraIntencionFormato  = null;
+                    }
+
+                    if($scope.pendiente[k].HoraRealizacion)
+                    {
+                        $scope.pendiente[k].HoraRealizacionFormato = convertTo24Hour($scope.pendiente[k].HoraRealizacion);
+                    }
+                    else
+                    {
+                        $scope.pendiente[k].HoraRealizacionFormato  = null;
+                    }
+                    
                     
                     $scope.GetClasePendiente($scope.pendiente[k]);
                 }
@@ -2095,8 +2113,11 @@ app.controller("PendienteController", function($scope, $window, $http, $rootScop
     //----------- Archivos --------
     $(document).on('hide.bs.modal','#EtiquetaFile', function () 
     {
-        $scope.ActivarDesactivarTema($scope.nuevoPendiente.Tema);
-        $scope.ActivarDesactivarEtiqueta($scope.nuevoPendiente.Etiqueta);
+        if($scope.nuevoPendiente)
+        {
+            $scope.ActivarDesactivarTema($scope.nuevoPendiente.Tema);
+            $scope.ActivarDesactivarEtiqueta($scope.nuevoPendiente.Etiqueta);
+        }
     });
     
 });

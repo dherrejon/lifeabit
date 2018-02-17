@@ -403,5 +403,209 @@ function GetNumeroImagen($id)
     }
 }
 
+function GetNumeroImagenPorConcepto($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT Nombre, ConceptoId, Tipo, UsuarioId FROM NumeroImagenPorConceptoVista WHERE UsuarioId = ".$id;
+ 
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $response = $stmt->fetchAll(PDO::FETCH_OBJ); 
+        
+        $app->status(200);
+        $db = null;
+        echo json_encode($response);
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+}
+
+
+function AgregarImagen()
+{
+    $request = \Slim\Slim::getInstance()->request();
+    $imagen = json_decode($_POST['datos']);
+    global $app;
+
+    try 
+    {
+        $db = getConnection();
+        $db->beginTransaction();
+
+    } catch(PDOException $e) 
+    {
+        echo '[{"Estatus": "Fallo"}]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    } 
+    
+    
+    /*------------------ Imagenes ---------------------*/
+    $countFile = 0;
+    if($imagen->AgregarImagen > 0)
+    {
+        $countFile = count($_FILES['file']['name']);
+    }
+        
+    $count= 0;
+    $imagenId = [];
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$imagen->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$imagen->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$imagen->UsuarioId."/IMG/Thumbnail/";
+        
+        if(!is_dir("ArchivosUsuario/".$imagen->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$imagen->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        if(!is_dir("ArchivosUsuario/".$imagen->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$imagen->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['imgweb']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['file']['name'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                //$imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Imagen (Nombre, Extension, Size, UsuarioId) VALUES ( '".$name."', '".$ext."', ".$size.", ".$imagen->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $imagenId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //$uploadfile = $_FILES['file']['name'];
+                move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($imagen->ImagenSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$imagen->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$imagen->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($imagen->ImagenSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$imagen->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $imagenId[$k] = 0;
+            }
+        }   
+       
+    }
+    /*------------------Termina Imagenes --------------*/
+    
+    echo '[{"Estatus": "Exitoso"}]';
+    $app->status(200);
+    $db->commit();
+    $db = null;
+    
+  
+}
+
+
 
 ?>

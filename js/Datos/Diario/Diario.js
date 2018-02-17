@@ -5,6 +5,7 @@ class Diario
         this.DiarioId = "";
         this.Fecha = "";
         this.Notas = "";
+        this.Titulo = "";
         this.Ciudad = new Ciudad();
         
         this.Etiqueta = [];
@@ -107,6 +108,7 @@ function SetDiario(data)
     diario.Notas = data.Notas;
     diario.Imagen = data.Imagen;
     diario.Archivo = data.Archivo;
+    diario.Titulo = data.Titulo;
     
     diario.FechaFormato = TransformarFecha(data.Fecha);
 

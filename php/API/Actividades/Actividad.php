@@ -212,25 +212,9 @@ function GetActividad()
 function AgregarActividad()
 {
     $request = \Slim\Slim::getInstance()->request();
-    $actividad = json_decode($request->getBody());
+    $actividad = json_decode($_POST['datos']);
     global $app;
     
-    //$cancion = json_decode($_POST['cancion']);
-    
-    /*if($_FILES['file']['error'] == 0)
-    {
-        $name = $_FILES['file']['name'];
-
-        $archivo = addslashes(file_get_contents($_FILES['file']['tmp_name']));
-        
-         $sql = "INSERT INTO Cancion (UsuarioId, Titulo, Cancionero, NombreArchivo) VALUES(:UsuarioId, :Titulo, '".$archivo."', :NombreArchivo)";
-    }
-    else
-    {
-        echo '[ { "Estatus": "No se puedo leer el archivo" } ]';
-        $app->stop();
-    }*/
-
     $sql = "INSERT INTO Actividad (UsuarioId, Nombre, Notas, FechaCreacion, Hora) VALUES(:UsuarioId, :Nombre, :Notas, :FechaCreacion, STR_TO_DATE( :Hora, '%h:%i %p' ))";
     
     try 
@@ -248,6 +232,7 @@ function AgregarActividad()
         $stmt->execute();
         
         $actividadId = $db->lastInsertId();
+        $actividad->ActividadId = $actividadId;
         //echo '[{"Estatus": "Exitoso"}, {"Id": "'.$db->lastInsertId().'"}]';
         //$db = null;
 
@@ -259,6 +244,631 @@ function AgregarActividad()
         $app->status(409);
         $app->stop();
     }
+    
+    /*------------------ Imagenes ---------------------*/
+    $countFile = 0;
+    if($actividad->AgregarImagen > 0)
+    {
+        $countFile = count($_FILES['file']['name']);
+    }
+        
+    $count= 0;
+    $imagenId = [];
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$actividad->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$actividad->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$actividad->UsuarioId."/IMG/Thumbnail/";
+        
+        if(!is_dir("ArchivosUsuario/".$actividad->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$actividad->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        if(!is_dir("ArchivosUsuario/".$actividad->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$actividad->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+        
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['imgweb']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['file']['name'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Imagen ( Nombre, Extension, Size, UsuarioId) VALUES ( '".$name."', '".$ext."', ".$size.", ".$actividad->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $imagenId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($actividad->ImagenSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$actividad->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$actividad->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($actividad->ImagenSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$actividad->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $imagenId[$k] = 0;
+            }
+        }
+        
+        
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ImagenPorActividad (ActividadId, ImagenId) VALUES";
+            
+            //Imagen del evento
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($imagenId[$k] != 0)
+                {
+                    $sql .= " (".$actividadId.", ".$imagenId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+     $countImg = count($actividad->Imagen);
+    
+    if($countImg>0)  
+    {    
+        $sql = "INSERT INTO ImagenPorActividad (ActividadId, ImagenId) VALUES";
+        
+        $count = 0;
+        for($k=0; $k<$countImg; $k++)
+        {
+            if(!$actividad->Imagen[$k]->Eliminada)
+            {
+                $count++;
+                $sql .= " (".$actividadId.", ".$actividad->Imagen[$k]->ImagenId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+            
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countImg; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorImagen WHERE ImagenId =".$actividad->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($actividad->Imagen[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$actividad->Imagen[$k]->Etiqueta[$i]->EtiquetaId.", ".$actividad->Imagen[$k]->ImagenId.", '".$actividad->Imagen[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorImagen WHERE ImagenId =".$actividad->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($actividad->Imagen[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$actividad->Imagen[$k]->Tema[$i]->TemaActividadId.", ".$actividad->Imagen[$k]->ImagenId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+        
+       
+    }
+    
+    $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenActividadVista WHERE ActividadId = ".$actividadId;
+
+    try 
+    {
+        $stmt = $db->query($sql);
+        $actividad->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    /*------------------Termina Imagenes --------------*/
+    
+    //------------------------------ Archivos inicia --------------------------------------
+    $countFile = 0;
+    if($actividad->AgregarArchivo > 0)
+    {
+        $countFile = count($_FILES['Archivo']['name']);
+    }
+        
+    $count= 0;
+    $archivoId = [];
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$actividad->UsuarioId."/Archivo/";
+        if(!is_dir("ArchivosUsuario/".$actividad->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$actividad->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['Archivo']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['Archivo']['name'][$k];
+                $size = $_FILES['Archivo']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$actividad->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $archivoId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $sql;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //$uploadfile = $_FILES['file']['name'];
+                move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($actividad->ArchivoSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($actividad->ArchivoSrc[$k]->Etiqueta[$i]->Visible || $actividad->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1")
+                        {
+                            $sql .= " (".$actividad->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
+                        }
+                        else
+                        {
+                             $sql .= " (".$actividad->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
+                        }
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($actividad->ArchivoSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$actividad->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $archivoId[$k] = 0;
+            }
+            
+        }
+        
+        
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ArchivoPorActividad (ActividadId, ArchivoId) VALUES";
+            
+            //Imagen de la nota
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($archivoId[$k] != 0)
+                {
+                    $sql .= " (".$actividad->ActividadId.", ".$archivoId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+     $countArch = count($actividad->Archivo);
+    
+    if($countArch>0)  
+    {    
+        $sql = "INSERT INTO ArchivoPorActividad (ActividadId, ArchivoId) VALUES";
+        
+        $count = 0;
+        for($k=0; $k<$countArch; $k++)
+        {
+            if(!$actividad->Archivo[$k]->Eliminado)
+            {
+                $count++;
+                $sql .= " (".$actividad->ActividadId.", ".$actividad->Archivo[$k]->ArchivoId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $e;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+            
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countArch; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorArchivo WHERE ArchivoId =".$actividad->Archivo[$k]->ArchivoId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($actividad->Archivo[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        if($actividad->Archivo[$k]->Etiqueta[$i]->Visible || $actividad->Archivo[$k]->Etiqueta[$i]->Visible == "1")
+                        {
+                            $sql .= " (".$actividad->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$actividad->Archivo[$k]->ArchivoId.", 1),";
+                        }
+                        else
+                        {
+                            $sql .= " (".$actividad->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$actividad->Archivo[$k]->ArchivoId.", 0),";
+                        }
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorArchivo WHERE ArchivoId =".$actividad->Archivo[$k]->ArchivoId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($actividad->Archivo[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$actividad->Archivo[$k]->Tema[$i]->TemaActividadId.", ".$actividad->Archivo[$k]->ArchivoId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+        
+       
+    }
+    
+    //----------------------------- archvios  fin---------------------------------------
     
     $countTema = count($actividad->Tema);
     
@@ -455,32 +1065,11 @@ function AgregarActividad()
 
 function EditarActividad()
 {
-    $request = \Slim\Slim::getInstance()->request();
-    $actividad = json_decode($request->getBody());
     global $app;
-    
-    //$cancion = json_decode($_POST['cancion']);
-    
-    /*if($cancion->ArchivoSeleccionado)
-    {
-        if($_FILES['file']['error'] == 0)
-        {
-            $name = $_FILES['file']['name'];
+    $request = \Slim\Slim::getInstance()->request();
 
-            $archivo = addslashes(file_get_contents($_FILES['file']['tmp_name']));
-
-             $sql = "UPDATE Cancion SET Titulo = :Titulo, Cancionero = '".$archivo."', NombreArchivo = '".$cancion->NombreArchivo."' WHERE CancionId = ".$cancion->CancionId;
-        }
-        else
-        {
-            echo '[ { "Estatus": "No se puedo leer el archivo" } ]';
-            $app->stop();
-        }
-    }
-    else
-    {
-         $sql = "UPDATE Cancion SET Titulo = :Titulo WHERE CancionId = ".$cancion->CancionId;
-    }*/
+    $actividad = json_decode($_POST['datos']);
+    
 
     $sql = "UPDATE Actividad SET Nombre = :Nombre, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ) WHERE ActividadId = ".$actividad->ActividadId;
     
@@ -568,6 +1157,666 @@ function EditarActividad()
         $app->status(409);
         $app->stop();
     }
+    
+    /*------------------ Imagenes ---------------------*/
+    $actividadId = $actividad->ActividadId;
+    $sql = "DELETE FROM ImagenPorActividad WHERE ActividadId =".$actividad->ActividadId;
+    try 
+    {
+        $stmt = $db->prepare($sql); 
+        $stmt->execute(); 
+        
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        //echo $e;
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    
+    $countFile = 0;
+    if($actividad->AgregarImagen > 0)
+    {
+        $countFile = count($_FILES['file']['name']);
+    }
+        
+    $count= 0;
+    $imagenId = [];
+    if($countFile > 0)
+    {
+        $dir = "ArchivosUsuario/".$actividad->UsuarioId."/IMG/Original/";
+        $dirweb = "ArchivosUsuario/".$actividad->UsuarioId."/IMG/Web/";
+        $dirtn = "ArchivosUsuario/".$actividad->UsuarioId."/IMG/Thumbnail/";
+        
+        if(!is_dir("ArchivosUsuario/".$actividad->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$actividad->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dir))
+        {
+            mkdir($dir,0777);
+        }
+        
+        if(!is_dir("ArchivosUsuario/".$actividad->UsuarioId))
+        {
+            mkdir("ArchivosUsuario/".$actividad->UsuarioId,0777);
+        }
+        
+        if(!is_dir($dirweb))
+        {
+            mkdir($dirweb,0777);
+        }
+        
+        if(!is_dir($dirtn))
+        {
+            mkdir($dirtn,0777);
+        }
+
+        for($k=0; $k<$countFile; $k++)
+        {
+            if($_FILES['imgweb']['error'][$k] == 0)
+            {
+                $count++;
+                
+                $name = $_FILES['file']['name'][$k];
+                $size = $_FILES['imgweb']['size'][$k];
+                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                $imagen = addslashes(file_get_contents($_FILES['file']['tmp_name'][$k]));
+                
+                $sql = "INSERT INTO Imagen ( Nombre, Extension, Size, UsuarioId) VALUES ( '".$name."', '".$ext."', ".$size.", ".$actividad->UsuarioId.")";
+                
+                try 
+                {
+                    $stmt = $db->prepare($sql);                
+                    $stmt->execute();
+                    
+                    $imagenId[$k]  = $db->lastInsertId();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+                
+                //Subir Imagen
+                //move_uploaded_file($_FILES['file']['tmp_name'][$k], $dir.$name);
+                move_uploaded_file($_FILES['imgth']['tmp_name'][$k], $dirtn.$name);
+                move_uploaded_file($_FILES['imgweb']['tmp_name'][$k], $dirweb.$name);
+                
+                
+                //----------------------- Etiquetas --------------------
+                $countEtiqueta = count($actividad->ImagenSrc[$k]->Etiqueta);
+                
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$actividad->ImagenSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$imagenId[$k].", '".$actividad->ImagenSrc[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+                
+                
+                //----------------------- Temas ---------------------------------
+                $countTema = count($actividad->ImagenSrc[$k]->Tema);
+                
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$actividad->ImagenSrc[$k]->Tema[$i]->TemaActividadId.", ".$imagenId[$k]."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+            else
+            {
+                $imagenId[$k] = 0;
+            }
+        }
+        
+        
+        if($count > 0)
+        {
+            $sql = "INSERT INTO ImagenPorActividad (ActividadId, ImagenId) VALUES";
+            
+            //Imagen del actividad
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($imagenId[$k] != 0)
+                {
+                    $sql .= " (".$actividadId.", ".$imagenId[$k]."),";
+                }
+            }
+
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+        }
+    }
+    
+     $countImg = count($actividad->Imagen);
+    
+    if($countImg>0)  
+    {    
+        $sql = "INSERT INTO ImagenPorActividad (ActividadId, ImagenId) VALUES";
+        
+        $count = 0;
+        for($k=0; $k<$countImg; $k++)
+        {
+            if(!$actividad->Imagen[$k]->Eliminada)
+            {
+                $count++;
+                $sql .= " (".$actividadId.", ".$actividad->Imagen[$k]->ImagenId."),";
+            }
+        }
+        if($count > 0)
+        {
+            $sql = rtrim($sql,",");
+
+            try 
+            {
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            } 
+            catch(PDOException $e) 
+            {
+                echo '[{"Estatus": "Fallo"}]';
+                echo $sql;
+                $db->rollBack();
+                $app->status(409);
+                $app->stop();
+            }
+            
+            //----------------------- Etiquetas --------------------
+            for($k=0; $k<$countImg; $k++)
+            {
+                $sql = "DELETE FROM EtiquetaPorImagen WHERE ImagenId =".$actividad->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countEtiqueta = count($actividad->Imagen[$k]->Etiqueta);
+                if($countEtiqueta > 0)
+                {
+                    $sql = "INSERT INTO EtiquetaPorImagen (EtiquetaId, ImagenId, Visible) VALUES";
+
+                    for($i=0; $i<$countEtiqueta; $i++)
+                    {
+                        $sql .= " (".$actividad->Imagen[$k]->Etiqueta[$i]->EtiquetaId.", ".$actividad->Imagen[$k]->ImagenId.", '".$actividad->Imagen[$k]->Etiqueta[$i]->Visible."'),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+
+
+                //----------------------- Temas ---------------------------------
+                $sql = "DELETE FROM TemaPorImagen WHERE ImagenId =".$actividad->Imagen[$k]->ImagenId;
+                try 
+                {
+                    $stmt = $db->prepare($sql); 
+                    $stmt->execute(); 
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[ { "Estatus": "Fallo" } ]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                $countTema = count($actividad->Imagen[$k]->Tema);
+
+                if($countTema > 0)
+                {
+                    $sql = "INSERT INTO TemaPorImagen (TemaId, ImagenId) VALUES";
+
+                    for($i=0; $i<$countTema; $i++)
+                    {
+                        $sql .= " (".$actividad->Imagen[$k]->Tema[$i]->TemaActividadId.", ".$actividad->Imagen[$k]->ImagenId."),";
+                    }
+
+                    $sql = rtrim($sql,",");
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute();
+
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+                }
+            }
+        }
+        
+       
+    }
+    
+    $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenActividadVista WHERE  ActividadId = ".$actividad->ActividadId;
+
+    try 
+    {
+        $stmt = $db->query($sql);
+        $actividad->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+    } 
+    catch(PDOException $e) 
+    {
+        echo '[ { "Estatus": "Fallo" } ]';
+        $db->rollBack();
+        $app->status(409);
+        $app->stop();
+    }
+    
+    /*------------------Termina Imagenes --------------*/
+    
+    //------------------------------ Archivos inicia --------------------------------------
+        $sql = "DELETE FROM ArchivoPorActividad WHERE ActividadId =".$actividad->ActividadId;
+        try 
+        {
+            $stmt = $db->prepare($sql); 
+            $stmt->execute(); 
+
+        } 
+        catch(PDOException $e) 
+        {
+            echo '[ { "Estatus": "Fallo" } ]';
+            echo $e;
+            $db->rollBack();
+            $app->status(409);
+            $app->stop();
+        }
+        
+        $countFile = 0;
+        if($actividad->AgregarArchivo > 0)
+        {
+            $countFile = count($_FILES['Archivo']['name']);
+        }
+
+        $count= 0;
+        $archivoId = [];
+        if($countFile > 0)
+        {
+            $dir = "ArchivosUsuario/".$actividad->UsuarioId."/Archivo/";
+            if(!is_dir("ArchivosUsuario/".$actividad->UsuarioId))
+            {
+                mkdir("ArchivosUsuario/".$actividad->UsuarioId, 0777);
+            }
+
+            if(!is_dir($dir))
+            {
+                mkdir($dir, 0777);
+            }
+
+            for($k=0; $k<$countFile; $k++)
+            {
+                if($_FILES['Archivo']['error'][$k] == 0)
+                {
+                    $count++;
+
+                    $name = $_FILES['Archivo']['name'][$k];
+                    $size = $_FILES['Archivo']['size'][$k];
+                    $ext = pathinfo($name, PATHINFO_EXTENSION);
+                    $archivo = addslashes(file_get_contents($_FILES['Archivo']['tmp_name'][$k]));
+
+                    $sql = "INSERT INTO Archivo (Nombre, Extension, Size, UsuarioId) VALUES ('".$name."', '".$ext."', '".$size."', ".$actividad->UsuarioId.")";
+
+                    try 
+                    {
+                        $stmt = $db->prepare($sql);                
+                        $stmt->execute();
+
+                        $archivoId[$k]  = $db->lastInsertId();
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[{"Estatus": "Fallo"}]';
+                        echo $sql;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    //Subir Imagen
+                    //$uploadfile = $_FILES['file']['name'];
+                    move_uploaded_file($_FILES['Archivo']['tmp_name'][$k], $dir.$name);
+
+
+                    //----------------------- Etiquetas --------------------
+                    $countEtiqueta = count($actividad->ArchivoSrc[$k]->Etiqueta);
+
+                    if($countEtiqueta > 0)
+                    {
+                        $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                        for($i=0; $i<$countEtiqueta; $i++)
+                        {
+                            if($actividad->ArchivoSrc[$k]->Etiqueta[$i]->Visible == "1" || $actividad->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
+                            {
+                                $sql .= " (".$actividad->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 1),";
+                            }
+                            else
+                            {
+                                $sql .= " (".$actividad->ArchivoSrc[$k]->Etiqueta[$i]->EtiquetaId.", ".$archivoId[$k].", 0),";
+                            }
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+
+
+                    //----------------------- Temas ---------------------------------
+                    $countTema = count($actividad->ArchivoSrc[$k]->Tema);
+
+                    if($countTema > 0)
+                    {
+                        $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                        for($i=0; $i<$countTema; $i++)
+                        {
+                            $sql .= " (".$actividad->ArchivoSrc[$k]->Tema[$i]->TemaActividadId.", ".$archivoId[$k]."),";
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+                }
+                else
+                {
+                    $archivoId[$k] = 0;
+                }
+
+            }
+
+
+            if($count > 0)
+            {
+                $sql = "INSERT INTO ArchivoPorActividad(ActividadId, ArchivoId) VALUES";
+
+                //Archivo del actividad
+                for($k=0; $k<$countFile; $k++)
+                {
+                    if($archivoId[$k] != 0)
+                    {
+                        $sql .= " (".$actividad->ActividadId.", ".$archivoId[$k]."),";
+                    }
+                }
+
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+            }
+        }
+
+         $countArch = count($actividad->Archivo);
+
+        if($countArch>0)  
+        {    
+            $sql = "INSERT INTO ArchivoPorActividad(ActividadId, ArchivoId) VALUES";
+
+            $count = 0;
+            for($k=0; $k<$countArch; $k++)
+            {
+                if(!$actividad->Archivo[$k]->Eliminado)
+                {
+                    $count++;
+                    $sql .= " (".$actividad->ActividadId.", ".$actividad->Archivo[$k]->ArchivoId."),";
+                }
+            }
+            if($count > 0)
+            {
+                $sql = rtrim($sql,",");
+
+                try 
+                {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                } 
+                catch(PDOException $e) 
+                {
+                    echo '[{"Estatus": "Fallo"}]';
+                    echo $e;
+                    $db->rollBack();
+                    $app->status(409);
+                    $app->stop();
+                }
+
+                //----------------------- Etiquetas --------------------
+                for($k=0; $k<$countArch; $k++)
+                {
+                    $sql = "DELETE FROM EtiquetaPorArchivo WHERE ArchivoId =".$actividad->Archivo[$k]->ArchivoId;
+                    try 
+                    {
+                        $stmt = $db->prepare($sql); 
+                        $stmt->execute(); 
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        echo $e;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $countEtiqueta = count($actividad->Archivo[$k]->Etiqueta);
+                    if($countEtiqueta > 0)
+                    {
+                        $sql = "INSERT INTO EtiquetaPorArchivo (EtiquetaId, ArchivoId, Visible) VALUES";
+
+                        for($i=0; $i<$countEtiqueta; $i++)
+                        {
+                            if($actividad->Archivo[$k]->Etiqueta[$i]->Visible == "1" || $actividad->ArchivoSrc[$k]->Etiqueta[$i]->Visible == true)
+                            {
+                                $sql .= " (".$actividad->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$actividad->Archivo[$k]->ArchivoId.", 1),";
+                            }
+                            else
+                            {
+                                $sql .= " (".$actividad->Archivo[$k]->Etiqueta[$i]->EtiquetaId.", ".$actividad->Archivo[$k]->ArchivoId.", 0),";
+                            }
+
+
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+
+
+                    //----------------------- Temas ---------------------------------
+                    $sql = "DELETE FROM TemaPorArchivo WHERE ArchivoId =".$actividad->Archivo[$k]->ArchivoId;
+                    try 
+                    {
+                        $stmt = $db->prepare($sql); 
+                        $stmt->execute(); 
+                    } 
+                    catch(PDOException $e) 
+                    {
+                        echo '[ { "Estatus": "Fallo" } ]';
+                        echo $e;
+                        $db->rollBack();
+                        $app->status(409);
+                        $app->stop();
+                    }
+
+                    $countTema = count($actividad->Archivo[$k]->Tema);
+
+                    if($countTema > 0)
+                    {
+                        $sql = "INSERT INTO TemaPorArchivo (TemaActividadId, ArchivoId) VALUES";
+
+                        for($i=0; $i<$countTema; $i++)
+                        {
+                            $sql .= " (".$actividad->Archivo[$k]->Tema[$i]->TemaActividadId.", ".$actividad->Archivo[$k]->ArchivoId."),";
+                        }
+
+                        $sql = rtrim($sql,",");
+
+                        try 
+                        {
+                            $stmt = $db->prepare($sql);
+                            $stmt->execute();
+
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo '[{"Estatus": "Fallo"}]';
+                            echo $sql;
+                            $db->rollBack();
+                            $app->status(409);
+                            $app->stop();
+                        }
+                    }
+                }
+            }
+        }
+
+        //----------------------------- archvios  fin---------------------------------------
+    
     
     $countTema = count($actividad->Tema);
     
@@ -774,6 +2023,52 @@ function BorrarActividad()
 }
 
 //------------- Otas operaciones -----------------
+function GetConceptoPorActividad($id)
+{
+    global $app;
+    global $session_expiration_time;
+
+    $request = \Slim\Slim::getInstance()->request();
+
+    $sql = "SELECT * FROM EtiquetaActividadVista WHERE ActividadId = ".$id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+        
+        
+ 
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $sql = "SELECT * FROM TemaActividadVista WHERE ActividadId = ".$id;
+
+    try 
+    {
+        $db = getConnection();
+        $stmt = $db->query($sql);
+        $tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+    } 
+    catch(PDOException $e) 
+    {
+        //echo($e);
+        echo '[ { "Estatus": "Fallo" } ]';
+        $app->status(409);
+        $app->stop();
+    }
+    
+    $app->status(200);
+    echo '[ {"Etiqueta":'.json_encode($etiqueta).'}, {"Tema":'.json_encode($tema).'} ]'; 
+    $db = null;
+}
 
 function GetEtiquetaPorActividad($id)
 {
@@ -888,6 +2183,7 @@ function GetActividadPorIdDatos()
     {
         for($k=0; $k<$numActividad; $k++)
         {
+            //etiqueta
             $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
             
             try 
@@ -904,6 +2200,7 @@ function GetActividadPorIdDatos()
                 $app->stop();
             }
             
+            //tema
             $sql = "SELECT TemaActividadId, Tema FROM TemaActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
             
             try 
@@ -919,6 +2216,8 @@ function GetActividadPorIdDatos()
                 $app->stop();
             }
             
+            
+            //eventos
             $sql = "SELECT EventoActividadId, Fecha, Hora, Lugar, LugarId, Hecho FROM EventoActividadVista WHERE  ActividadId = ".$actividad[$k]->ActividadId;
             
             try 
@@ -934,58 +2233,130 @@ function GetActividadPorIdDatos()
                 $app->stop();
             }
             
-            /*$countEvento = count($actividad[$k]->Evento);
-    
-            if($countEvento > 0)
+            
+            //imágenes
+            $sql = "SELECT ActividadId, ImagenId, Nombre, Extension, Size FROM ImagenActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
+
+            try 
             {
-                for($j=0; $j<$countEvento; $j++)
+                $stmt = $db->query($sql);
+                $actividad[$k]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
+                
+                $imagen = count($actividad[$k]->Imagen);
+                
+                if($imagen > 0)
                 {
-                    $sql = "SELECT EventoActividadId, EtiquetaId, Nombre, Visible, count FROM EtiquetaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
+                    for($i=0; $i<$imagen; $i++)
+                    {
+                        
+                        $sql =  $sql = "SELECT TemaActividadId, Tema FROM TemaImagenVista WHERE ImagenId = ".$actividad[$k]->Imagen[$i]->ImagenId;
 
-                    try 
-                    {
-                        $stmt = $db->query($sql);
-                        $actividad[$k]->Evento[$j]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    } 
-                    catch(PDOException $e) 
-                    {
-                        //echo($e);
-                        echo '[ { "Estatus": "Fallo" } ]';
-                        $app->status(409);
-                        $app->stop();
+                        try 
+                        {
+                            $stmt = $db->query($sql);
+                            $actividad[$k]->Imagen[$i]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo($e);
+                            echo '[ { "Estatus": "Fallo" } ]';
+                            $app->status(409);
+                            $app->stop();
+                        }
+                        
                     }
-
-                    $sql = "SELECT EventoActividadId, TemaActividadId, Tema FROM TemaEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
-
-                    try 
+                    
+                    for($i=0; $i<$imagen; $i++)
                     {
-                        $stmt = $db->query($sql);
-                        $actividad[$k]->Evento[$j]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    } 
-                    catch(PDOException $e) 
-                    {
-                        //echo($e);
-                        echo '[ { "Estatus": "Fallo" } ]';
-                        $app->status(409);
-                        $app->stop();
-                    }
+                        
+                        $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaImagenVista WHERE ImagenId = ".$actividad[$k]->Imagen[$i]->ImagenId;
 
-                    $sql = "SELECT ImagenId, Nombre, Extension, Size FROM ImagenEventoVista WHERE EventoActividadId = ".$actividad[$k]->Evento[$j]->EventoActividadId;
-
-                    try 
-                    {
-                        $stmt = $db->query($sql);
-                        $actividad[$k]->Evento[$j]->Imagen = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    } 
-                    catch(PDOException $e) 
-                    {
-                        //echo($e);
-                        echo '[ { "Estatus": "Fallo" } ]';
-                        $app->status(409);
-                        $app->stop();
+                        try 
+                        {
+                            $stmt = $db->query($sql);
+                            $actividad[$k]->Imagen[$i]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo($e);
+                            echo '[ { "Estatus": "Fallo" } ]';
+                            $app->status(409);
+                            $app->stop();
+                        }
+                        
                     }
                 }
-            }*/
+            } 
+            catch(PDOException $e) 
+            {
+                echo($sql);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+            
+            
+            //--------- Archivos --------
+            $sql = "SELECT ActividadId, ArchivoId, Nombre, Extension, Size FROM ArchivoActividadVista WHERE ActividadId = ".$actividad[$k]->ActividadId;
+
+            try 
+            {
+                $stmt = $db->query($sql);
+                $actividad[$k]->Archivo = $stmt->fetchAll(PDO::FETCH_OBJ);
+                
+                $archivo = count($actividad[$k]->Archivo);
+                
+                if($archivo > 0)
+                {
+                    for($i=0; $i<$archivo; $i++)
+                    {
+                        
+                        $sql =  $sql = "SELECT TemaActividadId, Tema FROM TemaArchivoVista WHERE ArchivoId = ".$actividad[$k]->Archivo[$i]->ArchivoId;
+
+                        try 
+                        {
+                            $stmt = $db->query($sql);
+                            $actividad[$k]->Archivo[$i]->Tema = $stmt->fetchAll(PDO::FETCH_OBJ);
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo($e);
+                            echo '[ { "Estatus": "Fallo" } ]';
+                            $app->status(409);
+                            $app->stop();
+                        }
+                        
+                    }
+                    
+                    for($i=0; $i<$archivo; $i++)
+                    {
+                        
+                        $sql = "SELECT EtiquetaId, Nombre, Visible, count FROM EtiquetaArchivoVista WHERE ArchivoId = ".$actividad[$k]->Archivo[$i]->ArchivoId;
+
+                        try 
+                        {
+                            $stmt = $db->query($sql);
+                            $actividad[$k]->Archivo[$i]->Etiqueta = $stmt->fetchAll(PDO::FETCH_OBJ);
+                        } 
+                        catch(PDOException $e) 
+                        {
+                            echo($e);
+                            echo '[ { "Estatus": "Fallo" } ]';
+                            $app->status(409);
+                            $app->stop();
+                        }
+                        
+                    }
+                }
+            }
+            catch(PDOException $e) 
+            {
+                echo($sql);
+                echo '[ { "Estatus": "Fallo" } ]';
+                $app->status(409);
+                $app->stop();
+            }
+
         }
     }
     

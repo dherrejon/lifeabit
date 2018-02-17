@@ -166,7 +166,6 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         
         GetDiarioPorId($http, $q, CONFIG, datos).then(function(data)
         {
-            
             for(var k=0; k<data.length; k++)
             {
                 data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
@@ -187,27 +186,43 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
         var datos = {Id:id};
         $scope.tipoDetalle = "Actividad";
         
-        GetActividadPorId($http, $q, CONFIG, datos).then(function(data)
-        {
-            
-            for(var k=0; k<data.length; k++)
-            {
-                data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
-                
-                for(var i=0; i<data[k].Evento.length; i++)
-                {
-                    data[k].Evento[i].NotasHTML = $sce.trustAsHtml( data[k].Evento[i].NotasHTML);
-                }
-                
-                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
-            }
-             
-            $scope.detalle = data;
-            $scope.eventoData = data[0].Evento;
+        var actividad = [];
         
-        }).catch(function(error)
+        $scope.filtro.usuarioId = $rootScope.UsuarioId;
+        (self.servicioObj = LifeService.Post('GetActividadPorIdDatos', datos )).then(function (dataResponse) 
         {
-            alert(error);
+            if (dataResponse.status == 200) 
+            {
+                var data = dataResponse.data;
+                
+                $scope.detalle = [];
+                
+                for(var k=0; k<data.length; k++)
+                {
+                    $scope.detalle[k] = SetActividad(data[k]);
+                    $scope.detalle[k].NotasHTML = $sce.trustAsHtml($scope.detalle[k].NotasHTML);
+                    
+                    $scope.detalle[k].Evento = [];
+                    for(var i=0; i<data[k].Evento.length; i++)
+                    {
+                        $scope.detalle[k].Evento[i] = SetEventoActividad(data[k].Evento[i]);
+                        $scope.detalle[k].Evento[i].NotasHTML = $sce.trustAsHtml( $scope.detalle[k].Evento[i].NotasHTML);
+                    }
+
+                    $scope.detalle[k].EtiquetaVisible = $scope.GetEtiquetaVisible($scope.detalle[k].Etiqueta);
+                }
+
+                $scope.eventoData = $scope.detalle[0].Evento;
+            } 
+            else 
+            {
+                $rootScope.$broadcast('Alerta', "Por el momento no se puede cargar la información.", 'error');
+            }
+            self.servicioObj.detenerTiempo();
+        }, 
+        function (error) 
+        {
+            $rootScope.$broadcast('Alerta', error, 'error');
         });
     };
     
@@ -337,40 +352,64 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     {
         if(evento.Hecho == "1")
         {
-            if(evento.Fecha == $scope.hoy)
-            {
-                evento.EstatusTexto = "Hoy";
-            }
-            else
-            {
-                evento.EstatusTexto = "Hecho";
-            }
-            
+            evento.EstatusTexto = "Hecho";
+            evento.Clase = "done";
             return "done";
         }
         else if(evento.Fecha < $scope.hoy)
         {
-            evento.EstatusTexto = "Pendiente";
+            evento.EstatusTexto = "Atrasado";
+            evento.Clase = "pendiente";
             return "pendiente";
         }
         else if(evento.Fecha > $scope.hoy)
         {
             evento.EstatusTexto = "En espera";
+            evento.Clase = "enEspera";
             return "enEspera";
         }
         else if(evento.Fecha == $scope.hoy)
         {
-            evento.EstatusTexto = "Hoy";
+            evento.EstatusTexto = "Pendiente";
+            evento.Clase = "hoyPendiente";
             return "hoyPendiente";
         }
     };
     
+     $scope.GetEventoActividadPorId2 = function(id, opt)
+     {   
+        GetEventoActividadPorId($http, $q, CONFIG, id).then(function(data)
+        {
+            for(var k=0; k<data.length; k++)
+            {
+                data[k].NotasHTML = $sce.trustAsHtml(data[k].NotasHTML);
+                
+                
+                data[k].EtiquetaVisible = $scope.GetEtiquetaVisible(data[k].Etiqueta);
+            }
+             
+            $scope.detalleEvento = data[0];
+        
+        }).catch(function(error)
+        {
+            alert(error);
+        });
+    };
+
+    
     $scope.VerDetallesEvento = function(evento)
     {
-        $scope.detalleEvento = evento;
+        if($scope.tipoDetalle == "Evento")
+        {
+            $scope.detalleEvento = evento;
+        }
+        else
+        {
+            $scope.GetEventoActividadPorId2(evento.EventoActividadId);
+        }
+        
         $('#DetalleEvento').modal('toggle');
     };
-    
     
     $scope.GetEtiquetaVisible = function(etiqueta)
     {
@@ -551,6 +590,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     {
         etiqueta.mostrar = false;
         $scope.filtro.etiqueta.push(etiqueta);
+        $scope.LimpiarBusqueda();
             
         $scope.buscarConcepto = "";
         document.getElementById('buscarConcepto').focus();
@@ -562,6 +602,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
     {
         tema.mostrar = false;
         $scope.filtro.tema.push(tema);
+        $scope.LimpiarBusqueda();
         
         $scope.buscarConcepto = "";
         document.getElementById('buscarConcepto').focus();
@@ -655,11 +696,9 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
                 break;
             }
         }
+
+        $scope.LimpiarBusqueda();
         
-        if(($scope.filtro.etiqueta.length + $scope.filtro.tema.length) == 0)
-        {
-            $scope.LimpiarBusqueda();
-        }
     };
     
     $scope.QuitaretiquetaFiltro = function(etiqueta)
@@ -682,10 +721,8 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             }
         }
         
-        if(($scope.filtro.etiqueta.length + $scope.filtro.tema.length) == 0)
-        {
-            $scope.LimpiarBusqueda();
-        }
+        $scope.LimpiarBusqueda();
+        
     };
     
      $scope.LimpiarBusqueda = function()
@@ -896,6 +933,7 @@ app.controller("AplicacionController", function($scope, $window, $http, $rootSco
             {
                 $scope.detalle[0] = SetPendiente(dataResponse.data);
                 $scope.detalle[0].NotaHTML = $sce.trustAsHtml($scope.detalle[0].NotaHTML);
+                $scope.detalle[0].RecordatorioHTML = $sce.trustAsHtml($scope.detalle[0].RecordatorioHTML);
                 $scope.GetEtiquetaVisible($scope.detalle[0]);
             } 
             else 

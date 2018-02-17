@@ -554,7 +554,7 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         
         $scope.verEtiqueta = false;
         
-        etiqueta = etiqueta.split(" ");
+        etiqueta = LimiparCaracteresLabel(etiqueta);//etiqueta.split(" ");
         
         for(var k=0; k<etiqueta.length; k++)
         {
@@ -757,6 +757,38 @@ app.controller("ControlEtiquetaController", function($scope, $window, $http, $ro
         {
             alert(error);
         });
+    };
+    
+    $scope.GetNumeroEtiqueta = function(etiqueta)
+    {
+        if(etiqueta)
+        {
+            for(var k=0; k<etiqueta.length; k++)
+            {
+                if((etiqueta[k].Visible === true || etiqueta[k].Visible === "1") && !etiqueta[k].Actividad )
+                {
+                    return 1;
+                }
+            }
+        }
+        
+        return 0;
+    };
+    
+    $scope.GetNumeroTema = function(tema)
+    {
+        if(tema)
+        {
+            for(var k=0; k<tema.length; k++)
+            {
+                if(!tema[k].Actividad )
+                {
+                    return 1;
+                }
+            }
+        }
+        
+        return 0;
     };
 
 });

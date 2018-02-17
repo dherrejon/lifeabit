@@ -152,7 +152,6 @@
 		}
 
 		function update() {
-
 			resize();
 
 			var styleHeight = Math.round(parseFloat(ta.style.height));

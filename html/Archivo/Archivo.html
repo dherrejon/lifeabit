@@ -1,7 +1,7 @@
-<div ng-controller="ArchivoController as archivo"> 
+<div ng-controller="ArchivoController as archivo" ng-init="IniciarArchivoApp()"> 
    
     <div id="fileseccion">
-      <div class="row" >
+      <div class="row" ng-show="!misarchivos">
 
             <div class="col-xs-12">
                 <a ng-click="AbrirDriver()" class="pull-right btn operacionEvento"> 

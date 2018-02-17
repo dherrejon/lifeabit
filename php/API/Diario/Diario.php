@@ -354,8 +354,8 @@ function AgregarDiario()
     $diario = json_decode($_POST['datos']);
     global $app;
 
-    $sql = "INSERT INTO Diario (UsuarioId, Notas, Fecha, Hora) VALUES(:UsuarioId, :Notas, :Fecha, STR_TO_DATE( :Hora, '%h:%i %p' ))";
-    
+    $sql = "INSERT INTO Diario (UsuarioId, Notas, Fecha, Hora, Titulo) VALUES(:UsuarioId, :Notas, :Fecha, STR_TO_DATE( :Hora, '%h:%i %p' ), :Titulo)";
+
     try 
     {
         $db = getConnection();
@@ -366,6 +366,7 @@ function AgregarDiario()
         $stmt->bindParam("Fecha", $diario->Fecha);
         $stmt->bindParam("Notas", $diario->Notas);
         $stmt->bindParam("Hora", $diario->Hora);
+        $stmt->bindParam("Titulo", $diario->Titulo);
 
         $stmt->execute();
         
@@ -373,7 +374,8 @@ function AgregarDiario()
         //echo '[{"Estatus": "Exitoso"}, {"Id": "'.$db->lastInsertId().'"}]';
         //$db = null;
 
-    } catch(PDOException $e) 
+    } 
+    catch(PDOException $e) 
     {
         echo $e;
         echo '[{"Estatus": "Fallo"}]';
@@ -1199,7 +1201,7 @@ function EditarDiario()
     
     //$cancion = json_decode($_POST['cancion']);
     
-    $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' )  WHERE DiarioId = ".$diario->DiarioId;
+    $sql = "UPDATE Diario SET Fecha = :Fecha, Notas = :Notas, Hora = STR_TO_DATE( :Hora, '%h:%i %p' ), Titulo = :Titulo  WHERE DiarioId = ".$diario->DiarioId;
     
     try 
     {
@@ -1210,6 +1212,7 @@ function EditarDiario()
         $stmt->bindParam("Notas", $diario->Notas);
         $stmt->bindParam("Fecha", $diario->Fecha);
         $stmt->bindParam("Hora", $diario->Hora);
+        $stmt->bindParam("Titulo", $diario->Titulo);
 
         $stmt->execute();
 
